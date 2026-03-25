@@ -1,84 +1,56 @@
 ---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Hero from "@/components/sections/Hero.astro";
 import { getCollection } from 'astro:content';
-import fs from 'node:fs';
 
-const allEntries = await getCollection('vault');
-
-fs.writeFileSync('entries-debug.json', JSON.stringify(allEntries.map(e => ({ id: e.id, slug: e.data?.slug, filePath: e.filePath })), null, 2));
+const allVaultEntries = await getCollection('vault');
 
 // Group entries by top-level folder
-const tree = allEntries.reduce((acc, entry) => {
-  const parts = entry.id.split('/');
+const folders: Record<string, any[]> = {};
+allVaultEntries.forEach(entry => {
+  const vaultIndex = entry.filePath?.indexOf('vault/');
+  const realSlug = (entry.filePath && vaultIndex !== -1) 
+    ? entry.filePath.substring(vaultIndex + 6).replace(/\.md$/, '') 
+    : entry.id;
+
+  const parts = realSlug.split('/');
   const folder = parts.length > 1 ? parts[0] : 'Root';
-  if (!acc[folder]) acc[folder] = [];
-  acc[folder].push(entry);
-  return acc;
-}, {} as Record<string, typeof allEntries>);
+  if (!folders[folder]) folders[folder] = [];
+  folders[folder].push({ entry, realSlug });
+});
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Vault Index</title>
-    <style>
-      body {
-        font-family: 'Inter', system-ui, sans-serif;
-        line-height: 1.6;
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 3rem 2rem;
-        background-color: #f8fafc;
-        color: #0f172a;
-      }
-      .catalog-container {
-        background: white;
-        padding: 3rem;
-        border-radius: 12px;
-        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -4px rgba(0,0,0,0.05);
-      }
-      h1 { 
-        color: #1e293b;
-        font-size: 2.5rem;
-        margin-bottom: 2rem;
-        border-bottom: 2px solid #e2e8f0;
-        padding-bottom: 1rem;
-      }
-      h2 {
-        color: #334155;
-        margin-top: 2rem;
-        text-transform: capitalize;
-      }
-      ul { list-style: none; padding: 0; }
-      li { margin: 0.5rem 0; }
-      a {
-        text-decoration: none;
-        color: #2563eb;
-        transition: color 0.2s ease;
-      }
-      a:hover {
-        color: #1d4ed8;
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="catalog-container">
-      <h1>Vault Catalog</h1>
-      {Object.entries(tree).map(([folder, entries]) => (
-        <div>
-          <h2>{folder}</h2>
-          <ul>
-            {entries.map(entry => (
-              <li>
-                <a href={`/swarm-cruise/${entry.id}`}>
-                  {entry.data?.title || entry.id}
-                </a>
-              </li>
-            ))}
-          </ul>
+<BaseLayout title="Vault Catalog" description="Knowledge Vault and Swarm Cruise Website Hosted by AstroDeck">
+  <Hero
+    badge="Knowledge Base"
+    title="Swarm Cruise Vault"
+    subtitle="Explore the interconnected markdown notes, concepts, and ArXiV papers parsed securely from the vault directory."
+  />
+
+  <div class="container py-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {Object.entries(folders).map(([folder, items]) => (
+        <div class="rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col hover:border-primary/50 transition-colors duration-300">
+          <div class="p-6 pb-4 border-b bg-muted/20">
+            <h2 class="text-2xl font-semibold leading-none tracking-tight capitalize">
+              {folder}
+            </h2>
+            <p class="text-sm text-muted-foreground mt-2">{items.length} Articles</p>
+          </div>
+          <div class="p-6 max-h-96 overflow-y-auto">
+            <ul class="space-y-3">
+              {items.map(({ entry, realSlug }) => (
+                <li>
+                  <a href={`/${realSlug}/`} class="group flex items-center justify-between text-sm hover:text-primary transition-colors">
+                    <span class="truncate pr-4 flex-1">{entry.data?.title || realSlug.split('/').pop()}</span>
+                    <svg class="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       ))}
     </div>
-  </body>
-</html>
+  </div>
+</BaseLayout>

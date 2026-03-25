@@ -1,0 +1,87 @@
+---
+/**
+ * SEO Head Component
+ *
+ * Provides comprehensive SEO meta tags including:
+ * - Basic meta tags (title, description)
+ * - Canonical URL
+ * - Open Graph tags for social sharing
+ * - Twitter Card tags
+ * - Sitemap and RSS links
+ *
+ * @example
+ * ```astro
+ * <SEO
+ *   title="Page Title"
+ *   description="Page description for SEO"
+ *   image="/images/og-image.png"
+ *   type="website"
+ * />
+ * ```
+ */
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: Date;
+  author?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  image = '/cover.png',
+  type = 'website',
+  publishedTime,
+  author = 'AstroDeck',
+  noindex = false,
+} = Astro.props;
+
+// Fallback for dev server when Astro.site might be undefined
+const siteUrl = Astro.site ?? new URL('http://localhost:4321');
+const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+const socialImageURL = new URL(image, siteUrl);
+
+const siteName = 'AstroDeck';
+---
+
+<!-- Primary Meta Tags -->
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={socialImageURL} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={title} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:locale" content="en_US" />
+
+{type === 'article' && publishedTime && (
+  <>
+    <meta property="article:published_time" content={publishedTime.toISOString()} />
+    <meta property="article:author" content={author} />
+  </>
+)}
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalURL} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={socialImageURL} />
+<meta name="twitter:image:alt" content={title} />
+
+<!-- Sitemap & RSS -->
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link rel="alternate" type="application/rss+xml" title="AstroDeck Blog RSS Feed" href="/rss.xml" />

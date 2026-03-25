@@ -1,5 +1,7 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
+import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
 import wikiLinkPlugin from 'remark-wiki-link';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -24,10 +26,19 @@ allFiles.forEach(file => {
   }
 });
 
-// https://astro.build/config
 export default defineConfig({
   site: 'https://kausalflow.github.io',
-  base: '/swarm-cruise',
+  integrations: [
+    react(),
+    sitemap({
+      changefreq: 'weekly',
+      priority: 0.7,
+      lastmod: new Date(),
+    }),
+  ],
+  vite: {
+    plugins: [tailwindcss()],
+  },
   markdown: {
     remarkPlugins: [
       [wikiLinkPlugin, {
@@ -36,7 +47,7 @@ export default defineConfig({
         hrefTemplate: (permalink) => {
           const lower = permalink.toLowerCase();
           const mapped = slugToPath[lower] || permalink;
-          return `/swarm-cruise/${mapped}`;
+          return `/${mapped}/`;
         }
       }]
     ]

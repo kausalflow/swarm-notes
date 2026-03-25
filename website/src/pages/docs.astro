@@ -1,0 +1,728 @@
+---
+import FullWidthLayout from "@/layouts/FullWidthLayout.astro";
+
+const sections = [
+  { id: "getting-started", label: "Getting Started" },
+  { id: "building-blocks", label: "Building Blocks" },
+  { id: "create-page", label: "Create a New Page" },
+  { id: "add-section", label: "Add a Section" },
+  { id: "custom-component", label: "Custom Component" },
+  { id: "customize-theme", label: "Theme & Colors" },
+  { id: "customize-design", label: "Design Tokens" },
+  { id: "add-blog-post", label: "Add a Blog Post" },
+  { id: "build-deploy", label: "Build & Deploy" },
+  { id: "project-structure", label: "Project Structure" },
+];
+---
+
+<style>
+  .nav-link:not(.bg-foreground):hover {
+    background-color: var(--color-muted);
+  }
+  .nav-link.bg-foreground:hover {
+    opacity: 0.9;
+  }
+</style>
+
+<FullWidthLayout
+  title="Documentation"
+  description="Learn how to use AstroDeck with AI assistants or manually. Step-by-step guides for installation, pages, components, theming, and deployment."
+>
+  <!-- Header -->
+  <div class="py-16 px-6 md:px-12">
+    <h1 class="text-4xl font-bold tracking-tight md:text-6xl mb-4">
+      Documentation
+    </h1>
+    <p class="text-lg text-muted-foreground max-w-3xl">
+      AstroDeck is built AI-first. Every task below is shown two ways — tell your AI assistant what you want, or do it manually. Pick the approach that works for you.
+    </p>
+  </div>
+
+  <!-- Mobile Sub-Navigation -->
+  <div class="sticky top-14 z-30 lg:hidden border-b border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6 md:px-12">
+    <button
+        id="mobile-subnav-toggle"
+        class="flex items-center justify-between w-full py-3 text-sm"
+        aria-expanded="false"
+        aria-controls="mobile-subnav-menu"
+      >
+        <span class="flex items-center gap-2 text-muted-foreground">
+          <span>On this page:</span>
+          <span id="mobile-subnav-current" class="font-medium text-foreground">Getting Started</span>
+        </span>
+        <svg id="mobile-subnav-chevron" class="h-4 w-4 text-muted-foreground transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    <nav id="mobile-subnav-menu" class="hidden pb-3 space-y-1" aria-label="Page navigation">
+      {sections.map((section) => (
+        <a
+          href={`#${section.id}`}
+          data-section={section.id}
+          class="nav-link block px-3 py-2.5 text-sm rounded-xl transition-colors"
+        >
+          {section.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+
+  <!-- Main Content with Sidebar -->
+  <div class="lg:flex lg:gap-10 py-12 px-6 md:px-12">
+    <!-- Sticky Sidebar Navigation (Desktop) -->
+    <aside class="hidden lg:block lg:w-48 lg:shrink-0">
+        <div class="sticky top-20">
+          <nav id="docs-nav" class="space-y-1" aria-label="Documentation sections">
+            <p class="text-sm font-semibold mb-4 text-muted-foreground" aria-hidden="true">Guide</p>
+            {sections.map((section) => (
+              <a
+                href={`#${section.id}`}
+                data-section={section.id}
+                class="nav-link block px-3 py-2.5 text-sm rounded-xl transition-colors"
+              >
+                {section.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </aside>
+
+    <!-- Docs Content -->
+    <div class="flex-1 min-w-0 space-y-20">
+
+        <!-- 1. Getting Started -->
+        <section id="getting-started" class="scroll-mt-32 lg:scroll-mt-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Getting Started</h2>
+            <p class="text-muted-foreground">Download AstroDeck, install dependencies, and start the dev server.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
+                <h3 class="font-semibold text-sm">With AI</h3>
+              </div>
+              <p class="text-sm text-muted-foreground mb-3">
+                Download and unzip AstroDeck. Open the folder in your AI coding tool (Claude Code, Cursor, Windsurf, etc.) and say:
+              </p>
+              <div class="bg-muted/50 border border-border rounded-xl p-4">
+                <p class="text-sm italic">"Please install all dependencies and start the dev server."</p>
+              </div>
+            </div>
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <h3 class="font-semibold text-sm">Manual</h3>
+              </div>
+              <p class="text-sm text-muted-foreground mb-3">
+                Unzip the download, open a terminal in the project folder, and run:
+              </p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">npm install
+npm run dev</code></pre>
+              <p class="text-sm text-muted-foreground mt-3">
+                Then open <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">http://localhost:4321</code> in your browser.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Building Blocks -->
+        <section id="building-blocks" class="scroll-mt-32 lg:scroll-mt-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Building Blocks</h2>
+            <p class="text-muted-foreground">AstroDeck uses a three-tier architecture. Everything you build with falls into one of these tiers.</p>
+          </div>
+
+          <!-- Three-tier overview table -->
+          <div class="border rounded-xl p-6 bg-card overflow-x-auto mb-8">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b text-left">
+                  <th class="pb-2 pr-4 font-medium text-muted-foreground">Tier</th>
+                  <th class="pb-2 pr-4 font-medium text-muted-foreground">What</th>
+                  <th class="pb-2 pr-4 font-medium text-muted-foreground">Count</th>
+                  <th class="pb-2 font-medium text-muted-foreground">Location</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                <tr><td class="py-3 pr-4 font-semibold">Components</td><td class="py-3 pr-4 text-muted-foreground">Small UI primitives (Button, Dialog, Tabs...)</td><td class="py-3 pr-4">11</td><td class="py-3 font-mono text-xs">src/components/ui/</td></tr>
+                <tr><td class="py-3 pr-4 font-semibold">Sections</td><td class="py-3 pr-4 text-muted-foreground">Full page sections (Hero, Pricing, FAQ...)</td><td class="py-3 pr-4">16</td><td class="py-3 font-mono text-xs">src/components/sections/</td></tr>
+                <tr><td class="py-3 pr-4 font-semibold">Pages</td><td class="py-3 pr-4 text-muted-foreground">Complete page templates (SaaS, Portfolio...)</td><td class="py-3 pr-4">11</td><td class="py-3 font-mono text-xs">src/pages/</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Three code examples -->
+          <div class="space-y-6">
+            <div class="border rounded-xl p-6 bg-card">
+              <h3 class="font-semibold mb-1">Tier 1: Component</h3>
+              <p class="text-sm text-muted-foreground mb-3">Small, reusable React UI primitives from shadcn/ui + Radix UI. Use with <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">client:load</code> for interactivity.</p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">---
+import {'{'} Button {'}'} from "@/components/ui/button";
+---
+&lt;Button client:load variant="outline" size="lg"&gt;Click me&lt;/Button&gt;</code></pre>
+            </div>
+
+            <div class="border rounded-xl p-6 bg-card">
+              <h3 class="font-semibold mb-1">Tier 2: Section</h3>
+              <p class="text-sm text-muted-foreground mb-3">Full-width page blocks that combine layout, typography, and content. Drop them into any page and pass content as props.</p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">---
+import FAQ from "@/components/sections/FAQ.astro";
+---
+&lt;FAQ
+  title="Frequently Asked Questions"
+  faqs={'{'}[
+    {'{'} question: "Is it free?", answer: "Yes, MIT licensed." {'}'}
+  ]{'}'}
+/&gt;</code></pre>
+            </div>
+
+            <div class="border rounded-xl p-6 bg-card">
+              <h3 class="font-semibold mb-1">Tier 3: Page</h3>
+              <p class="text-sm text-muted-foreground mb-3">Complete pages that assemble multiple sections with a layout. Copy a template and customize the props.</p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Hero from "@/components/sections/Hero.astro";
+import Features from "@/components/sections/Features.astro";
+import CTA from "@/components/sections/CTA.astro";
+---
+&lt;BaseLayout title="My Page"&gt;
+  &lt;Hero title="Welcome" subtitle="..." /&gt;
+  &lt;Features title="Features" features={'{'}[...]{'}'}  /&gt;
+  &lt;CTA title="Get Started" description="..."
+    cta={'{'}{'{'} href: "/signup", label: "Sign Up" {'}'}{'}'}  /&gt;
+&lt;/BaseLayout&gt;</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Create a New Page -->
+        <section id="create-page" class="scroll-mt-32 lg:scroll-mt-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Create a New Page</h2>
+            <p class="text-muted-foreground">AstroDeck uses file-based routing. Every <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">.astro</code> file in <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">src/pages/</code> becomes a route.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
+                <h3 class="font-semibold text-sm">With AI</h3>
+              </div>
+              <div class="bg-muted/50 border border-border rounded-xl p-4">
+                <p class="text-sm italic">"Create a new About page with a hero section and a short introduction text about our team."</p>
+              </div>
+              <p class="text-sm text-muted-foreground mt-3">
+                Your AI assistant will create <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">src/pages/about.astro</code> with the correct layout, SEO meta tags, and content structure.
+              </p>
+            </div>
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <h3 class="font-semibold text-sm">Manual</h3>
+              </div>
+              <p class="text-sm text-muted-foreground mb-3">
+                Create <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">src/pages/about.astro</code>:
+              </p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+&lt;BaseLayout
+  title="About Us"
+  description="Learn about our team"
+&gt;
+  &lt;div class="py-16"&gt;
+    &lt;h1 class="text-4xl font-bold mb-6"&gt;
+      About Us
+    &lt;/h1&gt;
+    &lt;p class="text-muted-foreground"&gt;
+      Your content here.
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/BaseLayout&gt;</code></pre>
+              <p class="text-sm text-muted-foreground mt-3">
+                Visit <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">/about</code> to see your new page.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Add a Section Component -->
+        <section id="add-section" class="scroll-mt-32 lg:scroll-mt-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Add a Section Component</h2>
+            <p class="text-muted-foreground">AstroDeck ships with 16 pre-built sections (including 3 Hero variants, FAQ, Stats, Team, Comparison, Contact, and Newsletter). Import them into any page and pass your content as props.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
+                <h3 class="font-semibold text-sm">With AI</h3>
+              </div>
+              <div class="bg-muted/50 border border-border rounded-xl p-4">
+                <p class="text-sm italic">"Add a pricing section with 3 tiers — Free, Pro at $19/month, and Enterprise at $49/month — to the homepage."</p>
+              </div>
+              <p class="text-sm text-muted-foreground mt-3">
+                The AI will import the Pricing component, configure the tiers array, and place it on your page.
+              </p>
+            </div>
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <h3 class="font-semibold text-sm">Manual</h3>
+              </div>
+              <p class="text-sm text-muted-foreground mb-3">
+                Import the component and pass your data as props:
+              </p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">---
+import Pricing from
+  "@/components/sections/Pricing.astro";
+
+const tiers = [
+  {'{'}
+    name: "Free",
+    price: "$0",
+    description: "For personal projects",
+    features: ["1 project", "Support"],
+    cta: {'{'} href: "/signup", label: "Start" {'}'},
+  {'}'},
+  // ... more tiers
+];
+---
+
+&lt;Pricing title="Pricing" tiers={'{'}tiers{'}'} /&gt;</code></pre>
+              <p class="text-sm text-muted-foreground mt-3">
+                See all available sections at <a href="/sections" class="text-primary hover:underline">/sections</a>.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Create a Custom Component -->
+        <section id="custom-component" class="scroll-mt-32 lg:scroll-mt-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Create a Custom Component</h2>
+            <p class="text-muted-foreground">Build your own section components following AstroDeck's patterns and conventions.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
+                <h3 class="font-semibold text-sm">With AI</h3>
+              </div>
+              <div class="bg-muted/50 border border-border rounded-xl p-4">
+                <p class="text-sm italic">"Create a new FAQ accordion section component following the existing project patterns. It should accept a title and an array of questions with answers."</p>
+              </div>
+              <p class="text-sm text-muted-foreground mt-3">
+                The AI reads AGENTS.md to understand conventions and creates a component with TypeScript props, proper imports, and consistent styling.
+              </p>
+            </div>
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <h3 class="font-semibold text-sm">Manual</h3>
+              </div>
+              <p class="text-sm text-muted-foreground mb-3">
+                Create <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">src/components/sections/FAQ.astro</code>:
+              </p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">---
+interface Props {'{'}
+  title: string;
+  items: {'{'}
+    question: string;
+    answer: string;
+  {'}'}[];
+{'}'}
+
+const {'{'} title, items {'}'} = Astro.props;
+---
+
+&lt;section class="py-12 px-6"&gt;
+  &lt;h2 class="text-3xl font-bold mb-8"&gt;
+    {'{'}title{'}'}
+  &lt;/h2&gt;
+  &lt;div class="space-y-4"&gt;
+    {'{'}items.map((item) =&gt; (
+      &lt;details class="border rounded-lg p-4"&gt;
+        &lt;summary class="font-medium
+          cursor-pointer"&gt;
+          {'{'}item.question{'}'}
+        &lt;/summary&gt;
+        &lt;p class="mt-2
+          text-muted-foreground"&gt;
+          {'{'}item.answer{'}'}
+        &lt;/p&gt;
+      &lt;/details&gt;
+    )){'}'}
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Customize Theme & Colors -->
+        <section id="customize-theme" class="scroll-mt-32 lg:scroll-mt-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Customize Theme & Colors</h2>
+            <p class="text-muted-foreground">AstroDeck uses OKLCH colors and CSS custom properties. All design tokens live in <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">src/styles/globals.css</code>.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
+                <h3 class="font-semibold text-sm">With AI</h3>
+              </div>
+              <div class="bg-muted/50 border border-border rounded-xl p-4">
+                <p class="text-sm italic">"Change the primary color to electric blue and update dark mode to match. Keep good contrast ratios."</p>
+              </div>
+              <p class="text-sm text-muted-foreground mt-3">
+                The AI updates both light and dark mode tokens in globals.css and ensures WCAG-compliant contrast.
+              </p>
+            </div>
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <h3 class="font-semibold text-sm">Manual</h3>
+              </div>
+              <p class="text-sm text-muted-foreground mb-3">
+                Edit <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">src/styles/globals.css</code>:
+              </p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">@theme {'{'}
+  --color-primary:
+    oklch(55% 0.25 260);
+  --color-primary-foreground:
+    oklch(98% 0 0);
+{'}'}
+
+.dark {'{'}
+  --color-primary:
+    oklch(70% 0.2 260);
+  --color-primary-foreground:
+    oklch(10% 0 0);
+{'}'}</code></pre>
+              <p class="text-sm text-muted-foreground mt-3">
+                OKLCH format: <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">oklch(lightness% chroma hue)</code>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. Design Tokens -->
+        <section id="customize-design" class="scroll-mt-32 lg:scroll-mt-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Design Tokens</h2>
+            <p class="text-muted-foreground">AstroDeck's entire design system is controlled through CSS custom properties in <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">src/styles/globals.css</code>. Change fonts, colors, border radius, and more.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
+                <h3 class="font-semibold text-sm">With AI</h3>
+              </div>
+              <div class="bg-muted/50 border border-border rounded-xl p-4">
+                <p class="text-sm italic">"Switch the font to Inter, set the border radius to 1rem, and use a warm color palette with an orange primary color."</p>
+              </div>
+              <p class="text-sm text-muted-foreground mt-3">
+                The AI updates the <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">@font-face</code> declarations, <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">--radius</code>, and all color tokens at once — in both light and dark mode.
+              </p>
+            </div>
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <h3 class="font-semibold text-sm">Manual</h3>
+              </div>
+              <p class="text-sm text-muted-foreground mb-3">
+                All tokens live in <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">src/styles/globals.css</code>:
+              </p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">/* Fonts — replace woff2 files in
+   public/fonts/ and update here */
+@font-face {'{'}
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Variable.woff2')
+    format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+{'}'}
+
+/* Design tokens in @theme block */
+@theme {'{'}
+  --color-background: oklch(100% 0 0);
+  --color-primary: oklch(11.2% ...);
+  --color-secondary: oklch(96.1% ...);
+  --color-muted: oklch(96.1% ...);
+  --color-border: oklch(91.4% ...);
+  --color-destructive: oklch(60.2% ...);
+  --radius: 0.5rem;
+{'}'}
+
+/* Dark mode overrides */
+.dark {'{'}
+  --color-background: oklch(1.5% 0 0);
+  --color-primary: oklch(98% 0 0);
+  /* ... all tokens overridden */
+{'}'}</code></pre>
+            </div>
+          </div>
+          <!-- Token reference table -->
+          <div class="mt-8 border rounded-xl p-6 bg-card overflow-x-auto">
+            <h3 class="font-semibold mb-4">Token Reference</h3>
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b text-left">
+                  <th class="pb-2 pr-4 font-medium text-muted-foreground">Token</th>
+                  <th class="pb-2 pr-4 font-medium text-muted-foreground">Used for</th>
+                  <th class="pb-2 font-medium text-muted-foreground">Tailwind class</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                <tr><td class="py-2 pr-4 font-mono text-xs">--color-background</td><td class="py-2 pr-4 text-muted-foreground">Page background</td><td class="py-2 font-mono text-xs">bg-background</td></tr>
+                <tr><td class="py-2 pr-4 font-mono text-xs">--color-foreground</td><td class="py-2 pr-4 text-muted-foreground">Main text</td><td class="py-2 font-mono text-xs">text-foreground</td></tr>
+                <tr><td class="py-2 pr-4 font-mono text-xs">--color-primary</td><td class="py-2 pr-4 text-muted-foreground">Buttons, links, accents</td><td class="py-2 font-mono text-xs">bg-primary, text-primary</td></tr>
+                <tr><td class="py-2 pr-4 font-mono text-xs">--color-card</td><td class="py-2 pr-4 text-muted-foreground">Card backgrounds</td><td class="py-2 font-mono text-xs">bg-card</td></tr>
+                <tr><td class="py-2 pr-4 font-mono text-xs">--color-muted</td><td class="py-2 pr-4 text-muted-foreground">Subtle backgrounds</td><td class="py-2 font-mono text-xs">bg-muted</td></tr>
+                <tr><td class="py-2 pr-4 font-mono text-xs">--color-muted-foreground</td><td class="py-2 pr-4 text-muted-foreground">Secondary text, descriptions</td><td class="py-2 font-mono text-xs">text-muted-foreground</td></tr>
+                <tr><td class="py-2 pr-4 font-mono text-xs">--color-border</td><td class="py-2 pr-4 text-muted-foreground">All borders</td><td class="py-2 font-mono text-xs">border-border</td></tr>
+                <tr><td class="py-2 pr-4 font-mono text-xs">--color-destructive</td><td class="py-2 pr-4 text-muted-foreground">Error states, delete</td><td class="py-2 font-mono text-xs">bg-destructive</td></tr>
+                <tr><td class="py-2 pr-4 font-mono text-xs">--radius</td><td class="py-2 pr-4 text-muted-foreground">Global border radius</td><td class="py-2 font-mono text-xs">rounded-md (uses --radius)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 7. Add a Blog Post -->
+        <section id="add-blog-post" class="scroll-mt-32 lg:scroll-mt-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Add a Blog Post</h2>
+            <p class="text-muted-foreground">Blog posts use Astro Content Collections. Create a Markdown file with frontmatter and it appears automatically.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
+                <h3 class="font-semibold text-sm">With AI</h3>
+              </div>
+              <div class="bg-muted/50 border border-border rounded-xl p-4">
+                <p class="text-sm italic">"Create a new blog post about our product launch, published today, with tags 'news' and 'launch'. Make it SEO-friendly."</p>
+              </div>
+              <p class="text-sm text-muted-foreground mt-3">
+                The AI creates the Markdown file with proper frontmatter schema and optimized content.
+              </p>
+            </div>
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <h3 class="font-semibold text-sm">Manual</h3>
+              </div>
+              <p class="text-sm text-muted-foreground mb-3">
+                Create <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">src/content/blog/product-launch.md</code>:
+              </p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">---
+title: "Announcing Our Launch"
+description: "We're live! Here's
+  what we've built and why."
+pubDate: 2026-03-15
+author: "Your Name"
+tags: ["news", "launch"]
+---
+
+# Announcing Our Launch
+
+Write your content in Markdown.
+Supports **bold**, *italic*,
+[links](https://example.com),
+images, and code blocks.</code></pre>
+              <p class="text-sm text-muted-foreground mt-3">
+                The post appears at <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">/blog/product-launch</code>.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. Build & Deploy -->
+        <section id="build-deploy" class="scroll-mt-32 lg:scroll-mt-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Build & Deploy</h2>
+            <p class="text-muted-foreground">Build a production-optimized version of your site and deploy it to any static hosting provider.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
+                <h3 class="font-semibold text-sm">With AI</h3>
+              </div>
+              <div class="bg-muted/50 border border-border rounded-xl p-4">
+                <p class="text-sm italic">"Build the project for production and check if there are any errors or warnings."</p>
+              </div>
+              <p class="text-sm text-muted-foreground mt-3">
+                The AI runs the build, reports issues, and can help fix them. For deployment:
+              </p>
+              <div class="bg-muted/50 border border-border rounded-xl p-4 mt-3">
+                <p class="text-sm italic">"Deploy this project to Vercel."</p>
+              </div>
+            </div>
+            <div class="border rounded-xl p-6 bg-card">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <h3 class="font-semibold text-sm">Manual</h3>
+              </div>
+              <p class="text-sm text-muted-foreground mb-3">
+                Build and preview locally:
+              </p>
+              <pre class="bg-muted/50 border border-border rounded-xl p-4 overflow-x-auto"><code class="text-sm font-mono">npm run build
+npm run preview</code></pre>
+              <p class="text-sm text-muted-foreground mt-3">
+                Deploy the <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">dist/</code> folder to any static host:
+              </p>
+              <ul class="mt-2 space-y-1 text-sm text-muted-foreground">
+                <li><strong>Vercel:</strong> Push to GitHub, import in dashboard</li>
+                <li><strong>Netlify:</strong> Connect repo, auto-detects Astro</li>
+                <li><strong>Cloudflare:</strong> <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">npx wrangler pages deploy dist</code></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. Project Structure -->
+        <section id="project-structure" class="scroll-mt-32 lg:scroll-mt-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Project Structure</h2>
+            <p class="text-muted-foreground">A quick reference of key directories and what they contain.</p>
+          </div>
+          <div class="border rounded-xl p-6 bg-card overflow-x-auto">
+            <pre class="text-sm font-mono leading-relaxed"><code>astrodeck/
+├── src/
+│   ├── components/
+│   │   ├── sections/      16 pre-built page sections (3 Hero variants + 13 more)
+│   │   └── ui/            11 shadcn/ui components (Button, Card, Dialog, Accordion...)
+│   ├── layouts/           Page templates (Base, FullWidth, Auth, Minimal, Article)
+│   ├── pages/             File-based routing — each .astro file = one route
+│   ├── content/blog/      Markdown blog posts with Content Collections
+│   ├── styles/globals.css Design tokens, OKLCH colors, Tailwind config
+│   ├── registry.json      Machine-readable component catalog
+│   └── lib/utils.ts       Utility functions
+├── public/                Static assets (fonts, images, favicon)
+├── AGENTS.md              AI assistant instructions (AGENTS.md standard)
+├── PROJECT.md             Your project-specific AI overrides
+├── .cursor/rules          Cursor AI rules
+├── .github/copilot-instructions.md  GitHub Copilot instructions
+├── .windsurfrules         Windsurf AI rules
+├── astro.config.mjs       Astro + Vite + integrations config
+└── package.json           Dependencies and npm scripts</code></pre>
+          </div>
+        </section>
+
+    </div>
+  </div>
+
+  <!-- Footer CTA -->
+  <div class="py-16 px-6 md:px-12 text-center">
+    <p class="text-muted-foreground mb-4">
+      Want to dive deeper? Check out the source code and full README on GitHub.
+    </p>
+    <a
+      href="https://github.com/holger1411/astrodeck"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center gap-2 justify-center rounded-xl bg-primary text-primary-foreground font-medium h-10 px-6 hover:bg-primary/90 transition-colors text-sm"
+    >
+      View on GitHub
+      <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+      </svg>
+    </a>
+  </div>
+
+  <script>
+    function initDocsNav() {
+      const navLinks = document.querySelectorAll('.nav-link');
+      const pageSections = document.querySelectorAll('section[id]');
+      const mobileToggle = document.getElementById('mobile-subnav-toggle');
+      const mobileMenu = document.getElementById('mobile-subnav-menu');
+      const mobileChevron = document.getElementById('mobile-subnav-chevron');
+      const mobileCurrent = document.getElementById('mobile-subnav-current');
+
+      // Mobile subnav toggle
+      mobileToggle?.addEventListener('click', () => {
+        const isOpen = mobileMenu?.classList.contains('hidden');
+        mobileMenu?.classList.toggle('hidden');
+        mobileChevron?.classList.toggle('rotate-180');
+        mobileToggle.setAttribute('aria-expanded', String(isOpen));
+      });
+
+      // Close mobile menu on link click
+      mobileMenu?.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          mobileMenu.classList.add('hidden');
+          mobileChevron?.classList.remove('rotate-180');
+          mobileToggle?.setAttribute('aria-expanded', 'false');
+        });
+      });
+
+      // Intersection observer for active section highlighting
+      const observerOptions = {
+        root: null,
+        rootMargin: '-100px 0px -66%',
+        threshold: 0
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            navLinks.forEach(link => {
+              link.classList.remove('bg-foreground', 'text-background');
+            });
+            const activeLinks = document.querySelectorAll(`[data-section="${id}"]`);
+            activeLinks.forEach(link => {
+              link.classList.add('bg-foreground', 'text-background');
+            });
+            // Update mobile current label
+            if (mobileCurrent) {
+              const activeLink = document.querySelector(`aside [data-section="${id}"]`);
+              if (activeLink) {
+                mobileCurrent.textContent = activeLink.textContent?.trim() || '';
+              }
+            }
+          }
+        });
+      }, observerOptions);
+
+      pageSections.forEach(section => observer.observe(section));
+    }
+
+    initDocsNav();
+    document.addEventListener('astro:after-swap', initDocsNav);
+  </script>
+</FullWidthLayout>

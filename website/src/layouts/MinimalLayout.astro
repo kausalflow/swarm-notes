@@ -1,0 +1,63 @@
+---
+/**
+ * Minimal Layout
+ *
+ * Full-width layout without header or footer.
+ * Ideal for standalone pages like 404, maintenance, or landing pages
+ * that need complete control over the viewport.
+ *
+ * @example
+ * ```astro
+ * <MinimalLayout title="Page Not Found">
+ *   <div class="flex items-center justify-center min-h-screen">
+ *     <h1>404</h1>
+ *   </div>
+ * </MinimalLayout>
+ * ```
+ */
+import { ClientRouter } from "astro:transitions";
+import "@/styles/globals.css";
+import SEO from "@/components/SEO.astro";
+import FontPreload from "@/components/FontPreload.astro";
+import ThemeScript from "@/components/ThemeScript.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  noindex?: boolean;
+}
+
+const { 
+  title, 
+  description = "AstroDeck - Modern Astro.js Component Library",
+  image,
+  noindex = false,
+} = Astro.props;
+
+const fullTitle = `${title} | AstroDeck`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <FontPreload />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{fullTitle}</title>
+    <SEO 
+      title={fullTitle}
+      description={description}
+      image={image}
+      noindex={noindex}
+    />
+    <ClientRouter />
+    <ThemeScript />
+  </head>
+  <body class="min-h-screen antialiased">
+    <main id="main-content" class="min-h-screen">
+      <slot />
+    </main>
+  </body>
+</html>
