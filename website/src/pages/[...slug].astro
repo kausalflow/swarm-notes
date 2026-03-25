@@ -50,14 +50,35 @@ const renderValue = (val: any) => {
   return String(val);
 };
 
+// Derive the section from the slug (first path segment)
+const slugParts = realSlug.split('/');
+const section = slugParts.length > 1 ? slugParts[0] : null;
+const sectionLabel = section
+  ? section.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
+  : null;
+const catalogHref = section ? `/catalog/${section}/` : '/';
+
 const frontmatter = Object.entries(entry.data || {}).filter(([key]) => key !== 'title' && key !== 'slug');
 ---
 
 <ArticleLayout title={entry.data?.title || realSlug} description="Vault Entry">
-  <div class="mb-6">
-    <a href="/" class="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+  <div class="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
+    <a href="/" class="hover:text-foreground transition-colors">Home</a>
+    {section && (
+      <>
+        <span>/</span>
+        <a href={catalogHref} class="hover:text-foreground transition-colors">{sectionLabel}</a>
+      </>
+    )}
+    <span>/</span>
+    <span class="text-foreground font-medium truncate max-w-xs">{entry.data?.title || realSlug.split('/').pop()}</span>
+  </div>
+
+  <!-- Back button -->
+  <div class="mb-8">
+    <a href={catalogHref} class="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
       <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-      Back to Catalog
+      Back to {sectionLabel || 'Catalog'}
     </a>
   </div>
   
