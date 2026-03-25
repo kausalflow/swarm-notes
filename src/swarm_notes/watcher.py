@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
-from swarm_cruise.config import settings
+from swarm_notes.config import settings
 
 logger = logging.getLogger(__name__)
 

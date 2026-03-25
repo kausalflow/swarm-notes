@@ -44,7 +44,7 @@ jobs:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           LLM_MODEL: ${{ secrets.LLM_MODEL || vars.LLM_MODEL }}
           CONFIG_FILE: ${{ github.event.inputs.config_file || 'configs/config.ts.yaml' }}
-        run: uv run python -m swarm_cruise.main --config "$CONFIG_FILE"
+        run: uv run python -m swarm_notes.main --config "$CONFIG_FILE"
 
       - name: Commit and push new vault files
         uses: stefanzweifel/git-auto-commit-action@v5

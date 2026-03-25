@@ -11,7 +11,7 @@ import logging
 import re
 from dataclasses import dataclass
 
-from swarm_cruise.watcher import RawPaper
+from swarm_notes.watcher import RawPaper
 
 logger = logging.getLogger(__name__)
 

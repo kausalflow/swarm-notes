@@ -12,7 +12,7 @@ import logging
 import shutil
 from pathlib import Path
 
-from swarm_cruise.config import settings
+from swarm_notes.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -90,3 +90,34 @@ def get_existing_concept_slugs() -> list[str]:
     if not settings.vault_concepts_dir.exists():
         return []
     return [f.stem for f in settings.vault_concepts_dir.glob("*.md")]
+
+
+def get_existing_arxiv_ids() -> set[str]:
+    """Return the set of arxiv IDs already present in the live vault (and staging).
+
+    Paper filenames follow the pattern ``{arxiv_id}-{title-slug}.md``, where
+    ``arxiv_id`` is of the form ``YYMM.NNNNN``.  This function extracts the ID
+    by splitting on the first ``-`` that follows the numeric arxiv ID pattern.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    set[str]
+        A set of arxiv ID strings such as ``{"2603.23284", "2603.23294"}``.
+    """
+    import re
+    pattern = re.compile(r"^(\d{4}\.\d{4,5})-")
+    ids: set[str] = set()
+
+    for search_dir in (settings.vault_papers_dir, settings.tmp_papers_dir):
+        if not search_dir.exists():
+            continue
+        for f in search_dir.glob("*.md"):
+            m = pattern.match(f.name)
+            if m:
+                ids.add(m.group(1))
+
+    return ids

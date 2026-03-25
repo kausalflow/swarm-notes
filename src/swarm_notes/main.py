@@ -24,15 +24,15 @@ logger = logging.getLogger(__name__)
 @app.command()
 def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path to config.yaml")) -> None:
     """Run the full pipeline."""
-    from swarm_cruise import config as src_config
+    from swarm_notes import config as src_config
     if Path(config).exists():
         src_config.load_yaml_config(config)
     else:
         logger.info("No config.yaml found at '%s', using environment variables / defaults.", config)
 
-    from swarm_cruise import analyst, federation, router, watcher
-    from swarm_cruise.vault_manager import commit_staging, discard_staging, init_staging, init_vault
-    from swarm_cruise.vault_writer import update_public_feed, write_paper
+    from swarm_notes import analyst, federation, router, watcher
+    from swarm_notes.vault_manager import commit_staging, discard_staging, init_staging, init_vault, get_existing_arxiv_ids
+    from swarm_notes.vault_writer import update_public_feed, write_paper
 
     # ------------------------------------------------------------------
     # 1. Initialise vault directories
@@ -65,6 +65,24 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
             raise typer.Exit(0)
 
         # ------------------------------------------------------------------
+        # 4b. Deduplicate – skip papers already in the vault
+        # ------------------------------------------------------------------
+        existing_ids = get_existing_arxiv_ids()
+        new_papers = [p for p in papers if p.arxiv_id not in existing_ids]
+        skipped = len(papers) - len(new_papers)
+        if skipped:
+            logger.info(
+                "Deduplication: skipping %d already-processed paper(s), %d new to process",
+                skipped, len(new_papers),
+            )
+        papers = new_papers
+
+        if not papers:
+            logger.info("All fetched papers already exist in the vault – nothing to do")
+            commit_staging()
+            raise typer.Exit(0)
+
+        # ------------------------------------------------------------------
         # 5. Router + Analyst + Vault Writer – process each paper
         # ------------------------------------------------------------------
         logger.info("--- Step 5: Router / Analyst / Vault Writer (%d papers) ---", len(papers))
@@ -80,7 +98,7 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
                 
                 # Check Domain Expert Configuration
                 if src_config.settings.enable_domain_expert:
-                    from swarm_cruise.domain_expert import extract_open_questions
+                    from swarm_notes.domain_expert import extract_open_questions
                     questions = extract_open_questions(paper.arxiv_id)
                     analysis.open_questions = questions
                     
@@ -97,9 +115,9 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
         # ------------------------------------------------------------------
         if analyses:
             logger.info("--- Step 6: Discussant (%d papers) ---", len(analyses))
-            from swarm_cruise.discussant import discuss_papers
+            from swarm_notes.discussant import discuss_papers
             discussion_md = discuss_papers(analyses)
-            from swarm_cruise.vault_writer import append_daily_discussion
+            from swarm_notes.vault_writer import append_daily_discussion
             append_daily_discussion(discussion_md)
 
         # ------------------------------------------------------------------

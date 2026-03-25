@@ -4,8 +4,8 @@ import os
 import logging
 from pydantic_ai import Agent
 
-from swarm_cruise.analyst import PaperAnalysis
-from swarm_cruise.config import settings
+from swarm_notes.analyst import PaperAnalysis
+from swarm_notes.config import settings
 
 logger = logging.getLogger(__name__)
 

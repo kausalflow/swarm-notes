@@ -1,7 +1,7 @@
 [project]
-name = "swarm-cruise"
+name = "swarm-notes"
 version = "0.1.0"
-description = "Add your description here"
+description = "Automated research paper tracking and knowledge synthesis"
 readme = "README.md"
 authors = [
     { name = "LM", email = "hi@leima.is" }
@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
-swarm-cruise = "swarm_cruise.main:app"
+swarm-notes = "swarm_notes.main:app"
 
 [build-system]
 requires = ["uv_build>=0.8.15,<0.9.0"]

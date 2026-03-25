@@ -2773,7 +2773,7 @@ wheels = [
 ]
 
 [[package]]
-name = "swarm-cruise"
+name = "swarm-notes"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

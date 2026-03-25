@@ -13,10 +13,10 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 
-from swarm_cruise.config import settings
-from swarm_cruise.router import Skill
-from swarm_cruise.vault_manager import get_existing_concept_slugs
-from swarm_cruise.watcher import RawPaper
+from swarm_notes.config import settings
+from swarm_notes.router import Skill
+from swarm_notes.vault_manager import get_existing_concept_slugs
+from swarm_notes.watcher import RawPaper
 
 logger = logging.getLogger(__name__)
 

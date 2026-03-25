@@ -15,8 +15,8 @@ from pathlib import Path
 
 import frontmatter
 
-from swarm_cruise.analyst import PaperAnalysis, OpenQuestion
-from swarm_cruise.config import settings
+from swarm_notes.analyst import PaperAnalysis, OpenQuestion
+from swarm_notes.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +181,7 @@ def _build_body(analysis: PaperAnalysis) -> str:
 def _write_concept_stub(slug: str, display_name: str, one_liner: str) -> None:
     """Write a concept stub Markdown file if one does not already exist."""
     # Check staging first, then live vault (avoid overwriting existing)
-    from swarm_cruise.config import settings
+    from swarm_notes.config import settings
 
     staging_path = settings.tmp_concepts_dir / f"{slug}.md"
     vault_path = settings.vault_concepts_dir / f"{slug}.md"

@@ -5,8 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 from pydantic_ai import Agent
 
-from swarm_cruise.analyst import OpenQuestion
-from swarm_cruise.config import settings
+from swarm_notes.analyst import OpenQuestion
+from swarm_notes.config import settings
 
 logger = logging.getLogger(__name__)
 

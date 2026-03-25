@@ -21,7 +21,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-from swarm_cruise.config import settings
+from swarm_notes.config import settings
 
 logger = logging.getLogger(__name__)
 

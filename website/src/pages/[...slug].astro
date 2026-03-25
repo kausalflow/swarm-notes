@@ -58,7 +58,14 @@ const sectionLabel = section
   : null;
 const catalogHref = section ? `/catalog/${section}/` : '/';
 
-const frontmatter = Object.entries(entry.data || {}).filter(([key]) => key !== 'title' && key !== 'slug');
+const HIDDEN_KEYS = new Set([
+  'title', 'slug',
+  // CSL nested objects — already rendered in body
+  'author', 'issued',
+  // internal bookkeeping
+  'processed_at', 'generated_stub', 'type',
+]);
+const frontmatter = Object.entries(entry.data || {}).filter(([key]) => !HIDDEN_KEYS.has(key));
 ---
 
 <ArticleLayout title={entry.data?.title || realSlug} description="Vault Entry">
