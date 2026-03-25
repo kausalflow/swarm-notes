@@ -1,0 +1,78 @@
+"""Tests for the vault_manager module.
+
+This module contains unit tests to ensure that the initialisation,
+staging, discarding, and committing of the vault work correctly.
+"""
+
+from unittest.mock import MagicMock, patch
+
+from src import vault_manager
+
+
+def test_init_vault() -> None:
+    """Test the init_vault function.
+
+    Ensures that the primary vault directories are created if they
+    do not exist.
+    """
+    mock_mkdir = MagicMock()
+    with patch("pathlib.Path.mkdir", mock_mkdir):
+        vault_manager.init_vault()
+    assert mock_mkdir.call_count == 3
+
+
+def test_init_staging() -> None:
+    """Test the init_staging function.
+
+    Ensures that the staging directory is reset and re-initialised
+    correctly when it already exists.
+    """
+    mock_mkdir = MagicMock()
+    with patch("pathlib.Path.mkdir", mock_mkdir):
+        with patch("src.vault_manager.TMP_VAULT_DIR") as mock_dir:
+            mock_dir.exists.return_value = True
+            with patch("shutil.rmtree") as mock_rmtree:
+                vault_manager.init_staging()
+                mock_rmtree.assert_called_once()
+    assert mock_mkdir.call_count == 3
+
+
+def test_commit_staging() -> None:
+    """Test the commit_staging function.
+
+    Ensures that staged files are merged into the vault and
+    the staging area is subsequently removed.
+    """
+    with patch("src.vault_manager.TMP_VAULT_DIR") as mock_dir:
+        mock_dir.exists.return_value = True
+        with patch("src.vault_manager._merge_directory") as mock_merge:
+            with patch("shutil.rmtree") as mock_rmtree:
+                vault_manager.commit_staging()
+                assert mock_merge.call_count == 3
+                mock_rmtree.assert_called_once()
+
+
+def test_commit_staging_not_exists() -> None:
+    """Test the commit_staging function when no staging exists.
+
+    Ensures that no action is taken if the staging area is absent.
+    """
+    with patch("src.vault_manager.TMP_VAULT_DIR") as mock_dir:
+        mock_dir.exists.return_value = False
+        with patch("src.vault_manager._merge_directory") as mock_merge:
+            with patch("shutil.rmtree") as mock_rmtree:
+                vault_manager.commit_staging()
+                mock_merge.assert_not_called()
+                mock_rmtree.assert_not_called()
+
+
+def test_discard_staging() -> None:
+    """Test the discard_staging function.
+
+    Ensures that the staging area is removed without merging.
+    """
+    with patch("src.vault_manager.TMP_VAULT_DIR") as mock_dir:
+        mock_dir.exists.return_value = True
+        with patch("shutil.rmtree") as mock_rmtree:
+            vault_manager.discard_staging()
+            mock_rmtree.assert_called_once()

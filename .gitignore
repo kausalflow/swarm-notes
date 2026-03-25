@@ -9,6 +9,7 @@ build/
 .venv/
 venv/
 env/
+.env
 
 # Staging directory – never commit tmp_vault
 tmp_vault/

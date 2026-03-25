@@ -12,8 +12,9 @@ def _reload_config(env: dict[str, str]):
     # Remove cached module so module-level code reruns
     sys.modules.pop("src.config", None)
     with patch.dict("os.environ", env, clear=True):
-        import src.config as cfg
-        return cfg
+        with patch("dotenv.load_dotenv"):
+            import src.config as cfg
+            return cfg
 
 
 class TestDefaultLlmModel:
@@ -60,7 +61,8 @@ class TestGeminiApiKeyPropagation:
         sys.modules.pop("src.config", None)
         fake_key = "AIzaSy_test_propagation_key"
         with patch.dict("os.environ", {"LLM_API_KEY": fake_key}, clear=True):
-            import src.config as cfg  # noqa: F401
+            with patch("dotenv.load_dotenv"):
+                import src.config as cfg  # noqa: F401
 
             assert os.environ.get("GEMINI_API_KEY") == fake_key
 
@@ -73,6 +75,7 @@ class TestGeminiApiKeyPropagation:
             {"GEMINI_API_KEY": existing, "LLM_API_KEY": new_key},
             clear=True,
         ):
-            import src.config as cfg  # noqa: F401
+            with patch("dotenv.load_dotenv"):
+                import src.config as cfg  # noqa: F401
 
             assert os.environ.get("GEMINI_API_KEY") == existing
