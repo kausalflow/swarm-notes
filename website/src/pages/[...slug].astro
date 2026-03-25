@@ -1,0 +1,124 @@
+---
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const allVaultEntries = await getCollection('vault');
+  return allVaultEntries.map(entry => {
+    const vaultIndex = entry.filePath?.indexOf('vault/');
+    let realSlug = entry.id;
+    if (entry.filePath && vaultIndex !== -1) {
+      realSlug = entry.filePath.substring(vaultIndex + 6).replace(/\.md$/, '');
+    }
+    return {
+      params: { slug: realSlug },
+      props: { entry, realSlug },
+    };
+  });
+}
+
+const { entry, realSlug } = Astro.props;
+const { Content } = await render(entry);
+const { title, ...frontmatter } = entry.data;
+
+// We should also map frontmatter generated links correctly using the same heuristic or let remark-wiki-link handle it, 
+// but frontmatter is raw. We'll reconstruct it by guessing the target if not exact.
+import fs from 'node:fs';
+import path from 'node:path';
+const vaultAbsPath = path.resolve('../vault');
+let allFiles = [];
+try { allFiles = fs.readdirSync(vaultAbsPath, { recursive: true }); } catch(e){}
+const slugToPath: Record<string, string> = {};
+allFiles.forEach(f => {
+  if (typeof f === 'string' && f.endsWith('.md')) {
+    slugToPath[path.basename(f, '.md').toLowerCase()] = f.replace(/\\/g, '/').replace(/\.md$/, '');
+  }
+});
+
+const renderValue = (val: any) => {
+  if (typeof val === 'string' && val.match(/^\[\[.*\]\]$/)) {
+    const rawLink = val.replace(/[[\]]/g, '').trim();
+    const cleanLink = rawLink.toLowerCase().replace(/ /g, '-');
+    const mappedLink = slugToPath[cleanLink] || cleanLink;
+    return `<a href="/swarm-cruise/${mappedLink}">${val}</a>`;
+  }
+  return String(val);
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title || entry.id}</title>
+    <style>
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+        background-color: #f8fafc;
+        color: #0f172a;
+      }
+      .content {
+        background: white;
+        padding: 3rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -4px rgba(0,0,0,0.05);
+      }
+      .frontmatter {
+        margin-top: 4rem;
+        padding: 2rem;
+        background: #f1f5f9;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+      .frontmatter h3 {
+        margin-top: 0;
+        color: #334155;
+      }
+      /* Prose styles */
+      h1 { color: #1e293b; font-size: 2.25rem; font-weight: 700; margin-bottom: 1.5rem; }
+      h2 { color: #334155; margin-top: 2rem; }
+      a { color: #3b82f6; text-decoration: none; }
+      a:hover { text-decoration: underline; color: #2563eb; }
+      pre { background: #1e293b; padding: 1rem; border-radius: 6px; overflow-x: auto; color: white; }
+      code { font-family: ui-monospace, monospace; font-size: 0.9em; }
+      p code { background: #f1f5f9; padding: 0.2em 0.4em; border-radius: 4px; color: #ea580c; }
+      blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; margin-left: 0; color: #475569; }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <a href="/swarm-cruise/" style="display: inline-block; margin-bottom: 1rem; color: #64748b; font-weight: 500;">&larr; Back to Catalog</a>
+      <h1>{title || entry.id}</h1>
+      <article>
+        <Content />
+      </article>
+      
+      {Object.keys(frontmatter).length > 0 && (
+        <div class="frontmatter">
+          <h3>Metadata & Links</h3>
+          <ul style="list-style: none; padding: 0;">
+            {Object.entries(frontmatter).map(([key, value]) => (
+              <li style="margin-bottom: 0.5rem; display: flex; gap: 0.5rem; align-items: baseline;">
+                <strong style="min-width: 120px; color: #475569;">{key}:</strong>
+                <div style="flex: 1;">
+                  {Array.isArray(value) ? (
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                      {value.map(v => (
+                        <span class="tag" style="background: #e2e8f0; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.875rem;" set:html={renderValue(v)} />
+                      ))}
+                    </div>
+                  ) : (
+                    <span set:html={renderValue(value)} />
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  </body>
+</html>

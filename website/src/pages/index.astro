@@ -1,0 +1,84 @@
+---
+import { getCollection } from 'astro:content';
+import fs from 'node:fs';
+
+const allEntries = await getCollection('vault');
+
+fs.writeFileSync('entries-debug.json', JSON.stringify(allEntries.map(e => ({ id: e.id, slug: e.data?.slug, filePath: e.filePath })), null, 2));
+
+// Group entries by top-level folder
+const tree = allEntries.reduce((acc, entry) => {
+  const parts = entry.id.split('/');
+  const folder = parts.length > 1 ? parts[0] : 'Root';
+  if (!acc[folder]) acc[folder] = [];
+  acc[folder].push(entry);
+  return acc;
+}, {} as Record<string, typeof allEntries>);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Vault Index</title>
+    <style>
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        line-height: 1.6;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+        background-color: #f8fafc;
+        color: #0f172a;
+      }
+      .catalog-container {
+        background: white;
+        padding: 3rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -4px rgba(0,0,0,0.05);
+      }
+      h1 { 
+        color: #1e293b;
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 1rem;
+      }
+      h2 {
+        color: #334155;
+        margin-top: 2rem;
+        text-transform: capitalize;
+      }
+      ul { list-style: none; padding: 0; }
+      li { margin: 0.5rem 0; }
+      a {
+        text-decoration: none;
+        color: #2563eb;
+        transition: color 0.2s ease;
+      }
+      a:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="catalog-container">
+      <h1>Vault Catalog</h1>
+      {Object.entries(tree).map(([folder, entries]) => (
+        <div>
+          <h2>{folder}</h2>
+          <ul>
+            {entries.map(entry => (
+              <li>
+                <a href={`/swarm-cruise/${entry.id}`}>
+                  {entry.data?.title || entry.id}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </body>
+</html>
