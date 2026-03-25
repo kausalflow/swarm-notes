@@ -119,18 +119,28 @@ def _build_body(analysis: PaperAnalysis) -> str:
     """Build the Markdown body of the paper note."""
     lines: list[str] = []
 
-    # Title
     lines.append(f"# {analysis.title}\n")
+    lines.append(f"**Authors**: {', '.join(analysis.authors)}")
+    lines.append(f"**Date**: {analysis.published}")
+    lines.append(f"**ArXiv**: [{analysis.arxiv_id}]({analysis.url})\n")
 
-    # Summary
     lines.append("## Summary\n")
     lines.append(f"{analysis.summary}\n")
 
-    # Key Contributions
     lines.append("## Key Contributions\n")
     for contrib in analysis.key_contributions:
         lines.append(f"- {contrib}")
     lines.append("")
+
+    if analysis.limitations:
+        lines.append("## Limitations\n")
+        lines.append(f"{analysis.limitations}\n")
+
+    if analysis.open_questions:
+        lines.append("## Open Questions & Future Work\n")
+        for q in analysis.open_questions:
+            lines.append(f"- {q}")
+        lines.append("")
 
     # Concepts
     if analysis.concepts:

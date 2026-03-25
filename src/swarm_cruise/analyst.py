@@ -108,6 +108,11 @@ class PaperAnalysis(BaseModel):
         )
     )
 
+    open_questions: list[str] = Field(
+        default_factory=list,
+        description="List of open questions or future research identified by the domain expert.",
+    )
+
 
 # ---------------------------------------------------------------------------
 # Agent factory
