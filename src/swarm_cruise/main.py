@@ -6,6 +6,10 @@ import logging
 import sys
 from pathlib import Path
 
+import typer
+
+app = typer.Typer(help="Swarm Cruise Orchestrator")
+
 # ---------------------------------------------------------------------------
 # Logging setup
 # ---------------------------------------------------------------------------
@@ -17,11 +21,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def main() -> int:
-    """Run the full pipeline.  Returns 0 on success, 1 on failure."""
-    from src import analyst, federation, router, watcher
-    from src.vault_manager import commit_staging, discard_staging, init_staging, init_vault
-    from src.vault_writer import update_public_feed, write_paper
+@app.command()
+def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path to config.yaml")) -> None:
+    """Run the full pipeline."""
+    from swarm_cruise import config as src_config
+    if Path(config).exists():
+        src_config.load_yaml_config(config)
+    else:
+        logger.info("No config.yaml found at '%s', using environment variables / defaults.", config)
+
+    from swarm_cruise import analyst, federation, router, watcher
+    from swarm_cruise.vault_manager import commit_staging, discard_staging, init_staging, init_vault
+    from swarm_cruise.vault_writer import update_public_feed, write_paper
 
     # ------------------------------------------------------------------
     # 1. Initialise vault directories
@@ -51,7 +62,7 @@ def main() -> int:
             logger.warning("Watcher returned no papers – nothing to process")
             # Still a valid (empty) run; commit any federation changes
             commit_staging()
-            return 0
+            raise typer.Exit(0)
 
         # ------------------------------------------------------------------
         # 5. Router + Analyst + Vault Writer – process each paper
@@ -92,13 +103,12 @@ def main() -> int:
             len(analyses),
             len(papers),
         )
-        return 0
 
     except Exception as exc:
         logger.critical("Pipeline crashed: %s", exc, exc_info=True)
         discard_staging()
-        return 1
+        raise typer.Exit(1)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    app()

@@ -12,37 +12,28 @@ import logging
 import shutil
 from pathlib import Path
 
-from src.config import (
-    TMP_CONCEPTS_DIR,
-    TMP_DATASETS_DIR,
-    TMP_PAPERS_DIR,
-    TMP_VAULT_DIR,
-    VAULT_CONCEPTS_DIR,
-    VAULT_DATASETS_DIR,
-    VAULT_DIR,
-    VAULT_PAPERS_DIR,
-)
+from swarm_cruise.config import settings
 
 logger = logging.getLogger(__name__)
 
 
 def init_vault() -> None:
     """Create the primary vault directories if they do not exist."""
-    for directory in (VAULT_PAPERS_DIR, VAULT_CONCEPTS_DIR, VAULT_DATASETS_DIR):
+    for directory in (settings.vault_papers_dir, settings.vault_concepts_dir, settings.vault_datasets_dir):
         directory.mkdir(parents=True, exist_ok=True)
-    logger.info("Vault directories initialised at %s", VAULT_DIR)
+    logger.info("Vault directories initialised at %s", settings.vault_dir)
 
 
 def init_staging() -> None:
     """Create (or recreate) the staging ``tmp_vault/`` directories."""
-    if TMP_VAULT_DIR.exists():
-        shutil.rmtree(TMP_VAULT_DIR)
-        logger.debug("Removed stale tmp_vault at %s", TMP_VAULT_DIR)
+    if settings.tmp_vault_dir.exists():
+        shutil.rmtree(settings.tmp_vault_dir)
+        logger.debug("Removed stale tmp_vault at %s", settings.tmp_vault_dir)
 
-    for directory in (TMP_PAPERS_DIR, TMP_CONCEPTS_DIR, TMP_DATASETS_DIR):
+    for directory in (settings.tmp_papers_dir, settings.tmp_concepts_dir, settings.tmp_datasets_dir):
         directory.mkdir(parents=True, exist_ok=True)
 
-    logger.info("Staging directory initialised at %s", TMP_VAULT_DIR)
+    logger.info("Staging directory initialised at %s", settings.tmp_vault_dir)
 
 
 def commit_staging() -> None:
@@ -52,22 +43,22 @@ def commit_staging() -> None:
     New files are simply moved.  The staging directory is removed on
     completion.
     """
-    if not TMP_VAULT_DIR.exists():
+    if not settings.tmp_vault_dir.exists():
         logger.warning("commit_staging called but tmp_vault does not exist – nothing to do")
         return
 
-    _merge_directory(TMP_PAPERS_DIR, VAULT_PAPERS_DIR)
-    _merge_directory(TMP_CONCEPTS_DIR, VAULT_CONCEPTS_DIR)
-    _merge_directory(TMP_DATASETS_DIR, VAULT_DATASETS_DIR)
+    _merge_directory(settings.tmp_papers_dir, settings.vault_papers_dir)
+    _merge_directory(settings.tmp_concepts_dir, settings.vault_concepts_dir)
+    _merge_directory(settings.tmp_datasets_dir, settings.vault_datasets_dir)
 
-    shutil.rmtree(TMP_VAULT_DIR)
+    shutil.rmtree(settings.tmp_vault_dir)
     logger.info("Staging committed to vault and tmp_vault removed")
 
 
 def discard_staging() -> None:
     """Remove ``tmp_vault/`` without touching the live vault."""
-    if TMP_VAULT_DIR.exists():
-        shutil.rmtree(TMP_VAULT_DIR)
+    if settings.tmp_vault_dir.exists():
+        shutil.rmtree(settings.tmp_vault_dir)
         logger.info("Staging discarded – tmp_vault removed")
     else:
         logger.debug("discard_staging called but tmp_vault does not exist")

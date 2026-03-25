@@ -21,11 +21,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-from src.config import (
-    FEDERATION_FEEDS,
-    TMP_PAPERS_DIR,
-    VAULT_PAPERS_DIR,
-)
+from swarm_cruise.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -39,10 +35,10 @@ def run_federation(feed_urls: list[str] | None = None) -> None:
     ----------
     feed_urls:
         URLs of external ``public_feed.json`` files.  Defaults to
-        ``FEDERATION_FEEDS`` from config.
+        ``settings.federation_feeds`` from config.
     """
     if feed_urls is None:
-        feed_urls = FEDERATION_FEEDS
+        feed_urls = settings.federation_feeds
 
     if not feed_urls:
         logger.info("Federation: no external feeds configured – skipping")
@@ -91,11 +87,11 @@ def _process_entry(entry: dict, source_label: str) -> None:
 def _find_existing_paper(arxiv_id: str) -> Path | None:
     """Return the path of an existing paper file in staging or vault, or None."""
     # Check staging first (files written in the current run)
-    for path in TMP_PAPERS_DIR.iterdir():
+    for path in settings.tmp_papers_dir.iterdir():
         if path.is_file() and arxiv_id in path.name:
             return path
     # Then the live vault
-    for path in VAULT_PAPERS_DIR.iterdir():
+    for path in settings.vault_papers_dir.iterdir():
         if path.is_file() and arxiv_id in path.name:
             return path
     return None
@@ -113,7 +109,7 @@ def _append_external_perspective(
     If the file lives in the live vault (not staging), copy it to staging
     first so edits are part of the atomic commit.
     """
-    staging_path = TMP_PAPERS_DIR / paper_path.name
+    staging_path = settings.tmp_papers_dir / paper_path.name
     if not staging_path.exists():
         # Copy live vault file into staging before modifying
         import shutil
@@ -147,7 +143,7 @@ def _write_federated_stub(entry: dict, source_label: str) -> None:
     summary = entry.get("summary", "")
 
     slug = _make_slug(arxiv_id, title)
-    out_path = TMP_PAPERS_DIR / f"{slug}.md"
+    out_path = settings.tmp_papers_dir / f"{slug}.md"
 
     if out_path.exists():
         return  # Already written this run

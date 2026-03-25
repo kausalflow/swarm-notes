@@ -2761,6 +2761,7 @@ dependencies = [
     { name = "python-frontmatter" },
     { name = "pyyaml" },
     { name = "requests" },
+    { name = "typer" },
 ]
 
 [package.dev-dependencies]
@@ -2776,6 +2777,7 @@ requires-dist = [
     { name = "python-frontmatter", specifier = ">=1.1.0" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "requests", specifier = ">=2.32.5" },
+    { name = "typer", specifier = ">=0.24.1" },
 ]
 
 [package.metadata.requires-dev]

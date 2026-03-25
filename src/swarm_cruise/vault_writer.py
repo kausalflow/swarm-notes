@@ -12,13 +12,8 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-from src.analyst import PaperAnalysis
-from src.config import (
-    PUBLIC_FEED_FILE,
-    PUBLIC_FEED_MAX_ITEMS,
-    TMP_CONCEPTS_DIR,
-    TMP_PAPERS_DIR,
-)
+from swarm_cruise.analyst import PaperAnalysis
+from swarm_cruise.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +60,7 @@ def write_paper(analysis: PaperAnalysis, skill_name: str) -> Path:
         Path to the written staging file.
     """
     slug = _make_slug(analysis.arxiv_id, analysis.title)
-    out_path = TMP_PAPERS_DIR / f"{slug}.md"
+    out_path = settings.tmp_papers_dir / f"{slug}.md"
 
     frontmatter = _build_frontmatter(analysis, skill_name)
     body = _build_body(analysis)
@@ -170,10 +165,10 @@ def _build_body(analysis: PaperAnalysis) -> str:
 def _write_concept_stub(slug: str, display_name: str, one_liner: str) -> None:
     """Write a concept stub Markdown file if one does not already exist."""
     # Check staging first, then live vault (avoid overwriting existing)
-    from src.config import VAULT_CONCEPTS_DIR  # avoid circular at module level
+    from swarm_cruise.config import settings
 
-    staging_path = TMP_CONCEPTS_DIR / f"{slug}.md"
-    vault_path = VAULT_CONCEPTS_DIR / f"{slug}.md"
+    staging_path = settings.tmp_concepts_dir / f"{slug}.md"
+    vault_path = settings.vault_concepts_dir / f"{slug}.md"
 
     if staging_path.exists() or vault_path.exists():
         logger.debug("Concept stub already exists for '%s' – skipping", slug)
@@ -228,9 +223,9 @@ def update_public_feed(analyses: list[PaperAnalysis]) -> None:
     ]
 
     combined = new_entries + existing
-    trimmed = combined[:PUBLIC_FEED_MAX_ITEMS]
+    trimmed = combined[:settings.public_feed_max_items]
 
-    PUBLIC_FEED_FILE.write_text(
+    settings.public_feed_file.write_text(
         json.dumps(trimmed, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
@@ -257,7 +252,7 @@ def _analysis_to_feed_entry(analysis: PaperAnalysis) -> dict:
 
 def _load_feed() -> list[dict]:
     try:
-        with PUBLIC_FEED_FILE.open() as fh:
+        with settings.public_feed_file.open() as fh:
             data = json.load(fh)
             if isinstance(data, list):
                 return data
