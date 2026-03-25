@@ -48,6 +48,9 @@ jobs:
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.LLM_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL || vars.LLM_MODEL }}
           # Allow workflow_dispatch inputs to override config defaults
           ARXIV_KEYWORDS: ${{ github.event.inputs.keywords }}
           FEDERATION_FEEDS: ${{ github.event.inputs.federation_feeds }}

@@ -36,8 +36,35 @@ PUBLIC_FEED_FILE = REPO_ROOT / "public_feed.json"
 LLM_API_KEY: str = os.environ.get("LLM_API_KEY", "")
 OPENAI_API_KEY: str = os.environ.get("OPENAI_API_KEY", LLM_API_KEY)
 
+# Google/Gemini API key – pydantic-ai reads GEMINI_API_KEY or GOOGLE_API_KEY.
+# If the user supplies LLM_API_KEY with a Google key (starts with "AIzaSy"),
+# propagate it automatically so the google-gla provider can authenticate.
+GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY", "") or os.environ.get(
+    "GOOGLE_API_KEY", ""
+)
+if not GEMINI_API_KEY and LLM_API_KEY.startswith("AIzaSy"):
+    GEMINI_API_KEY = LLM_API_KEY
+    os.environ.setdefault("GEMINI_API_KEY", GEMINI_API_KEY)
+
+
+def _default_llm_model() -> str:
+    """Return the best default model based on available API keys.
+
+    Priority:
+    1. ``LLM_MODEL`` env var – explicit override always wins.
+    2. Google / Gemini key detected → ``google-gla:gemini-2.0-flash``.
+    3. Fall back to ``openai:gpt-4o-mini``.
+    """
+    explicit = os.environ.get("LLM_MODEL", "")
+    if explicit:
+        return explicit
+    if GEMINI_API_KEY:
+        return "google-gla:gemini-2.0-flash"
+    return "openai:gpt-4o-mini"
+
+
 # Model to use for extraction (can be overridden via env var)
-LLM_MODEL: str = os.environ.get("LLM_MODEL", "openai:gpt-4o-mini")
+LLM_MODEL: str = _default_llm_model()
 
 # ---------------------------------------------------------------------------
 # Watcher configuration

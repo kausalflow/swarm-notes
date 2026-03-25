@@ -10,3 +10,6 @@ requests>=2.32.0
 
 # Pydantic (pulled in by pydantic-ai, pinned here for clarity)
 pydantic>=2.7.0
+
+# Testing
+pytest>=7.0.0
