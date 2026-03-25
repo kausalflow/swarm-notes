@@ -43,6 +43,7 @@ datasets:
 {dataset_lines}
 skill: "{skill}"
 processed_at: "{processed_at}"
+created_at: "{created_at}"
 ---
 """
 
@@ -100,7 +101,7 @@ def _build_frontmatter(analysis: PaperAnalysis, skill_name: str) -> str:
     )
     dataset_lines = "\n".join(f'  - "{d}"' for d in analysis.datasets) or "  []"
 
-    processed_at = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now_utc = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     return _FRONTMATTER_TEMPLATE.format(
         title=_yaml_escape(analysis.title),
@@ -113,7 +114,8 @@ def _build_frontmatter(analysis: PaperAnalysis, skill_name: str) -> str:
         architecture_lines=architecture_lines,
         dataset_lines=dataset_lines,
         skill=skill_name,
-        processed_at=processed_at,
+        processed_at=now_utc,
+        created_at=now_utc,
     )
 
 
@@ -188,14 +190,15 @@ def _write_concept_stub(slug: str, display_name: str, one_liner: str) -> None:
         logger.debug("Concept stub already exists for '%s' – skipping", slug)
         return
 
-    processed_at = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now_utc = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     content = f"""\
 ---
 title: "{_yaml_escape(display_name)}"
 slug: "{slug}"
 type: concept
 generated_stub: true
-processed_at: "{processed_at}"
+processed_at: "{now_utc}"
+created_at: "{now_utc}"
 ---
 
 # {display_name}
@@ -219,12 +222,16 @@ def _create_open_question(question: OpenQuestion, analysis: PaperAnalysis) -> No
     live_path = settings.vault_open_questions_dir / filename
     staging_path = settings.tmp_open_questions_dir / filename
 
+    is_new = not staging_path.exists() and not live_path.exists()
+
     if live_path.exists() and not staging_path.exists():
         shutil.copy2(live_path, staging_path)
 
+    now_utc = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     papers = []
     content = f"**Background:** {question.background}\n\n**Question / Future Work:** {question.description}"
-    
+    existing_created_at: str | None = None
+
     if staging_path.exists():
         try:
             post = frontmatter.load(staging_path)
@@ -233,6 +240,7 @@ def _create_open_question(question: OpenQuestion, analysis: PaperAnalysis) -> No
                 papers = [papers]
             # Retain original deeper description instead of wiping it
             content = post.content if post.content.strip() else content
+            existing_created_at = post.metadata.get("created_at")
         except Exception as exc:
             logger.warning("VaultWriter: Failed to parse existing frontmatter for %s: %s", slug, exc)
 
@@ -241,11 +249,15 @@ def _create_open_question(question: OpenQuestion, analysis: PaperAnalysis) -> No
     if paper_id not in papers:
         papers.append(paper_id)
 
-    post = frontmatter.Post(
-        content,
-        title=question.title,
-        source_papers=papers
-    )
+    metadata: dict = {
+        "title": question.title,
+        "source_papers": papers,
+        "created_at": existing_created_at if existing_created_at else now_utc,
+    }
+    if not is_new:
+        metadata["modified_at"] = now_utc
+
+    post = frontmatter.Post(content, **metadata)
     with staging_path.open("wb") as f:
         frontmatter.dump(post, f)
 
@@ -292,7 +304,11 @@ def update_public_feed(analyses: list[PaperAnalysis]) -> None:
 
 
 def append_daily_discussion(content: str) -> None:
-    """Appends the discussion content to today's daily note in staging."""
+    """Appends the discussion content to today's daily note in staging.
+
+    Creates the file with a ``created_at`` frontmatter timestamp if it is new,
+    or prepends / updates a ``modified_at`` timestamp on subsequent appends.
+    """
     today_str = datetime.now().date().isoformat()
     filename = f"{today_str}.md"
 
@@ -304,13 +320,27 @@ def append_daily_discussion(content: str) -> None:
         shutil.copy2(live_path, staging_path)
 
     is_new = not staging_path.exists()
+    now_utc = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     header = f"\n\n## Discussion for {now_str}\n\n"
 
-    with staging_path.open("a", encoding="utf-8") as f:
-        if is_new:
-            f.write(f"# Daily Notes: {today_str}\n")
-        f.write(header + content + "\n")
+    if is_new:
+        # Write frontmatter + heading first
+        front = f"---\ncreated_at: \"{now_utc}\"\n---\n\n# Daily Notes: {today_str}\n"
+        staging_path.write_text(front, encoding="utf-8")
+        with staging_path.open("a", encoding="utf-8") as f:
+            f.write(header + content + "\n")
+    else:
+        # Update modified_at in existing frontmatter then append
+        try:
+            post = frontmatter.load(staging_path)
+            post.metadata["modified_at"] = now_utc
+            with staging_path.open("wb") as f:
+                frontmatter.dump(post, f)
+        except Exception as exc:
+            logger.warning("VaultWriter: could not update modified_at for %s: %s", filename, exc)
+        with staging_path.open("a", encoding="utf-8") as f:
+            f.write(header + content + "\n")
 
     logger.info("VaultWriter: appended to daily discussion → %s", staging_path)
 
