@@ -86,16 +86,26 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
                 # Continue with other papers
 
         # ------------------------------------------------------------------
-        # 6. Update the public feed
+        # 6. Discussant – Synthesise insights
         # ------------------------------------------------------------------
         if analyses:
-            logger.info("--- Step 6: Update public feed (%d papers) ---", len(analyses))
+            logger.info("--- Step 6: Discussant (%d papers) ---", len(analyses))
+            from swarm_cruise.discussant import discuss_papers
+            discussion_md = discuss_papers(analyses)
+            from swarm_cruise.vault_writer import append_daily_discussion
+            append_daily_discussion(discussion_md)
+
+        # ------------------------------------------------------------------
+        # 7. Update the public feed
+        # ------------------------------------------------------------------
+        if analyses:
+            logger.info("--- Step 7: Update public feed (%d papers) ---", len(analyses))
             update_public_feed(analyses)
 
         # ------------------------------------------------------------------
-        # 7. Atomic commit: move staging → vault
+        # 8. Atomic commit: move staging → vault
         # ------------------------------------------------------------------
-        logger.info("--- Step 7: Committing staging to vault ---")
+        logger.info("--- Step 8: Committing staging to vault ---")
         commit_staging()
 
         logger.info(

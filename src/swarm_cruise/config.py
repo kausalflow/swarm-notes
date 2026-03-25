@@ -16,12 +16,16 @@ class Settings(BaseModel):
     vault_papers_dir: Path = Field(default=REPO_ROOT / "vault" / "papers")
     vault_concepts_dir: Path = Field(default=REPO_ROOT / "vault" / "concepts")
     vault_datasets_dir: Path = Field(default=REPO_ROOT / "vault" / "datasets")
+    vault_discussions_dir: Path = Field(default=REPO_ROOT / "vault" / "discussions")
+    vault_daily_dir: Path = Field(default=REPO_ROOT / "vault" / "discussions" / "daily")
     
     # Staging paths
     tmp_vault_dir: Path = Field(default=REPO_ROOT / "tmp_vault")
     tmp_papers_dir: Path = Field(default=REPO_ROOT / "tmp_vault" / "papers")
     tmp_concepts_dir: Path = Field(default=REPO_ROOT / "tmp_vault" / "concepts")
     tmp_datasets_dir: Path = Field(default=REPO_ROOT / "tmp_vault" / "datasets")
+    tmp_discussions_dir: Path = Field(default=REPO_ROOT / "tmp_vault" / "discussions")
+    tmp_daily_dir: Path = Field(default=REPO_ROOT / "tmp_vault" / "discussions" / "daily")
     
     # Data files
     taxonomy_file: Path = Field(default=REPO_ROOT / "taxonomy.json")
