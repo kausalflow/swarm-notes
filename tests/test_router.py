@@ -1,7 +1,7 @@
 """Tests for router.py."""
 
-from swarm_cruise.router import GENERAL_SKILL, VISION_SKILL, route
-from swarm_cruise.watcher import RawPaper
+from swarm_notes.router import GENERAL_SKILL, VISION_SKILL, route
+from swarm_notes.watcher import RawPaper
 
 
 def test_route_category() -> None:

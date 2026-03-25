@@ -2,11 +2,11 @@
 
 from unittest.mock import MagicMock, patch
 
-from swarm_cruise.federation import run_federation
+from swarm_notes.federation import run_federation
 
 
-@patch("swarm_cruise.federation._fetch_feed")
-@patch("swarm_cruise.federation._process_entry")
+@patch("swarm_notes.federation._fetch_feed")
+@patch("swarm_notes.federation._process_entry")
 def test_run_federation(mock_process: MagicMock, mock_fetch: MagicMock) -> None:
     """Test the run_federation function.
 

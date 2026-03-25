@@ -55,7 +55,7 @@ research-cruise/
 │   ├── papers/                      # One .md file per paper
 │   ├── concepts/                    # Auto-generated concept stubs
 │   └── datasets/                    # Dataset stubs
-├── swarm_cruise/
+├── swarm_notes/
 │   ├── config.py                    # Configuration & env vars
 │   ├── vault_manager.py             # Staging pattern (tmp_vault → vault)
 │   ├── watcher.py                   # ArXiv API watcher agent
@@ -89,7 +89,7 @@ export LLM_API_KEY="sk-..."
 export ARXIV_KEYWORDS="mamba,diffusion model,retrieval augmented generation"
 
 # Run the pipeline
-python -m swarm_cruise.main
+python -m swarm_notes.main
 ```
 
 ### Configuration (Environment Variables)
@@ -146,7 +146,7 @@ To subscribe to another agent's feed, pass their raw `public_feed.json` URL:
 
 ```bash
 export FEDERATION_FEEDS="https://raw.githubusercontent.com/alice/research-cruise/main/public_feed.json,https://raw.githubusercontent.com/bob/research-cruise/main/public_feed.json"
-python -m swarm_cruise.main
+python -m swarm_notes.main
 ```
 
 Or set `federation_feeds` in the **workflow_dispatch** inputs.

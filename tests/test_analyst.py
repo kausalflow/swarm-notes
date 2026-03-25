@@ -2,9 +2,9 @@
 
 from unittest.mock import MagicMock, patch
 
-from swarm_cruise.analyst import analyse
-from swarm_cruise.router import GENERAL_SKILL
-from swarm_cruise.watcher import RawPaper
+from swarm_notes.analyst import analyse
+from swarm_notes.router import GENERAL_SKILL
+from swarm_notes.watcher import RawPaper
 
 
 class MockOutput:
@@ -17,8 +17,8 @@ class MockOutput:
     concepts: list[str] = []
 
 
-@patch("swarm_cruise.analyst.Agent")
-@patch("swarm_cruise.analyst._load_taxonomy")
+@patch("swarm_notes.analyst.Agent")
+@patch("swarm_notes.analyst._load_taxonomy")
 def test_analyse(mock_load_taxonomy: MagicMock, mock_agent_class: MagicMock) -> None:
     """Test the analyse function.
 

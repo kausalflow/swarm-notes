@@ -10,10 +10,10 @@ from unittest.mock import patch
 def _reload_config(env: dict[str, str]):
     """Reload src.config with a clean environment snapshot."""
     # Remove cached module so module-level code reruns
-    sys.modules.pop("swarm_cruise.config", None)
+    sys.modules.pop("swarm_notes.config", None)
     with patch.dict("os.environ", env, clear=True):
         with patch("dotenv.load_dotenv"):
-            import swarm_cruise.config as cfg
+            import swarm_notes.config as cfg
             return cfg
 
 
@@ -58,16 +58,16 @@ class TestGeminiApiKeyPropagation:
     """When LLM_API_KEY is a Google key, GEMINI_API_KEY is auto-propagated."""
 
     def test_gemini_key_propagated_from_llm_api_key(self):
-        sys.modules.pop("swarm_cruise.config", None)
+        sys.modules.pop("swarm_notes.config", None)
         fake_key = "AIzaSy_test_propagation_key"
         with patch.dict("os.environ", {"LLM_API_KEY": fake_key}, clear=True):
             with patch("dotenv.load_dotenv"):
-                import swarm_cruise.config as cfg  # noqa: F401
+                import swarm_notes.config as cfg  # noqa: F401
 
             assert os.environ.get("GEMINI_API_KEY") == fake_key
 
     def test_existing_gemini_key_not_overwritten(self):
-        sys.modules.pop("swarm_cruise.config", None)
+        sys.modules.pop("swarm_notes.config", None)
         existing = "AIzaSy_already_set"
         new_key = "AIzaSy_should_not_override"
         with patch.dict(
@@ -76,6 +76,6 @@ class TestGeminiApiKeyPropagation:
             clear=True,
         ):
             with patch("dotenv.load_dotenv"):
-                import swarm_cruise.config as cfg  # noqa: F401
+                import swarm_notes.config as cfg  # noqa: F401
 
             assert os.environ.get("GEMINI_API_KEY") == existing

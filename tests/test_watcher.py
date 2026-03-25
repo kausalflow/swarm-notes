@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from swarm_cruise.watcher import fetch_papers
+from swarm_notes.watcher import fetch_papers
 
 MOCK_ATOM_XML = b'''<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
