@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -202,6 +203,7 @@ processed_at: "{processed_at}"
 # Public feed maintenance
 # ---------------------------------------------------------------------------
 
+
 def update_public_feed(analyses: list[PaperAnalysis]) -> None:
     """Add *analyses* to ``public_feed.json``, keeping the last N entries.
 
@@ -234,6 +236,30 @@ def update_public_feed(analyses: list[PaperAnalysis]) -> None:
         len(new_entries),
         len(trimmed),
     )
+
+
+def append_daily_discussion(content: str) -> None:
+    """Appends the discussion content to today's daily note in staging."""
+    today_str = datetime.date.today().isoformat()
+    filename = f"{today_str}.md"
+
+    live_path = settings.vault_daily_dir / filename
+    staging_path = settings.tmp_daily_dir / filename
+
+    # If not already staged, but exists in live vault, copy it over first
+    if not staging_path.exists() and live_path.exists():
+        shutil.copy2(live_path, staging_path)
+
+    is_new = not staging_path.exists()
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    header = f"\n\n## Discussion for {now_str}\n\n"
+
+    with staging_path.open("a", encoding="utf-8") as f:
+        if is_new:
+            f.write(f"# Daily Notes: {today_str}\n")
+        f.write(header + content + "\n")
+
+    logger.info("VaultWriter: appended to daily discussion → %s", staging_path)
 
 
 def _analysis_to_feed_entry(analysis: PaperAnalysis) -> dict:

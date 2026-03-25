@@ -18,7 +18,7 @@ def test_init_vault() -> None:
     mock_mkdir = MagicMock()
     with patch("pathlib.Path.mkdir", mock_mkdir):
         vault_manager.init_vault()
-    assert mock_mkdir.call_count == 3
+    assert mock_mkdir.call_count == 5
 
 
 def test_init_staging() -> None:
@@ -34,7 +34,7 @@ def test_init_staging() -> None:
             with patch("shutil.rmtree") as mock_rmtree:
                 vault_manager.init_staging()
                 mock_rmtree.assert_called_once()
-    assert mock_mkdir.call_count == 3
+    assert mock_mkdir.call_count == 5
 
 
 def test_commit_staging() -> None:
@@ -48,7 +48,7 @@ def test_commit_staging() -> None:
         with patch("swarm_cruise.vault_manager._merge_directory") as mock_merge:
             with patch("shutil.rmtree") as mock_rmtree:
                 vault_manager.commit_staging()
-                assert mock_merge.call_count == 3
+                assert mock_merge.call_count == 5
                 mock_rmtree.assert_called_once()
 
 

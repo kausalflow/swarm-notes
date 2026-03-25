@@ -19,9 +19,12 @@ logger = logging.getLogger(__name__)
 
 def init_vault() -> None:
     """Create the primary vault directories if they do not exist."""
-    for directory in (settings.vault_papers_dir, settings.vault_concepts_dir, settings.vault_datasets_dir):
-        directory.mkdir(parents=True, exist_ok=True)
-    logger.info("Vault directories initialised at %s", settings.vault_dir)
+    settings.vault_papers_dir.mkdir(parents=True, exist_ok=True)
+    settings.vault_concepts_dir.mkdir(parents=True, exist_ok=True)
+    settings.vault_datasets_dir.mkdir(parents=True, exist_ok=True)
+    settings.vault_discussions_dir.mkdir(parents=True, exist_ok=True)
+    settings.vault_daily_dir.mkdir(parents=True, exist_ok=True)
+    logger.info("Vault structure initialised at %s", settings.vault_dir)
 
 
 def init_staging() -> None:
@@ -30,10 +33,12 @@ def init_staging() -> None:
         shutil.rmtree(settings.tmp_vault_dir)
         logger.debug("Removed stale tmp_vault at %s", settings.tmp_vault_dir)
 
-    for directory in (settings.tmp_papers_dir, settings.tmp_concepts_dir, settings.tmp_datasets_dir):
-        directory.mkdir(parents=True, exist_ok=True)
-
-    logger.info("Staging directory initialised at %s", settings.tmp_vault_dir)
+    settings.tmp_papers_dir.mkdir(parents=True, exist_ok=True)
+    settings.tmp_concepts_dir.mkdir(parents=True, exist_ok=True)
+    settings.tmp_datasets_dir.mkdir(parents=True, exist_ok=True)
+    settings.tmp_discussions_dir.mkdir(parents=True, exist_ok=True)
+    settings.tmp_daily_dir.mkdir(parents=True, exist_ok=True)
+    logger.debug("Staging area initialised at %s", settings.tmp_vault_dir)
 
 
 def commit_staging() -> None:
@@ -50,7 +55,10 @@ def commit_staging() -> None:
     _merge_directory(settings.tmp_papers_dir, settings.vault_papers_dir)
     _merge_directory(settings.tmp_concepts_dir, settings.vault_concepts_dir)
     _merge_directory(settings.tmp_datasets_dir, settings.vault_datasets_dir)
+    _merge_directory(settings.tmp_daily_dir, settings.vault_daily_dir)
+    _merge_directory(settings.tmp_discussions_dir, settings.vault_discussions_dir)
 
+    # 3. Clean up stagings.tmp_vault_dir)
     shutil.rmtree(settings.tmp_vault_dir)
     logger.info("Staging committed to vault and tmp_vault removed")
 
