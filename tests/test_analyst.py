@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 from swarm_notes.analyst import analyse
-from swarm_notes.router import GENERAL_SKILL
+from swarm_notes.router import load_skills, get_general_skill
 from swarm_notes.watcher import RawPaper
 
 
@@ -51,7 +51,8 @@ def test_analyse(mock_load_taxonomy: MagicMock, mock_agent_class: MagicMock) -> 
         primary_category="cs.CL",
     )
 
-    result = analyse(paper, GENERAL_SKILL)
+    load_skills()
+    result = analyse(paper, get_general_skill())
 
     assert result.arxiv_id == "12345"
     assert result.url == "http://url"

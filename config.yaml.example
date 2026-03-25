@@ -12,5 +12,9 @@ public_feed_max_items: 20
 site_name: "Swarm Notes"
 site_description: "Automated research paper tracking and knowledge synthesis."
 
+# Skill configuration
+# active_skills: ["time-series", "physics"]  # IDs of skill folders to load; empty = all
+# skills_dir: "skills"                       # Root directory for skills
+
 # Experimental domain expert agent (crawls HTML, consumes token quotas)
 enable_domain_expert: true

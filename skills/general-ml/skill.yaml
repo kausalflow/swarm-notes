@@ -1,0 +1,14 @@
+name: GeneralMLSkill
+description: "General machine learning papers that do not fit a specialised category."
+extra_system_prompt: |
+  Extract the key contributions, methodology, evaluation benchmarks, 
+  and limitations of this paper.
+preferred_tags:
+  - benchmark
+  - dataset
+  - evaluation
+  - meta-learning
+arxiv_categories:
+  - cs.LG
+  - cs.AI
+  - stat.ML

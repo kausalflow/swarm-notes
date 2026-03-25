@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 
 from swarm_notes.config import settings
-from swarm_notes.router import Skill
+from swarm_notes.router import SkillSpec
 from swarm_notes.vault_manager import get_existing_concept_slugs
 from swarm_notes.watcher import RawPaper
 
@@ -136,7 +136,7 @@ class PaperAnalysis(BaseModel):
 # Agent factory
 # ---------------------------------------------------------------------------
 
-def _build_system_prompt(skill: Skill, taxonomy: dict) -> str:
+def _build_system_prompt(skill: SkillSpec, taxonomy: dict) -> str:
     tags_list = ", ".join(taxonomy.get("tags", []))
     architectures_list = ", ".join(taxonomy.get("architectures", []))
     domains_list = ", ".join(taxonomy.get("domains", []))
@@ -144,7 +144,7 @@ def _build_system_prompt(skill: Skill, taxonomy: dict) -> str:
     existing_concepts_list = get_existing_concept_slugs()
     existing_concepts_str = ", ".join(existing_concepts_list) if existing_concepts_list else "(No concepts currently exist in the vault)"
 
-    return f"""You are an expert academic paper analyst specialising in machine learning research.
+    base_prompt = f"""You are an expert academic paper analyst specialising in machine learning research.
 
 Your task is to analyse the provided paper abstract and extract structured information.
 
@@ -167,9 +167,12 @@ IMPORTANT RULES:
 5. Key contributions must be specific, not generic ("we propose X" → "X achieves Y on Z benchmark").
 6. For concepts, ALWAYS check the EXISTING CONCEPTS IN VAULT list. If a highly synonymous concept already exists, you MUST exactly reuse its slug. Only create entirely new concepts if they represent a genuinely novel idea.
 """
+    if skill.analyst_system_prompt_override:
+        return skill.analyst_system_prompt_override
+    return base_prompt
 
 
-def analyse(paper: RawPaper, skill: Skill) -> PaperAnalysis:
+def analyse(paper: RawPaper, skill: SkillSpec) -> PaperAnalysis:
     """Run the analyst agent on *paper* using the provided *skill* context.
 
     Parameters

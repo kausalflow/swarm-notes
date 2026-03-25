@@ -34,6 +34,9 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
     from swarm_notes.vault_manager import commit_staging, discard_staging, init_staging, init_vault, get_existing_arxiv_ids
     from swarm_notes.vault_writer import update_public_feed, write_paper, write_site_config
 
+    # Load skills from disk based on config
+    router.load_skills()
+
     # ------------------------------------------------------------------
     # 1. Initialise vault directories
     # ------------------------------------------------------------------
@@ -88,6 +91,7 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
         # ------------------------------------------------------------------
         logger.info("--- Step 5: Router / Analyst / Vault Writer (%d papers) ---", len(papers))
         analyses = []
+        skills_used_map = {}
 
         for paper in papers:
             try:
@@ -95,12 +99,13 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
                 logger.info(
                     "Processing %s with skill %s", paper.arxiv_id, skill.name
                 )
+                skills_used_map[skill.id] = skill
                 analysis = analyst.analyse(paper, skill)
                 
                 # Check Domain Expert Configuration
                 if src_config.settings.enable_domain_expert:
                     from swarm_notes.domain_expert import extract_open_questions
-                    questions = extract_open_questions(paper.arxiv_id)
+                    questions = extract_open_questions(paper.arxiv_id, skill)
                     analysis.open_questions = questions
                     
                 write_paper(analysis, skill.name)
@@ -117,7 +122,13 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
         if analyses:
             logger.info("--- Step 6: Discussant (%d papers) ---", len(analyses))
             from swarm_notes.discussant import discuss_papers
-            discussion_md = discuss_papers(analyses)
+            
+            # If all papers used the same skill, pass it to the discussant for better focus
+            primary_skill = None
+            if len(skills_used_map) == 1:
+                primary_skill = next(iter(skills_used_map.values()))
+            
+            discussion_md = discuss_papers(analyses, primary_skill)
             from swarm_notes.vault_writer import append_daily_discussion
             append_daily_discussion(discussion_md)
 
@@ -140,6 +151,9 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
             len(papers),
         )
 
+    except typer.Exit:
+        # Re-raise Typer exit as-is
+        raise
     except Exception as exc:
         logger.critical("Pipeline crashed: %s", exc, exc_info=True)
         discard_staging()

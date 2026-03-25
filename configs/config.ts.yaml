@@ -8,5 +8,11 @@ arxiv_total_cap: 20
 federation_feeds: []
 public_feed_max_items: 20
 
+# Skill configuration
+active_skills: 
+  - "time-series"
+  - "general-ml"
+skills_dir: "skills"                       # Root directory for skills
+
 # Experimental domain expert agent (crawls HTML, consumes token quotas)
 enable_domain_expert: true

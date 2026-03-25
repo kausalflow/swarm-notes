@@ -1,0 +1,14 @@
+name: PhysicsSkill
+description: "Papers applying machine learning to physics, or physics-informed neural networks."
+extra_system_prompt: |
+  Pay special attention to physical constraints, conservation laws, 
+  differential equations, and scientific datasets.
+preferred_tags:
+  - physics
+  - pinn
+  - scientific-ml
+  - fluid-dynamics
+  - astrophysics
+arxiv_categories:
+  - physics.comp-ph
+  - physics.data-an
