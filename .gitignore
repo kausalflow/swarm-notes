@@ -26,3 +26,7 @@ tmp_vault/
 .pytest_cache/
 .coverage
 htmlcov/
+
+
+website/content/*
+!website/content/.gitkeep
