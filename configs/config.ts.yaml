@@ -1,0 +1,12 @@
+# Example research-cruise configuration
+llm_model: "gemini-flash-lite-latest"
+arxiv_keywords:
+  - "time series"
+  - "forecasting"
+arxiv_max_results_per_keyword: 5
+arxiv_total_cap: 20
+federation_feeds: []
+public_feed_max_items: 20
+
+# Experimental domain expert agent (crawls HTML, consumes token quotas)
+enable_domain_expert: true
