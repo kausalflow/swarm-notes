@@ -1,0 +1,18 @@
+name: NLPSkill
+description: "Papers on natural language processing, text generation, or language understanding."
+extra_system_prompt: |
+  Pay special attention to: model size (parameters), tokenisation strategy, 
+  pre-training corpus, downstream task benchmarks (GLUE, SuperGLUE, MMLU, 
+  HumanEval), and alignment techniques.
+preferred_tags:
+  - nlp
+  - language-model
+  - transformer
+  - bert
+  - gpt
+  - llm
+  - text-classification
+  - summarization
+  - machine-translation
+arxiv_categories:
+  - cs.CL

@@ -54,6 +54,20 @@ class Settings(BaseModel):
     ])
     public_feed_max_items: int = 20
 
+    # Skill config
+    active_skills: list[str] = Field(
+        default_factory=list,
+        description=(
+            "List of skill IDs (folder names) to load. "
+            "If empty, all skills in `skills_dir` are loaded. "
+            "The router will pick the best match from this subset."
+        ),
+    )
+    skills_dir: Path = Field(
+        default=REPO_ROOT / "skills",
+        description="Root directory that contains skill subfolders.",
+    )
+
     # Experimental features
     enable_domain_expert: bool = False
 

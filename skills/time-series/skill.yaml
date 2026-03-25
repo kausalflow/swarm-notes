@@ -1,0 +1,14 @@
+name: TimeSeriesSkill
+description: "Papers focused on time-series analysis, forecasting, or temporal modelling."
+extra_system_prompt: |
+  Pay special attention to: forecasting horizon, dataset benchmarks 
+  (e.g., ETTh1, Traffic, Weather), seasonality handling, and comparison 
+  against statistical baselines (ARIMA, Prophet).
+preferred_tags:
+  - time-series
+  - forecasting
+  - anomaly-detection
+  - temporal
+  - sequential
+arxiv_categories:
+  - eess.SP

@@ -16,178 +16,114 @@ from swarm_notes.watcher import RawPaper
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class Skill:
-    """Represents a domain extraction skill with its name and system prompt fragment."""
+from pathlib import Path
+import yaml
+from pydantic import BaseModel, Field
 
+from swarm_notes.config import settings
+from swarm_notes.watcher import RawPaper
+
+logger = logging.getLogger(__name__)
+
+
+class SkillSpec(BaseModel):
+    """Represents a domain extraction skill loaded from YAML."""
+    id: str = Field(description="Skill ID, usually the folder name.")
     name: str
     description: str
     extra_system_prompt: str
-    preferred_tags: list[str]
+    preferred_tags: list[str] = Field(default_factory=list)
+    arxiv_categories: list[str] = Field(default_factory=list)
+    
+    # Per-agent overrides (optional)
+    analyst_system_prompt_override: str | None = None
+    discussant_context: str | None = None
+    domain_expert_context: str | None = None
 
 
-# ---------------------------------------------------------------------------
-# Skill definitions
-# ---------------------------------------------------------------------------
-
-TIME_SERIES_SKILL = Skill(
-    name="TimeSeriesSkill",
-    description="Papers focused on time-series analysis, forecasting, or temporal modelling.",
-    extra_system_prompt=(
-        "Pay special attention to: forecasting horizon, dataset benchmarks "
-        "(e.g., ETTh1, Traffic, Weather), seasonality handling, and comparison "
-        "against statistical baselines (ARIMA, Prophet)."
-    ),
-    preferred_tags=[
-        "time-series", "forecasting", "anomaly-detection",
-        "temporal", "sequential",
-    ],
-)
-
-VISION_SKILL = Skill(
-    name="VisionSkill",
-    description="Papers on computer vision, image recognition, or visual understanding.",
-    extra_system_prompt=(
-        "Pay special attention to: backbone architecture (ViT, CNN, hybrid), "
-        "training dataset (ImageNet, COCO, ADE20K), evaluation metrics "
-        "(mAP, mIoU, top-1 accuracy), and comparison with SOTA methods."
-    ),
-    preferred_tags=[
-        "computer-vision", "image-classification", "object-detection",
-        "image-segmentation", "vision-transformer", "cnn",
-    ],
-)
-
-NLP_SKILL = Skill(
-    name="NLPSkill",
-    description="Papers on natural language processing, text generation, or language understanding.",
-    extra_system_prompt=(
-        "Pay special attention to: model size (parameters), tokenisation strategy, "
-        "pre-training corpus, downstream task benchmarks (GLUE, SuperGLUE, MMLU, "
-        "HumanEval), and alignment techniques."
-    ),
-    preferred_tags=[
-        "nlp", "language-model", "transformer", "bert", "gpt", "llm",
-        "text-classification", "summarization", "machine-translation",
-    ],
-)
-
-MULTIMODAL_SKILL = Skill(
-    name="MultimodalSkill",
-    description="Papers combining vision, language, audio, or other modalities.",
-    extra_system_prompt=(
-        "Pay special attention to: modality alignment strategy (contrastive, "
-        "generative), cross-modal attention, training datasets (LAION, CC3M, "
-        "WIT), and zero-shot transfer results."
-    ),
-    preferred_tags=[
-        "multimodal", "vision-language-model", "clip", "contrastive-learning",
-        "audio-language-model",
-    ],
-)
-
-RL_SKILL = Skill(
-    name="ReinforcementLearningSkill",
-    description="Papers on reinforcement learning, RLHF, or agent-based learning.",
-    extra_system_prompt=(
-        "Pay special attention to: reward model design, environment benchmarks "
-        "(Atari, MuJoCo, NetHack), exploration strategy, and safety constraints."
-    ),
-    preferred_tags=[
-        "reinforcement-learning", "rlhf", "multi-agent", "planning",
-        "autonomous-agent", "alignment",
-    ],
-)
-
-GENERATIVE_SKILL = Skill(
-    name="GenerativeSkill",
-    description="Papers on generative models: diffusion, GANs, VAEs, or flow models.",
-    extra_system_prompt=(
-        "Pay special attention to: generative paradigm (score-based, flow-matching, "
-        "adversarial), sampling efficiency, FID/IS evaluation scores, and "
-        "guidance mechanisms (classifier-free guidance, CFG scale)."
-    ),
-    preferred_tags=[
-        "diffusion-model", "stable-diffusion", "gan", "vae",
-        "generative-adversarial-network", "variational-autoencoder",
-    ],
-)
-
-EFFICIENCY_SKILL = Skill(
-    name="EfficiencySkill",
-    description="Papers on efficient ML: compression, quantisation, pruning, or efficient architectures.",
-    extra_system_prompt=(
-        "Pay special attention to: compression ratio, hardware targets "
-        "(GPU, TPU, edge), throughput/latency improvements, accuracy "
-        "degradation, and comparison with full-precision baselines."
-    ),
-    preferred_tags=[
-        "model-compression", "quantization", "pruning", "knowledge-distillation",
-        "efficient-transformer", "peft", "lora", "parameter-efficient-fine-tuning",
-    ],
-)
-
-GENERAL_SKILL = Skill(
-    name="GeneralMLSkill",
-    description="General machine learning papers that do not fit a specialised category.",
-    extra_system_prompt=(
-        "Extract the key contributions, methodology, evaluation benchmarks, "
-        "and limitations of this paper."
-    ),
-    preferred_tags=["benchmark", "dataset", "evaluation", "meta-learning"],
-)
-
-# Ordered list; first match wins
-_SKILL_REGISTRY: list[Skill] = [
-    TIME_SERIES_SKILL,
-    VISION_SKILL,
-    MULTIMODAL_SKILL,
-    RL_SKILL,
-    GENERATIVE_SKILL,
-    EFFICIENCY_SKILL,
-    NLP_SKILL,
-    GENERAL_SKILL,
-]
-
-# ArXiv category → preferred skill mapping
-_CATEGORY_SKILL_MAP: dict[str, Skill] = {
-    "cs.CV": VISION_SKILL,
-    "cs.CL": NLP_SKILL,
-    "cs.LG": GENERAL_SKILL,
-    "cs.AI": GENERAL_SKILL,
-    "cs.RO": RL_SKILL,
-    "stat.ML": GENERAL_SKILL,
-    "eess.SP": TIME_SERIES_SKILL,
-}
+# Global registry populated at runtime
+_SKILL_REGISTRY: list[SkillSpec] = []
 
 
-def route(paper: RawPaper) -> Skill:
-    """Select the best-matching :class:`Skill` for *paper*.
-
-    Strategy
-    --------
-    1. Check if the primary ArXiv category maps directly to a *specific* domain
-       skill (not the general fallback).
-    2. Scan the title + abstract for keyword signals.
-    3. Fall back to :data:`GENERAL_SKILL`.
+def load_skills() -> None:
+    """Load skills from the skills_dir into the global registry.
+    
+    If settings.active_skills is set, only load those IDs.
+    Always ensures a 'general-ml' skill is available as fallback.
     """
+    global _SKILL_REGISTRY
+    skills_dir = settings.skills_dir
+    if not skills_dir.exists():
+        logger.warning("Skills directory not found at %s", skills_dir)
+        return
+
+    active_ids = settings.active_skills
+    loaded = []
+    
+    # Iterate through subdirectories in skills_dir
+    for skill_path in skills_dir.iterdir():
+        if not skill_path.is_dir():
+            continue
+        
+        skill_id = skill_path.name
+        if active_ids and skill_id not in active_ids and skill_id != "general-ml":
+            continue
+            
+        yaml_file = skill_path / "skill.yaml"
+        if not yaml_file.exists():
+            continue
+            
+        try:
+            with open(yaml_file, encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+                spec = SkillSpec(id=skill_id, **data)
+                loaded.append(spec)
+        except Exception as e:
+            logger.error("Failed to load skill from %s: %s", yaml_file, e)
+
+    _SKILL_REGISTRY = loaded
+    logger.info("Router: loaded %d skills", len(loaded))
+
+
+def get_general_skill() -> SkillSpec:
+    """Return the general skill fallback."""
+    for s in _SKILL_REGISTRY:
+        if s.id == "general-ml":
+            return s
+    # Hardcoded fallback if not even general-ml exists on disk
+    return SkillSpec(
+        id="general-ml",
+        name="GeneralMLSkill",
+        description="Fallback skill.",
+        extra_system_prompt="Analyse the paper.",
+    )
+
+
+def route(paper: RawPaper) -> SkillSpec:
+    """Select the best-matching skill for *paper* from the loaded registry."""
+    if not _SKILL_REGISTRY:
+        # Lazy load if not already done (e.g. in tests)
+        load_skills()
+
     combined_text = f"{paper.title} {paper.abstract}".lower()
 
-    # Category-based fast path – only for specific domain skills (not GENERAL_SKILL)
-    category_skill = _CATEGORY_SKILL_MAP.get(paper.primary_category)
-    if category_skill is not None and category_skill is not GENERAL_SKILL:
-        if _count_signals(combined_text, category_skill.preferred_tags) > 0:
-            logger.debug(
-                "Router: '%s' → %s (via category %s)",
-                paper.arxiv_id, category_skill.name, paper.primary_category,
-            )
-            return category_skill
+    # 1. Direct ArXiv category match (if skill defines it)
+    for skill in _SKILL_REGISTRY:
+        if paper.primary_category in skill.arxiv_categories:
+            if _count_signals(combined_text, skill.preferred_tags) > 0:
+                logger.debug(
+                    "Router: '%s' → %s (via category %s)",
+                    paper.arxiv_id, skill.name, paper.primary_category,
+                )
+                return skill
 
-    # Keyword-signal scoring across all skills
-    best_skill: Skill = GENERAL_SKILL
+    # 2. Keyword-signal scoring
+    best_skill: SkillSpec = get_general_skill()
     best_score: int = 0
 
     for skill in _SKILL_REGISTRY:
+        if skill.id == "general-ml":
+            continue
         score = _count_signals(combined_text, skill.preferred_tags)
         if score > best_score:
             best_score = score
@@ -201,14 +137,11 @@ def route(paper: RawPaper) -> Skill:
 
 def _count_signals(text: str, tags: list[str]) -> int:
     """Count how many *tags* appear as whole-word substrings in *text*.
-
-    Hyphens and underscores in a tag are treated as equivalent to a space,
-    hyphen, or underscore in the text (e.g. "time-series" matches "time series").
+    
+    Identical logic to legacy router.
     """
     count = 0
     for tag in tags:
-        # Split on separators, escape each word part, join with a flexible
-        # separator pattern so we don't accidentally escape the [ of the class.
         parts = re.split(r"[-_]", tag)
         escaped_parts = [re.escape(p) for p in parts if p]
         if not escaped_parts:
@@ -217,3 +150,22 @@ def _count_signals(text: str, tags: list[str]) -> int:
         if re.search(pattern, text, re.IGNORECASE):
             count += 1
     return count
+
+
+# Backward compatibility exports for existing tests
+# These will be resolved dynamically if used, but normally the registry is loaded in main()
+class _SkillCompat:
+    @property
+    def GENERAL_SKILL(self): return get_general_skill()
+    @property
+    def VISION_SKILL(self): 
+        for s in _SKILL_REGISTRY:
+            if "vision" in s.id: return s
+        return get_general_skill()
+
+# We can't easily export variables that change after module load unless we use a proxy
+# But since this is a refactor, I'll just keep the route() as the main API.
+# Existing tests import VISION_SKILL from router. I'll need to patch them or export a dummy.
+# Actually, I'll export a function to get them if needed, or just let tests break and I'll fix them.
+# Better: export them as None and populate them in load_skills? No, that's messy.
+# I'll update the tests.
