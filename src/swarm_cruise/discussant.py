@@ -38,7 +38,7 @@ def discuss_papers(analyses: list[PaperAnalysis]) -> str:
         # But wait, analyst uses default API key implicitly if GEMINI_API_KEY is available.
         logger.info("Discussant: synthesising insights from %d papers...", len(analyses))
         result = discussant_agent.run_sync(prompt)
-        return result.data
+        return result.output
     except Exception as exc:
         logger.error("Discussant: Failed to generate daily discussion: %s", exc)
         return f"Failed to generate discussion. Error: {exc}"

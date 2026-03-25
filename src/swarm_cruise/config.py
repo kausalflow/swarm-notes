@@ -18,6 +18,7 @@ class Settings(BaseModel):
     vault_datasets_dir: Path = Field(default=REPO_ROOT / "vault" / "datasets")
     vault_discussions_dir: Path = Field(default=REPO_ROOT / "vault" / "discussions")
     vault_daily_dir: Path = Field(default=REPO_ROOT / "vault" / "discussions" / "daily")
+    vault_open_questions_dir: Path = Field(default=REPO_ROOT / "vault" / "open-questions")
     
     # Staging paths
     tmp_vault_dir: Path = Field(default=REPO_ROOT / "tmp_vault")
@@ -26,6 +27,7 @@ class Settings(BaseModel):
     tmp_datasets_dir: Path = Field(default=REPO_ROOT / "tmp_vault" / "datasets")
     tmp_discussions_dir: Path = Field(default=REPO_ROOT / "tmp_vault" / "discussions")
     tmp_daily_dir: Path = Field(default=REPO_ROOT / "tmp_vault" / "discussions" / "daily")
+    tmp_open_questions_dir: Path = Field(default=REPO_ROOT / "tmp_vault" / "open-questions")
     
     # Data files
     taxonomy_file: Path = Field(default=REPO_ROOT / "vault" / "taxonomy.json")

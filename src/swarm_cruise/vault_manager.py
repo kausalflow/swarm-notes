@@ -24,6 +24,7 @@ def init_vault() -> None:
     settings.vault_datasets_dir.mkdir(parents=True, exist_ok=True)
     settings.vault_discussions_dir.mkdir(parents=True, exist_ok=True)
     settings.vault_daily_dir.mkdir(parents=True, exist_ok=True)
+    settings.vault_open_questions_dir.mkdir(parents=True, exist_ok=True)
     logger.info("Vault structure initialised at %s", settings.vault_dir)
 
 
@@ -38,6 +39,7 @@ def init_staging() -> None:
     settings.tmp_datasets_dir.mkdir(parents=True, exist_ok=True)
     settings.tmp_discussions_dir.mkdir(parents=True, exist_ok=True)
     settings.tmp_daily_dir.mkdir(parents=True, exist_ok=True)
+    settings.tmp_open_questions_dir.mkdir(parents=True, exist_ok=True)
     logger.debug("Staging area initialised at %s", settings.tmp_vault_dir)
 
 
@@ -57,6 +59,7 @@ def commit_staging() -> None:
     _merge_directory(settings.tmp_datasets_dir, settings.vault_datasets_dir)
     _merge_directory(settings.tmp_daily_dir, settings.vault_daily_dir)
     _merge_directory(settings.tmp_discussions_dir, settings.vault_discussions_dir)
+    _merge_directory(settings.tmp_open_questions_dir, settings.vault_open_questions_dir)
 
     # 3. Clean up stagings.tmp_vault_dir)
     shutil.rmtree(settings.tmp_vault_dir)
@@ -80,3 +83,10 @@ def _merge_directory(src: Path, dst: Path) -> None:
             dst_file = dst / src_file.name
             shutil.copy2(src_file, dst_file)
             logger.debug("Staged %s → %s", src_file, dst_file)
+
+
+def get_existing_concept_slugs() -> list[str]:
+    """Return a list of all concept slugs currently in the live vault."""
+    if not settings.vault_concepts_dir.exists():
+        return []
+    return [f.stem for f in settings.vault_concepts_dir.glob("*.md")]

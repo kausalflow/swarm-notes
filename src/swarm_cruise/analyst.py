@@ -15,6 +15,7 @@ from pydantic_ai import Agent
 
 from swarm_cruise.config import settings
 from swarm_cruise.router import Skill
+from swarm_cruise.vault_manager import get_existing_concept_slugs
 from swarm_cruise.watcher import RawPaper
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,23 @@ class ConceptLink(BaseModel):
     )
     one_liner: str = Field(
         description="One sentence that defines this concept in the context of the paper."
+    )
+
+
+class OpenQuestion(BaseModel):
+    """An explicit open question, unresolved problem, or future work direction."""
+    slug: str = Field(
+        description=("URL-safe slug for the question (e.g. 'llm-reasoning-limits'). "
+                     "Use hyphens, no spaces.")
+    )
+    title: str = Field(
+        description="A concise, 3-5 word title for the open question."
+    )
+    background: str = Field(
+        description="A highly concise, standalone 1-2 sentence background context unifying the open question. Must be written objectively as a universal encyclopedic fact. DO NOT use phrases like 'this paper', 'the authors', or 'this study'."
+    )
+    description: str = Field(
+        description="Detailed explanation of the open question or future work."
     )
 
 
@@ -108,7 +126,7 @@ class PaperAnalysis(BaseModel):
         )
     )
 
-    open_questions: list[str] = Field(
+    open_questions: list[OpenQuestion] = Field(
         default_factory=list,
         description="List of open questions or future research identified by the domain expert.",
     )
@@ -122,6 +140,9 @@ def _build_system_prompt(skill: Skill, taxonomy: dict) -> str:
     tags_list = ", ".join(taxonomy.get("tags", []))
     architectures_list = ", ".join(taxonomy.get("architectures", []))
     domains_list = ", ".join(taxonomy.get("domains", []))
+    
+    existing_concepts_list = get_existing_concept_slugs()
+    existing_concepts_str = ", ".join(existing_concepts_list) if existing_concepts_list else "(No concepts currently exist in the vault)"
 
     return f"""You are an expert academic paper analyst specialising in machine learning research.
 
@@ -132,6 +153,9 @@ TAXONOMY (use ONLY these values for tags/architectures/domains):
 - Available architectures: {architectures_list}
 - Available domains: {domains_list}
 
+EXISTING CONCEPTS IN VAULT:
+{existing_concepts_str}
+
 SKILL CONTEXT ({skill.name}):
 {skill.extra_system_prompt}
 
@@ -141,7 +165,7 @@ IMPORTANT RULES:
 3. Select architectures ONLY from the taxonomy architectures list above (or leave empty).
 4. The summary must be 3-5 sentences, technically precise but accessible.
 5. Key contributions must be specific, not generic ("we propose X" → "X achieves Y on Z benchmark").
-6. For concepts, only include genuinely novel or central concepts worth a dedicated vault page.
+6. For concepts, ALWAYS check the EXISTING CONCEPTS IN VAULT list. If a highly synonymous concept already exists, you MUST exactly reuse its slug. Only create entirely new concepts if they represent a genuinely novel idea.
 """
 
 

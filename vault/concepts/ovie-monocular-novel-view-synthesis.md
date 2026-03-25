@@ -1,16 +1,16 @@
 ---
-title: "OVIE (One View Is Enough!)"
+title: "OVIE"
 slug: "ovie-monocular-novel-view-synthesis"
 type: concept
 generated_stub: true
-processed_at: "2026-03-25T14:41:55Z"
+processed_at: "2026-03-25T16:32:20Z"
 ---
 
-# OVIE (One View Is Enough!)
+# OVIE
 
 > *Auto-generated stub. Edit this file to add more details.*
 
-A model for monocular novel-view synthesis trained purely on unpaired, in-the-wild images by leveraging a depth estimator only during training.
+A novel method for monocular novel view synthesis trained entirely on unpaired, in-the-wild internet images.
 
 ## Related Papers
 
