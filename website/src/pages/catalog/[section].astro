@@ -1,0 +1,85 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const allVaultEntries = await getCollection('vault');
+  
+  // Collect unique top-level folder names
+  const sections = new Set<string>();
+  allVaultEntries.forEach(entry => {
+    const vaultIndex = entry.filePath?.indexOf('vault/');
+    const realSlug = (entry.filePath && vaultIndex !== -1)
+      ? entry.filePath.substring(vaultIndex + 6).replace(/\.md$/, '')
+      : entry.id;
+    const parts = realSlug.split('/');
+    if (parts.length > 1) sections.add(parts[0]);
+  });
+
+  return Array.from(sections).map(section => ({
+    params: { section },
+    props: { section, allVaultEntries },
+  }));
+}
+
+const { section, allVaultEntries } = Astro.props;
+
+// Filter entries for this section
+const entries = allVaultEntries
+  .map((entry: any) => {
+    const vaultIndex = entry.filePath?.indexOf('vault/');
+    const realSlug = (entry.filePath && vaultIndex !== -1)
+      ? entry.filePath.substring(vaultIndex + 6).replace(/\.md$/, '')
+      : entry.id;
+    return { entry, realSlug };
+  })
+  .filter(({ realSlug }: { realSlug: string }) => realSlug.startsWith(section + '/'));
+
+const title = section.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+---
+
+<BaseLayout title={`${title} — Vault`} description={`Browse all ${title} in the Swarm Cruise Vault`}>
+
+  <!-- Compact page header -->
+  <div class="border-b bg-muted/20">
+    <div class="container max-w-5xl mx-auto px-6 py-10">
+      <div class="flex items-center gap-3 mb-3">
+        <a href="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Home</a>
+        <span class="text-muted-foreground/40">/</span>
+        <span class="text-sm font-medium">{title}</span>
+      </div>
+      <h1 class="text-4xl font-bold tracking-tight">{title}</h1>
+      <p class="text-muted-foreground mt-2">{entries.length} items</p>
+    </div>
+  </div>
+
+  <!-- Entry list -->
+  <div class="container max-w-5xl mx-auto px-6 py-10">
+    <div class="grid gap-3">
+      {entries.map(({ entry, realSlug }: { entry: any, realSlug: string }) => (
+        <a
+          href={`/${realSlug}/`}
+          class="group flex items-start gap-4 rounded-xl border bg-card px-5 py-4 shadow-sm hover:border-primary/50 hover:shadow-md transition-all"
+        >
+          <div class="mt-0.5 flex-shrink-0 rounded-md bg-primary/10 p-2 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold truncate group-hover:text-primary transition-colors">
+              {entry.data?.title || realSlug.split('/').pop()}
+            </h3>
+            {entry.data?.description && (
+              <p class="text-sm text-muted-foreground mt-0.5 line-clamp-2">{entry.data.description}</p>
+            )}
+          </div>
+          <svg class="h-4 w-4 text-muted-foreground/40 flex-shrink-0 mt-1 group-hover:text-primary group-hover:translate-x-1 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

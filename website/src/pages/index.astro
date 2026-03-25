@@ -1,56 +1,248 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import Hero from "@/components/sections/Hero.astro";
 import { getCollection } from 'astro:content';
 
 const allVaultEntries = await getCollection('vault');
 
-// Group entries by top-level folder
-const folders: Record<string, any[]> = {};
-allVaultEntries.forEach(entry => {
+// Build a flat search index of all entries with their real slugs
+const searchIndex = allVaultEntries.map(entry => {
   const vaultIndex = entry.filePath?.indexOf('vault/');
-  const realSlug = (entry.filePath && vaultIndex !== -1) 
-    ? entry.filePath.substring(vaultIndex + 6).replace(/\.md$/, '') 
+  const realSlug = (entry.filePath && vaultIndex !== -1)
+    ? entry.filePath.substring(vaultIndex + 6).replace(/\.md$/, '')
     : entry.id;
-
   const parts = realSlug.split('/');
-  const folder = parts.length > 1 ? parts[0] : 'Root';
-  if (!folders[folder]) folders[folder] = [];
-  folders[folder].push({ entry, realSlug });
+  const section = parts.length > 1 ? parts[0] : 'root';
+  return {
+    title: (entry.data as any)?.title || parts[parts.length - 1],
+    href: `/${realSlug}/`,
+    section,
+  };
 });
+
+// Stats
+const totalBySection: Record<string, number> = {};
+searchIndex.forEach(e => {
+  totalBySection[e.section] = (totalBySection[e.section] || 0) + 1;
+});
+
+// Top-level sections (not papers — they get their own row)
+const catalogSections = ['concepts', 'open-questions', 'discussions'];
+const sectionMeta: Record<string, { label: string; desc: string; icon: string }> = {
+  concepts: { label: 'Concepts', desc: 'Key ideas and terminology from our research', icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z' },
+  'open-questions': { label: 'Open Questions', desc: 'Unsolved problems and research directions', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+  discussions: { label: 'Discussions', desc: 'Daily research notes and synthesis', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
+};
+
+const jsonIndex = JSON.stringify(searchIndex);
 ---
 
-<BaseLayout title="Vault Catalog" description="Knowledge Vault and Swarm Cruise Website Hosted by AstroDeck">
-  <Hero
-    badge="Knowledge Base"
-    title="Swarm Cruise Vault"
-    subtitle="Explore the interconnected markdown notes, concepts, and ArXiV papers parsed securely from the vault directory."
-  />
+<BaseLayout title="Swarm Cruise Vault" description="Knowledge base of AI research concepts, open questions, discussions and papers.">
 
-  <div class="container py-12">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {Object.entries(folders).map(([folder, items]) => (
-        <div class="rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col hover:border-primary/50 transition-colors duration-300">
-          <div class="p-6 pb-4 border-b bg-muted/20">
-            <h2 class="text-2xl font-semibold leading-none tracking-tight capitalize">
-              {folder}
-            </h2>
-            <p class="text-sm text-muted-foreground mt-2">{items.length} Articles</p>
-          </div>
-          <div class="p-6 max-h-96 overflow-y-auto">
-            <ul class="space-y-3">
-              {items.map(({ entry, realSlug }) => (
-                <li>
-                  <a href={`/${realSlug}/`} class="group flex items-center justify-between text-sm hover:text-primary transition-colors">
-                    <span class="truncate pr-4 flex-1">{entry.data?.title || realSlug.split('/').pop()}</span>
-                    <svg class="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      ))}
+  <!-- Compact hero with search -->
+  <section class="relative border-b bg-background py-14 md:py-20">
+    <!-- Subtle gradient orbs -->
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="absolute -top-24 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-primary/5 blur-3xl dark:bg-primary/10"></div>
     </div>
-  </div>
+
+    <div class="container relative max-w-3xl mx-auto px-6 text-center">
+      <div class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium mb-6 text-muted-foreground">
+        <span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+        Knowledge Base
+      </div>
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-4">
+        Swarm Cruise <span class="text-primary">Vault</span>
+      </h1>
+      <p class="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+        Interconnected notes, concepts, open questions, and ArXiv papers from the swarm research pipeline.
+      </p>
+
+      <!-- Search bar -->
+      <div class="relative max-w-xl mx-auto">
+        <div class="pointer-events-none absolute inset-y-0 left-4 flex items-center">
+          <svg class="h-4 w-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+        </div>
+        <input
+          id="vault-search"
+          type="search"
+          placeholder="Search concepts, papers, questions…"
+          class="w-full rounded-xl border bg-card pl-11 pr-4 py-3 text-sm shadow-sm outline-none ring-offset-background focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+          autocomplete="off"
+        />
+        <!-- Search results dropdown -->
+        <div
+          id="search-results"
+          class="absolute z-[9999] mt-2 w-full rounded-xl border bg-card shadow-xl hidden text-left max-h-80 overflow-y-auto"
+        ></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Discussions — above papers -->
+  <section class="py-12 pb-0 px-6">
+    <div class="container max-w-5xl mx-auto">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold tracking-tight">Recent Discussions</h2>
+        <a href="/catalog/discussions/" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline">View all →</a>
+      </div>
+      <div class="grid gap-3">
+        {searchIndex
+          .filter(e => e.section === 'discussions')
+          .slice(0, 5)
+          .map(e => (
+            <a
+              href={e.href}
+              class="group flex items-center gap-4 rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 px-5 py-4 shadow-sm hover:border-emerald-400/60 hover:shadow-md transition-all"
+            >
+              <div class="flex-shrink-0 rounded-md bg-emerald-100 dark:bg-emerald-900/50 p-2 text-emerald-700 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+              </div>
+              <span class="flex-1 text-sm font-medium truncate text-emerald-900 dark:text-emerald-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">{e.title}</span>
+              <svg class="h-4 w-4 text-emerald-400/60 flex-shrink-0 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Papers list — immediately below discussions -->
+  <section class="py-12 px-6">
+    <div class="container max-w-5xl mx-auto">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold tracking-tight">Recent Papers</h2>
+        <a href="/catalog/papers/" class="text-sm text-primary hover:underline">View all →</a>
+      </div>
+      <div class="grid gap-3">
+        {searchIndex
+          .filter(e => e.section === 'papers')
+          .slice(0, 20)
+          .map(e => (
+            <a
+              href={e.href}
+              class="group flex items-center gap-4 rounded-xl border bg-card px-5 py-4 shadow-sm hover:border-primary/50 hover:shadow-md transition-all"
+            >
+              <div class="flex-shrink-0 rounded-md bg-primary/10 p-2 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <span class="flex-1 text-sm font-medium truncate group-hover:text-primary transition-colors">{e.title}</span>
+              <svg class="h-4 w-4 text-muted-foreground/40 flex-shrink-0 group-hover:text-primary group-hover:translate-x-1 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats bar -->
+  <section class="border-y bg-muted/30">
+    <div class="container max-w-5xl mx-auto px-6">
+      <div class="grid grid-cols-2 divide-x sm:grid-cols-4">
+        {Object.entries(totalBySection).map(([section, count]) => (
+          <div class="py-5 px-6 text-center">
+            <div class="text-2xl font-bold">{count}</div>
+            <div class="text-xs text-muted-foreground capitalize">{section.replace(/-/g, ' ')}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Catalog section cards (concepts, open-questions, discussions) -->
+  <section class="py-16 px-6 section-inverted">
+    <div class="container max-w-5xl mx-auto">
+      <h2 class="text-2xl font-bold tracking-tight mb-8">Browse by Section</h2>
+      <div class="grid gap-6 sm:grid-cols-3">
+        {catalogSections.filter(s => totalBySection[s]).map(s => {
+          const meta = sectionMeta[s] || { label: s, desc: '', icon: '' };
+          return (
+            <a
+              href={`/catalog/${s}/`}
+              class="group relative flex flex-col gap-4 rounded-xl border bg-card p-6 shadow-sm hover:border-primary/50 hover:shadow-md transition-all"
+            >
+              <div class="inline-flex w-fit p-2.5 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d={meta.icon} />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-lg">{meta.label}</h3>
+                <p class="text-sm text-muted-foreground mt-1">{meta.desc}</p>
+              </div>
+              <div class="mt-auto flex items-center justify-between">
+                <span class="text-xs font-medium text-muted-foreground">{totalBySection[s]} items</span>
+                <svg class="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
 </BaseLayout>
+
+<!-- Search data embedded safely in DOM -->
+<script type="application/json" id="vault-search-data" set:html={jsonIndex}></script>
+
+<script>
+  const rawData = document.getElementById('vault-search-data')?.textContent || '[]';
+  const entries = JSON.parse(rawData);
+  const input = document.getElementById('vault-search');
+  const resultsBox = document.getElementById('search-results');
+
+  function renderResults(query) {
+    if (!query || query.length < 2) {
+      resultsBox.classList.add('hidden');
+      resultsBox.innerHTML = '';
+      return;
+    }
+    const q = query.toLowerCase();
+    const hits = entries.filter(e =>
+      e.title.toLowerCase().includes(q) || e.section.toLowerCase().includes(q)
+    ).slice(0, 12);
+
+    if (hits.length === 0) {
+      resultsBox.innerHTML = '<div class="px-4 py-6 text-center text-sm text-muted-foreground">No results found.</div>';
+      resultsBox.classList.remove('hidden');
+      return;
+    }
+
+    resultsBox.innerHTML = hits.map(e => `
+      <a href="${e.href}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-muted transition-colors">
+        <span class="text-xs uppercase tracking-wider text-muted-foreground w-24 flex-shrink-0">${e.section.replace(/-/g, ' ')}</span>
+        <span class="text-sm font-medium truncate flex-1">${e.title}</span>
+      </a>
+    `).join('');
+    resultsBox.classList.remove('hidden');
+  }
+
+  input?.addEventListener('input', e => renderResults(e.target.value));
+
+  document.addEventListener('click', e => {
+    if (!input?.contains(e.target) && !resultsBox?.contains(e.target)) {
+      resultsBox?.classList.add('hidden');
+    }
+  });
+
+  // Also handle keyboard: Escape closes results
+  input?.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      resultsBox?.classList.add('hidden');
+      input.blur();
+    }
+  });
+</script>

@@ -8,7 +8,7 @@ const blog = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    author: z.string().default('AstroDeck Team'),
+    author: z.string().default('KausalFlow Team'),
     image: z.string().optional(),
     tags: z.array(z.string()).default([]),
   }),
