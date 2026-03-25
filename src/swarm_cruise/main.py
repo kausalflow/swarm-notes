@@ -8,7 +8,7 @@ from pathlib import Path
 
 import typer
 
-app = typer.Typer(help="Swarm Cruise Orchestrator")
+app = typer.Typer(help="Swarm Notes Orchestrator")
 
 # ---------------------------------------------------------------------------
 # Logging setup

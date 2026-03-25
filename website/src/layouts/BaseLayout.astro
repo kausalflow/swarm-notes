@@ -36,7 +36,6 @@ import Footer from "@/components/Footer.astro";
 import SEO from "@/components/SEO.astro";
 import FontPreload from "@/components/FontPreload.astro";
 import ThemeScript from "@/components/ThemeScript.astro";
-import Analytics from "@vercel/analytics/astro";
 import AnimationObserver from "@/components/AnimationObserver.astro";
 
 interface Props {
@@ -57,7 +56,7 @@ const {
   author,
 } = Astro.props;
 
-const fullTitle = `${title} | AstroDeck`;
+const fullTitle = `${title} | Swarm Notes`;
 ---
 
 <!doctype html>
@@ -88,7 +87,6 @@ const fullTitle = `${title} | AstroDeck`;
       <slot />
     </main>
     <Footer />
-    <Analytics />
     <AnimationObserver />
   </body>
 </html>
