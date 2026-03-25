@@ -6,18 +6,10 @@ on:
     - cron: "0 6 * * 1"
   workflow_dispatch:
     inputs:
-      keywords:
-        description: "Comma-separated ArXiv keywords to search (overrides defaults)"
+      config_file:
+        description: "Path to the configuration file (e.g., configs/config.ts.yaml)"
         required: false
-        default: ""
-      federation_feeds:
-        description: "Comma-separated external public_feed.json URLs for federation"
-        required: false
-        default: ""
-      max_results:
-        description: "Max papers per keyword"
-        required: false
-        default: "5"
+        default: "configs/config.ts.yaml"
 
 permissions:
   contents: write
@@ -35,14 +27,14 @@ jobs:
           # Fetch full history so auto-commit can push cleanly
           fetch-depth: 0
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: "pip"
+        run: uv python install 3.11
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: uv sync
 
       - name: Run agent pipeline
         env:
@@ -51,11 +43,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           LLM_MODEL: ${{ secrets.LLM_MODEL || vars.LLM_MODEL }}
-          # Allow workflow_dispatch inputs to override config defaults
-          ARXIV_KEYWORDS: ${{ github.event.inputs.keywords }}
-          FEDERATION_FEEDS: ${{ github.event.inputs.federation_feeds }}
-          ARXIV_MAX_RESULTS_PER_KEYWORD: ${{ github.event.inputs.max_results || '5' }}
-        run: python -m src.main
+          CONFIG_FILE: ${{ github.event.inputs.config_file || 'configs/config.ts.yaml' }}
+        run: uv run python -m swarm_cruise.main --config "$CONFIG_FILE"
 
       - name: Commit and push new vault files
         uses: stefanzweifel/git-auto-commit-action@v5
