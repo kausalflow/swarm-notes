@@ -1,0 +1,12 @@
+# Core LLM orchestration
+pydantic-ai>=0.0.14
+
+# File parsing
+python-frontmatter>=1.1.0
+pyyaml>=6.0.1
+
+# HTTP (stdlib urllib used for ArXiv, requests for federation convenience)
+requests>=2.32.0
+
+# Pydantic (pulled in by pydantic-ai, pinned here for clarity)
+pydantic>=2.7.0

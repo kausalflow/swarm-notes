@@ -1,0 +1,63 @@
+name: Autonomous Research Tracker
+
+on:
+  schedule:
+    # Run every Monday at 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      keywords:
+        description: "Comma-separated ArXiv keywords to search (overrides defaults)"
+        required: false
+        default: ""
+      federation_feeds:
+        description: "Comma-separated external public_feed.json URLs for federation"
+        required: false
+        default: ""
+      max_results:
+        description: "Max papers per keyword"
+        required: false
+        default: "5"
+
+permissions:
+  contents: write
+
+jobs:
+  run-pipeline:
+    name: Run Research Pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history so auto-commit can push cleanly
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run agent pipeline
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.LLM_API_KEY }}
+          # Allow workflow_dispatch inputs to override config defaults
+          ARXIV_KEYWORDS: ${{ github.event.inputs.keywords }}
+          FEDERATION_FEEDS: ${{ github.event.inputs.federation_feeds }}
+          ARXIV_MAX_RESULTS_PER_KEYWORD: ${{ github.event.inputs.max_results || '5' }}
+        run: python -m src.main
+
+      - name: Commit and push new vault files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(vault): autonomous update [skip ci]"
+          commit_author: "research-cruise-bot <research-cruise-bot@users.noreply.github.com>"
+          file_pattern: "vault/**/*.md public_feed.json"
+          skip_dirty_check: false

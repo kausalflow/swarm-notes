@@ -1,0 +1,104 @@
+"""Main entry point: orchestrates the full agent pipeline."""
+
+from __future__ import annotations
+
+import logging
+import sys
+from pathlib import Path
+
+# ---------------------------------------------------------------------------
+# Logging setup
+# ---------------------------------------------------------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%SZ",
+)
+logger = logging.getLogger(__name__)
+
+
+def main() -> int:
+    """Run the full pipeline.  Returns 0 on success, 1 on failure."""
+    from src import analyst, federation, router, watcher
+    from src.vault_manager import commit_staging, discard_staging, init_staging, init_vault
+    from src.vault_writer import update_public_feed, write_paper
+
+    # ------------------------------------------------------------------
+    # 1. Initialise vault directories
+    # ------------------------------------------------------------------
+    logger.info("=== research-cruise pipeline starting ===")
+    init_vault()
+
+    # ------------------------------------------------------------------
+    # 2. Prepare the staging area
+    # ------------------------------------------------------------------
+    init_staging()
+
+    try:
+        # ------------------------------------------------------------------
+        # 3. Federation Agent – run BEFORE the watcher
+        # ------------------------------------------------------------------
+        logger.info("--- Step 3: Federation Agent ---")
+        federation.run_federation()
+
+        # ------------------------------------------------------------------
+        # 4. Watcher – fetch recent papers from ArXiv
+        # ------------------------------------------------------------------
+        logger.info("--- Step 4: Watcher ---")
+        papers = watcher.fetch_papers()
+
+        if not papers:
+            logger.warning("Watcher returned no papers – nothing to process")
+            # Still a valid (empty) run; commit any federation changes
+            commit_staging()
+            return 0
+
+        # ------------------------------------------------------------------
+        # 5. Router + Analyst + Vault Writer – process each paper
+        # ------------------------------------------------------------------
+        logger.info("--- Step 5: Router / Analyst / Vault Writer (%d papers) ---", len(papers))
+        analyses = []
+
+        for paper in papers:
+            try:
+                skill = router.route(paper)
+                logger.info(
+                    "Processing %s with skill %s", paper.arxiv_id, skill.name
+                )
+                analysis = analyst.analyse(paper, skill)
+                write_paper(analysis, skill.name)
+                analyses.append(analysis)
+            except Exception as exc:
+                logger.error(
+                    "Failed to process paper %s: %s", paper.arxiv_id, exc, exc_info=True
+                )
+                # Continue with other papers
+
+        # ------------------------------------------------------------------
+        # 6. Update the public feed
+        # ------------------------------------------------------------------
+        if analyses:
+            logger.info("--- Step 6: Update public feed (%d papers) ---", len(analyses))
+            update_public_feed(analyses)
+
+        # ------------------------------------------------------------------
+        # 7. Atomic commit: move staging → vault
+        # ------------------------------------------------------------------
+        logger.info("--- Step 7: Committing staging to vault ---")
+        commit_staging()
+
+        logger.info(
+            "=== Pipeline complete: %d/%d papers processed successfully ===",
+            len(analyses),
+            len(papers),
+        )
+        return 0
+
+    except Exception as exc:
+        logger.critical("Pipeline crashed: %s", exc, exc_info=True)
+        discard_staging()
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
