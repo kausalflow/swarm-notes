@@ -1,1 +1,211 @@
-[]
+[
+  {
+    "arxiv_id": "2603.23502",
+    "title": "OccAny: Generalized Unconstrained Urban 3D Occupancy",
+    "authors": [
+      "Anh-Quan Cao",
+      "Tuan-Hung Vu"
+    ],
+    "published": "2026-03-24",
+    "url": "https://arxiv.org/abs/2603.23502",
+    "domain": "computer-vision",
+    "tags": [
+      "zero-shot-learning",
+      "multimodal",
+      "object-detection",
+      "image-segmentation",
+      "robustness",
+      "long-context"
+    ],
+    "summary": "OccAny addresses the scalability and generalization limitations of existing 3D occupancy prediction methods, which rely heavily on in-domain annotations and precise sensor priors. The model is presented as the first generalized framework capable of predicting metric occupancy coupled with segmentation features from uncalibrated, out-of-domain inputs, including sequential, monocular, or surround-view images. Key technical innovations include Segmentation Forcing, which enhances occupancy quality via mask-level supervision, and a Novel View Rendering pipeline for test-time view augmentation to improve geometry completion. Experiments show OccAny surpasses visual geometry baselines and remains competitive with in-domain self-supervised methods on urban occupancy prediction tasks.",
+    "processed_at": "2026-03-25T14:42:05.691046+00:00"
+  },
+  {
+    "arxiv_id": "2603.23494",
+    "title": "Active learning-enabled multi-objective design of thermally conductive and mechanically compliant polymers",
+    "authors": [
+      "Yuhan Liu",
+      "Jiaxin Xu",
+      "Renzheng Zhang",
+      "Meng Jiang",
+      "Tengfei Luo"
+    ],
+    "published": "2026-03-24",
+    "url": "https://arxiv.org/abs/2603.23494",
+    "domain": "chemistry",
+    "tags": [
+      "active-learning",
+      "bayesian-optimization",
+      "model,machine-learning",
+      "computational-chemistry",
+      "evaluation"
+    ],
+    "summary": "This work addresses the challenge of discovering polymers with high thermal conductivity (TC) and low mechanical modulus by introducing an active learning (AL) framework built upon multi-objective Bayesian optimization (MOBO). The methodology employs Deep Kernel Learning (DKL) surrogate models trained on initial data from a Molecular Dynamics (MD) pipeline to predict both TC and modulus along with their uncertainties. The search is guided by the parallel noisy expected hypervolume improvement (qNEHVI) acquisition function, which iteratively selects new polymer candidates for simulation evaluation to refine the models and explore the objective space. Ultimately, the framework successfully identified six polymers on the Pareto front, offering a data-efficient method to guide the design of multifunctional polymers.",
+    "processed_at": "2026-03-25T14:42:05.691070+00:00"
+  },
+  {
+    "arxiv_id": "2603.23491",
+    "title": "Foveated Diffusion: Efficient Spatially Adaptive Image and Video Generation",
+    "authors": [
+      "Brian Chao",
+      "Lior Yariv",
+      "Howard Xiao",
+      "Gordon Wetzstein"
+    ],
+    "published": "2026-03-24",
+    "url": "https://arxiv.org/abs/2603.23491",
+    "domain": "computer-vision",
+    "tags": [
+      "diffusion-model",
+      "efficient-transformer",
+      "evaluation",
+      "image-classification"
+    ],
+    "summary": "This work introduces Foveated Diffusion to address the computational bottleneck of high-resolution image and video generation by exploiting the eccentricity-dependent acuity of human vision. The core methodology involves using a gaze-dependent mask to allocate tokens non-uniformly, prioritizing high token density for the foveal region and lower density for the periphery. A key technical contribution is a mechanism for constructing these mixed-resolution tokens from high-resolution ground truth, allowing established diffusion models to be efficiently post-trained for this sparse token setting. The resulting generation is perceptually equivalent to full-resolution output but demands significantly fewer tokens and computation time, demonstrating foveation as a scalable efficiency optimization.",
+    "processed_at": "2026-03-25T14:42:05.691076+00:00"
+  },
+  {
+    "arxiv_id": "2603.23490",
+    "title": "Dynamic Light Spanners in Doubling Metrics",
+    "authors": [
+      "Sujoy Bhore",
+      "Jonathan Conroy",
+      "Arnold Filtser"
+    ],
+    "published": "2026-03-24",
+    "url": "https://arxiv.org/abs/2603.23490",
+    "domain": "graph-learning",
+    "tags": [
+      "graph-learning",
+      "metric-space",
+      "algorithmic-analysis",
+      "data-structures",
+      "distributed-training"
+    ],
+    "summary": "This paper addresses the dynamic spanner problem in metric spaces with a constant doubling dimension, where points undergo insertions and deletions. The authors present an algorithm that maintains a $(1+\\varepsilon)$-spanner whose total weight is bounded by a constant multiple of the MST weight for the current point set. Crucially, each update operation (insertion or deletion) is achieved in $\\operatorname{poly}(\\log \\Phi)$ time, where $\\Phi$ is the aspect ratio of the point set. This result resolves a major open problem, as no efficient dynamic algorithm for lightweight spanners existed previously, even for Euclidean spaces.",
+    "processed_at": "2026-03-25T14:42:05.691081+00:00"
+  },
+  {
+    "arxiv_id": "2603.23488",
+    "title": "One View Is Enough! Monocular Training for In-the-Wild Novel View Generation",
+    "authors": [
+      "Adrien Ramanana Rahary",
+      "Nicolas Dufour",
+      "Patrick Perez",
+      "David Picard"
+    ],
+    "published": "2026-03-24",
+    "url": "https://arxiv.org/abs/2603.23488",
+    "domain": "computer-vision",
+    "tags": [
+      "self-supervised-learning",
+      "image-segmentation",
+      "object-detection",
+      "computer-vision",
+      "zero-shot-learning"
+    ],
+    "summary": "This paper introduces OVIE, a novel method for synthesizing new views from a single in-the-wild image, circumventing the traditional reliance on multi-view supervision. The core idea is to utilize a pre-trained monocular depth estimator during training to scaffold the process: the source image is lifted to 3D, transformed by a sampled camera, and projected to create a pseudo-target view for loss calculation. To enable training on vast, uncurated datasets, the authors propose a masked training formulation that selectively applies losses only to geometrically consistent regions, thereby managing the ambiguity introduced by disocclusions. Crucially, OVIE operates without any explicit 3D representation or depth estimation at inference time, achieving superior zero-shot performance and significantly faster generation speeds compared to existing baselines.",
+    "processed_at": "2026-03-25T14:42:05.691085+00:00"
+  },
+  {
+    "arxiv_id": "2603.23480",
+    "title": "Stablecoins as Dry Powder: A Copula-Based Risk Analysis of Cryptocurrency Markets",
+    "authors": [
+      "Elliot Jones",
+      "Toshiko Matsui",
+      "William Knottenbelt"
+    ],
+    "published": "2026-03-24",
+    "url": "https://arxiv.org/abs/2603.23480",
+    "domain": "finance",
+    "tags": [
+      "forecasting",
+      "finance",
+      "statistical-modeling",
+      "risk-analysis"
+    ],
+    "summary": "This study investigates the under-explored structural role of stablecoins in transmitting systemic risk across the cryptocurrency ecosystem using copula-based modeling techniques. The authors quantify the transmission of volatility and trading activity from stablecoin markets to the broader digital asset markets, establishing significant in-sample causality across multiple time horizons. Key findings indicate that stablecoin volume and upside volatility act as predictors, effectively serving as 'dry powder' that influences overall market dynamics. Moreover, incorporating these stablecoin factors substantially improves forecasting accuracy by reducing Mean Squared Error and lowers risk in volatility-targeting portfolio strategies.",
+    "processed_at": "2026-03-25T14:42:05.691089+00:00"
+  },
+  {
+    "arxiv_id": "2603.23465",
+    "title": "Statistical Efficiency of Single- and Multi-step Models for Forecasting and Control",
+    "authors": [
+      "Anne Somalwar",
+      "Bruce D. Lee",
+      "George J. Pappas",
+      "Nikolai Matni"
+    ],
+    "published": "2026-03-24",
+    "url": "https://arxiv.org/abs/2603.23465",
+    "domain": "time-series",
+    "tags": [
+      "time-series",
+      "forecasting",
+      "evaluation",
+      "control"
+    ],
+    "summary": "This work analyzes the statistical efficiency trade-off between using sequentially rolled-out single-step models versus directly trained multi-step predictors for forecasting and control, particularly in the context of compounding error. The authors theoretically and empirically show that when system dynamics are perfectly captured (well-specified), single-step models achieve the minimal asymptotic prediction error. Conversely, if the system is partially observable, leading to model misspecification, direct multi-step predictors can substantially mitigate bias and outperform single-step rollouts. These findings establish a clear principle for model selection in time-series applications, with implications for closed-loop control performance.",
+    "processed_at": "2026-03-25T14:42:05.691094+00:00"
+  },
+  {
+    "arxiv_id": "2603.23323",
+    "title": "PNap: Lifecycle-aware Edge Multi-state sleep for Energy Efficient MEC",
+    "authors": [
+      "Federico Giarrè",
+      "Holger Karl"
+    ],
+    "published": "2026-03-24",
+    "url": "https://arxiv.org/abs/2603.23323",
+    "domain": "time-series",
+    "tags": [
+      "forecasting",
+      "time-series",
+      "anomaly-detection"
+    ],
+    "summary": "This paper addresses the high energy consumption of Multi-access Edge Computing (MEC) infrastructure during low-load phases by proposing PowerNap (PNap), a lifecycle-aware orchestration framework. PNap jointly manages the progressively deeper sleep states of edge servers and the non-instantaneous lifecycle operations of hosted services to balance energy savings against wake-up latency penalties. By leveraging traffic forecasting, the framework optimizes the number of active servers to ensure service continuity, a crucial coupling often overlooked in pure energy-saving strategies. Experimental results demonstrate that PNap achieves up to 14.9% energy reduction compared to existing state-of-the-art methods while preserving service availability metrics.",
+    "processed_at": "2026-03-25T14:42:05.691100+00:00"
+  },
+  {
+    "arxiv_id": "2603.23294",
+    "title": "Granger Causality in Expectiles: an M-vine copula test",
+    "authors": [
+      "Roberto Fuentes-Martínez",
+      "Irene Crimaldi"
+    ],
+    "published": "2026-03-24",
+    "url": "https://arxiv.org/abs/2603.23294",
+    "domain": "finance",
+    "tags": [
+      "time-series",
+      "anomaly-detection",
+      "finance",
+      "statistical-inference",
+      "evaluation"
+    ],
+    "summary": "This paper introduces a novel, model-free measure for Granger causality framed in terms of expectiles, which are theoretically desirable risk measures that allow for a deeper analysis of distributional dependence beyond mean-based causality. A corresponding statistical test is constructed based on M-vine copula models, enabling the non-parametric detection of multivariate Granger causality among $d+1$ time series under arbitrary non-linear and non-Gaussian dependence. The authors prove the strong consistency of this test statistic and show via simulations that it maintains accurate size control while offering superior power, especially in detecting complex joint causal structures. The framework's practical relevance is illustrated through applications to international stock market indices, confirming its ability to uncover relationships invisible to simpler pairwise analyses.",
+    "processed_at": "2026-03-25T14:42:05.691105+00:00"
+  },
+  {
+    "arxiv_id": "2603.23284",
+    "title": "WaveSFNet: A Wavelet-Based Codec and Spatial--Frequency Dual-Domain Gating Network for Spatiotemporal Prediction",
+    "authors": [
+      "Xinyong Cai",
+      "Runming Xie",
+      "Hu Chen",
+      "Yuankai Wu"
+    ],
+    "published": "2026-03-24",
+    "url": "https://arxiv.org/abs/2603.23284",
+    "domain": "computer-vision",
+    "tags": [
+      "convolutional-neural-network",
+      "efficient-transformer",
+      "image-segmentation",
+      "forecasting",
+      "computer-vision"
+    ],
+    "summary": "WaveSFNet is proposed as an efficient, recurrent-free framework for spatiotemporal prediction aimed at resolving the trade-off between modeling long-range dynamics and preserving high-frequency details. The core innovation lies in coupling a wavelet-based codec, which preserves essential high-frequency subband cues during sampling, with a spatial--frequency dual-domain gated spatiotemporal translator. This translator explicitly enhances dynamic information using adjacent-frame differences before fusing large-kernel spatial modeling with frequency-domain global modulation. Extensive experiments across Moving MNIST, TaxiBJ, and WeatherBench show that WaveSFNet delivers competitive accuracy while sustaining low computational overhead.",
+    "processed_at": "2026-03-25T14:42:05.691108+00:00"
+  }
+]

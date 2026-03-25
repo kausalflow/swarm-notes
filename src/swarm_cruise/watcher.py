@@ -9,11 +9,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
-from src.config import (
-    ARXIV_KEYWORDS,
-    ARXIV_MAX_RESULTS_PER_KEYWORD,
-    ARXIV_TOTAL_CAP,
-)
+from swarm_cruise.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +42,7 @@ def fetch_papers(
     Parameters
     ----------
     keywords:
-        Search terms.  Defaults to ``ARXIV_KEYWORDS`` from config.
+        Search terms.  Defaults to ``settings.arxiv_keywords`` from config.
     max_per_keyword:
         Maximum results per keyword query.
     total_cap:
@@ -58,11 +54,11 @@ def fetch_papers(
         Deduplicated list of papers ordered by relevance/recency.
     """
     if keywords is None:
-        keywords = ARXIV_KEYWORDS
+        keywords = settings.arxiv_keywords
     if max_per_keyword is None:
-        max_per_keyword = ARXIV_MAX_RESULTS_PER_KEYWORD
+        max_per_keyword = settings.arxiv_max_results_per_keyword
     if total_cap is None:
-        total_cap = ARXIV_TOTAL_CAP
+        total_cap = settings.arxiv_total_cap
 
     seen_ids: set[str] = set()
     papers: list[RawPaper] = []

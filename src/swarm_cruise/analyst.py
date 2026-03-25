@@ -13,9 +13,9 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 
-from src.config import LLM_MODEL, TAXONOMY_FILE
-from src.router import Skill
-from src.watcher import RawPaper
+from swarm_cruise.config import settings
+from swarm_cruise.router import Skill
+from swarm_cruise.watcher import RawPaper
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +159,7 @@ def analyse(paper: RawPaper, skill: Skill) -> PaperAnalysis:
     system_prompt = _build_system_prompt(skill, taxonomy)
 
     agent: Agent[None, PaperAnalysis] = Agent(
-        model=LLM_MODEL,
+        model=settings.llm_model,
         output_type=PaperAnalysis,
         system_prompt=system_prompt,
     )
@@ -197,7 +197,7 @@ def analyse(paper: RawPaper, skill: Skill) -> PaperAnalysis:
 def _load_taxonomy() -> dict:
     """Load taxonomy.json, returning an empty dict on failure."""
     try:
-        with TAXONOMY_FILE.open() as fh:
+        with settings.taxonomy_file.open() as fh:
             return json.load(fh)
     except Exception as exc:
         logger.warning("Could not load taxonomy: %s", exc)

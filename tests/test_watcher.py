@@ -2,7 +2,9 @@
 
 from unittest.mock import MagicMock, patch
 
-from src.watcher import fetch_papers
+import pytest
+
+from swarm_cruise.watcher import fetch_papers
 
 MOCK_ATOM_XML = b'''<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -40,3 +42,20 @@ def test_fetch_papers(mock_urlopen: MagicMock) -> None:
     assert papers[0].title == "Mock Paper Title"
     assert papers[0].primary_category == "cs.AI"
     assert papers[0].authors == ["John Doe"]
+
+
+@pytest.mark.integration
+def test_fetch_papers_integration() -> None:
+    """Integration test for fetch_papers.
+
+    This test makes a real network request to the ArXiv API to ensure the
+    XML parsing and data structure generation is working correctly.
+    """
+    papers = fetch_papers(keywords=["large language models"], max_per_keyword=2, total_cap=2)
+
+    assert len(papers) > 0
+    assert len(papers) <= 2
+    assert hasattr(papers[0], "arxiv_id")
+    assert papers[0].arxiv_id
+    assert papers[0].url.startswith("https://arxiv.org/abs/")
+    assert len(papers[0].title) > 0
