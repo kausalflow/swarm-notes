@@ -303,6 +303,39 @@ def update_public_feed(analyses: list[PaperAnalysis]) -> None:
     )
 
 
+def write_site_config() -> None:
+    """Write site identity metadata to ``website/src/content/site-config.json``.
+
+    The JSON file is read by the Astro website at build time to populate the
+    hero section with the deployment-specific name, description, and tracked
+    research topics.  It is committed alongside the vault so CI can build the
+    website without re-loading the Python config.
+
+    Fields written
+    --------------
+    site_name : str
+        Human-readable name for this swarm-notes deployment.
+    site_description : str
+        Short description shown in the hero subtitle.
+    arxiv_keywords : list[str]
+        Research topics this instance tracks (rendered as pills in the hero).
+    updated_at : str
+        ISO-8601 UTC timestamp of the last pipeline run.
+    """
+    repo_root = Path(__file__).parent.parent.parent.resolve()
+    out_path = repo_root / "website" / "src" / "content" / "site-config.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    payload = {
+        "site_name": settings.site_name,
+        "site_description": settings.site_description,
+        "arxiv_keywords": settings.arxiv_keywords,
+        "updated_at": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
+    out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    logger.info("VaultWriter: wrote site config → %s", out_path)
+
+
 def append_daily_discussion(content: str) -> None:
     """Appends the discussion content to today's daily note in staging.
 

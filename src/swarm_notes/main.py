@@ -32,13 +32,14 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
 
     from swarm_notes import analyst, federation, router, watcher
     from swarm_notes.vault_manager import commit_staging, discard_staging, init_staging, init_vault, get_existing_arxiv_ids
-    from swarm_notes.vault_writer import update_public_feed, write_paper
+    from swarm_notes.vault_writer import update_public_feed, write_paper, write_site_config
 
     # ------------------------------------------------------------------
     # 1. Initialise vault directories
     # ------------------------------------------------------------------
     logger.info("=== research-cruise pipeline starting ===")
     init_vault()
+    write_site_config()
 
     # ------------------------------------------------------------------
     # 2. Prepare the staging area

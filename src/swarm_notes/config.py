@@ -57,6 +57,10 @@ class Settings(BaseModel):
     # Experimental features
     enable_domain_expert: bool = False
 
+    # Site identity (written to website/src/content/site-config.json)
+    site_name: str = "Swarm Notes"
+    site_description: str = "Automated research paper tracking and knowledge synthesis."
+
     @classmethod
     def load_from_yaml(cls, yaml_path: str | Path | None = None) -> "Settings":
         data = {}

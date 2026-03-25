@@ -1,4 +1,4 @@
-# Example research-cruise configuration
+# Example swarm-notes configuration
 llm_model: "gemini-flash-lite-latest"
 arxiv_keywords:
   - "time series"
@@ -7,6 +7,10 @@ arxiv_max_results_per_keyword: 5
 arxiv_total_cap: 20
 federation_feeds: []
 public_feed_max_items: 20
+
+# Site identity — shown in the website hero to identify this deployment
+site_name: "Swarm Notes"
+site_description: "Automated research paper tracking and knowledge synthesis."
 
 # Experimental domain expert agent (crawls HTML, consumes token quotas)
 enable_domain_expert: true
