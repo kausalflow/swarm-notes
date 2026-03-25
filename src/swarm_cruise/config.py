@@ -28,7 +28,7 @@ class Settings(BaseModel):
     tmp_daily_dir: Path = Field(default=REPO_ROOT / "tmp_vault" / "discussions" / "daily")
     
     # Data files
-    taxonomy_file: Path = Field(default=REPO_ROOT / "taxonomy.json")
+    taxonomy_file: Path = Field(default=REPO_ROOT / "vault" / "taxonomy.json")
     public_feed_file: Path = Field(default=REPO_ROOT / "public_feed.json")
     
     # LLM keys and model
@@ -48,9 +48,12 @@ class Settings(BaseModel):
     
     # Federation config
     federation_feeds: list[str] = Field(default_factory=lambda: [
-        f for f in os.environ.get("settings.federation_feeds", "").split(",") if f.strip()
+        f for f in os.environ.get("FEDERATION_FEEDS", "").split(",") if f.strip()
     ])
     public_feed_max_items: int = 20
+
+    # Experimental features
+    enable_domain_expert: bool = False
 
     @classmethod
     def load_from_yaml(cls, yaml_path: str | Path | None = None) -> "Settings":

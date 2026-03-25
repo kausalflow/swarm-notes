@@ -77,6 +77,13 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
                     "Processing %s with skill %s", paper.arxiv_id, skill.name
                 )
                 analysis = analyst.analyse(paper, skill)
+                
+                # Check Domain Expert Configuration
+                if src_config.settings.enable_domain_expert:
+                    from swarm_cruise.domain_expert import extract_open_questions
+                    questions = extract_open_questions(paper.arxiv_id)
+                    analysis.open_questions = questions
+                    
                 write_paper(analysis, skill.name)
                 analyses.append(analysis)
             except Exception as exc:

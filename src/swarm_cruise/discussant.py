@@ -30,7 +30,7 @@ def discuss_papers(analyses: list[PaperAnalysis]) -> str:
         prompt += f"--- Title: {a.title} ({a.arxiv_id}) ---\n"
         prompt += f"Summary: {a.summary}\n"
         prompt += f"Key Contributions: {', '.join(a.key_contributions)}\n"
-        prompt += f"Novelty: {a.novelty_assessment}\n\n"
+        prompt += f"Limitations: {a.limitations}\n\n"
 
     try:
         # Patching google auth for pydantic_ai via explicit kwargs matching analyst if needed
