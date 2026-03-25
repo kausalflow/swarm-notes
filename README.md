@@ -106,10 +106,37 @@ python -m src.main
 
 ## CI/CD Setup
 
-1. Fork this repository.
-2. Add your API key as a repository secret named **`LLM_API_KEY`** (Settings → Secrets → Actions).
-3. The pipeline runs automatically every Monday at 06:00 UTC.  
-   You can also trigger it manually from the **Actions** tab using **workflow_dispatch**.
+### 1. Fork the repository
+
+Click **Fork** on GitHub to create your own copy of this repository.
+
+### 2. Add the required secret
+
+The pipeline needs an OpenAI-compatible API key to run the LLM analyst step.
+
+1. Open your forked repository on GitHub.
+2. Go to **Settings → Secrets and variables → Actions**.
+3. Click **New repository secret**.
+4. Set **Name** to `LLM_API_KEY` and **Secret** to your API key (e.g. `sk-...`).
+5. Click **Add secret**.
+
+> **Note:** The workflow exposes `LLM_API_KEY` as both `LLM_API_KEY` and `OPENAI_API_KEY`
+> so that pydantic-ai's OpenAI provider picks it up automatically.
+
+### 3. (Optional) Override the model
+
+By default the pipeline uses `openai:gpt-4o-mini`.  To use a different model, add a
+second repository secret (or variable) named `LLM_MODEL` with the pydantic-ai model
+string, e.g. `openai:gpt-4o` or `anthropic:claude-3-5-haiku`.
+
+You can also set `LLM_MODEL` in the workflow's `env:` block directly if you prefer not
+to use a secret.
+
+### 4. Run the pipeline
+
+- **Scheduled:** the pipeline fires automatically every **Monday at 06:00 UTC**.
+- **Manual:** go to **Actions → Autonomous Research Tracker → Run workflow**, optionally
+  override `keywords`, `federation_feeds`, and `max_results` in the dispatch form.
 
 ## The Hive Mind (Federation)
 

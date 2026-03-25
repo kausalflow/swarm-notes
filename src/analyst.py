@@ -160,7 +160,7 @@ def analyse(paper: RawPaper, skill: Skill) -> PaperAnalysis:
 
     agent: Agent[None, PaperAnalysis] = Agent(
         model=LLM_MODEL,
-        result_type=PaperAnalysis,
+        output_type=PaperAnalysis,
         system_prompt=system_prompt,
     )
 
@@ -176,7 +176,7 @@ def analyse(paper: RawPaper, skill: Skill) -> PaperAnalysis:
     logger.info("Analyst: analysing paper %s with skill %s", paper.arxiv_id, skill.name)
 
     result = agent.run_sync(user_message)
-    analysis: PaperAnalysis = result.data
+    analysis: PaperAnalysis = result.output
 
     # Ensure metadata from the raw paper is preserved accurately
     analysis.arxiv_id = paper.arxiv_id
