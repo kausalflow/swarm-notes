@@ -1,9 +1,9 @@
 ---
 title: "Spatial--Frequency Dual-Domain Gating"
-slug: "spatial-frequency-dual-domain-gating"
+slug: "dual-domain-gating"
 type: concept
 generated_stub: true
-processed_at: "2026-03-25T14:42:05Z"
+processed_at: "2026-03-25T16:32:39Z"
 ---
 
 # Spatial--Frequency Dual-Domain Gating

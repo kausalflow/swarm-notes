@@ -13,7 +13,9 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-from swarm_cruise.analyst import PaperAnalysis
+import frontmatter
+
+from swarm_cruise.analyst import PaperAnalysis, OpenQuestion
 from swarm_cruise.config import settings
 
 logger = logging.getLogger(__name__)
@@ -139,7 +141,8 @@ def _build_body(analysis: PaperAnalysis) -> str:
     if analysis.open_questions:
         lines.append("## Open Questions & Future Work\n")
         for q in analysis.open_questions:
-            lines.append(f"- {q}")
+            lines.append(f"- [[{q.slug}]]")
+            _create_open_question(q, analysis)
         lines.append("")
 
     # Concepts
@@ -209,6 +212,46 @@ processed_at: "{processed_at}"
     logger.info("VaultWriter: created concept stub → %s", staging_path)
 
 
+def _create_open_question(question: OpenQuestion, analysis: PaperAnalysis) -> None:
+    """Create or update an open question file with frontmatter tracking sources."""
+    slug = _slugify(question.slug)
+    filename = f"{slug}.md"
+    live_path = settings.vault_open_questions_dir / filename
+    staging_path = settings.tmp_open_questions_dir / filename
+
+    if live_path.exists() and not staging_path.exists():
+        shutil.copy2(live_path, staging_path)
+
+    papers = []
+    content = f"**Background:** {question.background}\n\n**Question / Future Work:** {question.description}"
+    
+    if staging_path.exists():
+        try:
+            post = frontmatter.load(staging_path)
+            papers = post.metadata.get("source_papers", [])
+            if not isinstance(papers, list):
+                papers = [papers]
+            # Retain original deeper description instead of wiping it
+            content = post.content if post.content.strip() else content
+        except Exception as exc:
+            logger.warning("VaultWriter: Failed to parse existing frontmatter for %s: %s", slug, exc)
+
+    paper_slug = _make_slug(analysis.arxiv_id, analysis.title)
+    paper_id = f"[[{paper_slug}]]"
+    if paper_id not in papers:
+        papers.append(paper_id)
+
+    post = frontmatter.Post(
+        content,
+        title=question.title,
+        source_papers=papers
+    )
+    with staging_path.open("wb") as f:
+        frontmatter.dump(post, f)
+
+    logger.info("VaultWriter: tracked open question → %s", staging_path)
+
+
 # ---------------------------------------------------------------------------
 # Public feed maintenance
 # ---------------------------------------------------------------------------
@@ -250,7 +293,7 @@ def update_public_feed(analyses: list[PaperAnalysis]) -> None:
 
 def append_daily_discussion(content: str) -> None:
     """Appends the discussion content to today's daily note in staging."""
-    today_str = datetime.date.today().isoformat()
+    today_str = datetime.now().date().isoformat()
     filename = f"{today_str}.md"
 
     live_path = settings.vault_daily_dir / filename

@@ -3,14 +3,14 @@ title: "M-vine Copula Test"
 slug: "m-vine-copula-test"
 type: concept
 generated_stub: true
-processed_at: "2026-03-25T14:42:03Z"
+processed_at: "2026-03-25T16:32:35Z"
 ---
 
 # M-vine Copula Test
 
 > *Auto-generated stub. Edit this file to add more details.*
 
-A non-parametric statistical test for multivariate Granger causality built upon the M-vine copula structure to model complex dependencies.
+A statistical test for multivariate Granger causality that utilizes M-vine copula models to capture non-linear and non-Gaussian dependence without parametric assumptions.
 
 ## Related Papers
 
