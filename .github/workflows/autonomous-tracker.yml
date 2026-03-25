@@ -62,5 +62,5 @@ jobs:
         with:
           commit_message: "chore(vault): autonomous update [skip ci]"
           commit_author: "research-cruise-bot <research-cruise-bot@users.noreply.github.com>"
-          file_pattern: "vault/**/*.md public_feed.json"
+          file_pattern: "vault/**/*.md vault/**/*.json"
           skip_dirty_check: false
