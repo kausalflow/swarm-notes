@@ -3,7 +3,7 @@ name: Autonomous Research Tracker
 on:
   schedule:
     # Run every Monday at 06:00 UTC
-    - cron: "0 6 * * 1"
+    - cron: "0 5 * * *"
   workflow_dispatch:
     inputs:
       config_file:
