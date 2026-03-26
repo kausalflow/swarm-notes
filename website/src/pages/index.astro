@@ -50,7 +50,7 @@ const jsonIndex = JSON.stringify(searchIndex);
   <BaseLayout title={siteConfig.site_name} description={siteConfig.site_description}>
 
   <!-- Compact hero with search -->
-  <section class="relative border-b bg-background py-14 md:py-20">
+  <section class="relative border-b bg-background py-14 md:py-20 overflow-hidden">
     <!-- Subtle gradient orbs -->
     <div class="pointer-events-none absolute inset-0" aria-hidden="true">
       <div class="absolute -top-24 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-primary/5 blur-3xl dark:bg-primary/10"></div>
@@ -103,8 +103,8 @@ const jsonIndex = JSON.stringify(searchIndex);
   </section>
 
   <!-- Recent Discussions — above papers -->
-  <section class="py-12 pb-0 px-6">
-    <div class="container max-w-5xl mx-auto">
+  <section class="py-12 pb-0">
+    <div class="container max-w-5xl mx-auto px-4 sm:px-6">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold tracking-tight">Recent Discussions</h2>
         <a href="/catalog/discussions/" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline">View all →</a>
@@ -135,8 +135,8 @@ const jsonIndex = JSON.stringify(searchIndex);
   </section>
 
   <!-- Papers list — immediately below discussions -->
-  <section class="py-12 px-6">
-    <div class="container max-w-5xl mx-auto">
+  <section class="py-12">
+    <div class="container max-w-5xl mx-auto px-4 sm:px-6">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold tracking-tight">Recent Papers</h2>
         <a href="/catalog/papers/" class="text-sm text-primary hover:underline">View all →</a>
@@ -169,10 +169,10 @@ const jsonIndex = JSON.stringify(searchIndex);
 
   <!-- Stats bar -->
   <section class="border-y bg-muted/30">
-    <div class="container max-w-5xl mx-auto px-6">
+    <div class="container max-w-5xl mx-auto px-4 sm:px-6">
       <div class="grid grid-cols-2 divide-x sm:grid-cols-4">
         {Object.entries(totalBySection).map(([section, count]) => (
-          <div class="py-5 px-6 text-center">
+          <div class="py-5 px-2 sm:px-4 text-center">
             <div class="text-2xl font-bold">{count}</div>
             <div class="text-xs text-muted-foreground capitalize">{section.replace(/-/g, ' ')}</div>
           </div>
@@ -182,8 +182,8 @@ const jsonIndex = JSON.stringify(searchIndex);
   </section>
 
   <!-- Catalog section cards (concepts, open-questions, discussions) -->
-  <section class="py-16 px-6 section-inverted">
-    <div class="container max-w-5xl mx-auto">
+  <section class="py-16 section-inverted">
+    <div class="container max-w-5xl mx-auto px-4 sm:px-6">
       <h2 class="text-2xl font-bold tracking-tight mb-8">Browse by Section</h2>
       <div class="grid gap-6 sm:grid-cols-3">
         {catalogSections.filter(s => totalBySection[s]).map(s => {
