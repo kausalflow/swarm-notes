@@ -49,7 +49,7 @@ jobs:
       - name: Commit and push new vault files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore(vault): autonomous update [skip ci]"
+          commit_message: "data(vault): autonomous update"
           commit_author: "research-cruise-bot <research-cruise-bot@users.noreply.github.com>"
           file_pattern: "vault/**/*.*"
           skip_dirty_check: false
