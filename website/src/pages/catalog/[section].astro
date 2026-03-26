@@ -77,7 +77,7 @@ const title = section.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpp
             </svg>
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-semibold truncate group-hover:text-primary transition-colors">
+            <h3 class="font-semibold leading-snug break-words group-hover:text-primary transition-colors">
               {entry.data?.title || realSlug.split('/').pop()}
             </h3>
             {entry.data?.description && (
