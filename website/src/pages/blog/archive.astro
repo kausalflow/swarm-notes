@@ -30,21 +30,25 @@ function formatDate(date: Date) {
       </p>
     </div>
 
-    <ul class="space-y-6">
+    <ul class="space-y-4">
       {
         sortedPosts.map((post) => (
-          <li>
-            <a href={`/blog/${post.id}`} class="group block">
-              <div class="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4">
-                <time
-                  datetime={post.data.pubDate.toISOString()}
-                  class="text-sm text-muted-foreground min-w-[120px]"
-                >
-                  {formatDate(post.data.pubDate)}
-                </time>
-                <h2 class="text-xl font-bold group-hover:text-primary transition-colors">
+          <li class="group">
+            <a href={`/blog/${post.id}`} class="block p-4 -mx-4 rounded-xl transition-all hover:bg-accent/40 border border-transparent hover:border-border/60">
+              <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                <div class="flex items-center gap-2 text-sm text-muted-foreground min-w-[140px]">
+                  <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <time datetime={post.data.pubDate.toISOString()}>
+                    {formatDate(post.data.pubDate)}
+                  </time>
+                </div>
+                <h2 class="text-lg font-bold group-hover:text-primary transition-colors flex-1">
                   {post.data.title}
                 </h2>
+                <div class="flex items-center gap-1.5 text-xs text-muted-foreground sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  <span>{post.data.author}</span>
+                </div>
               </div>
             </a>
           </li>

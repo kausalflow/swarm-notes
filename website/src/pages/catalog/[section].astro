@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { enrichVaultEntry } from "@/lib/vault-utils";
 
 export async function getStaticPaths() {
   const allVaultEntries = await getCollection('vault');
@@ -24,25 +25,11 @@ export async function getStaticPaths() {
 
 const { section, allVaultEntries } = Astro.props;
 
-const getMostRecentTimestamp = (entry: any): number => {
-  const modified = entry?.data?.modified_at ? Date.parse(String(entry.data.modified_at)) : NaN;
-  if (!Number.isNaN(modified)) return modified;
-  const created = entry?.data?.created_at ? Date.parse(String(entry.data.created_at)) : NaN;
-  if (!Number.isNaN(created)) return created;
-  return 0;
-};
-
-// Filter entries for this section
+// Filter and enrich entries for this section
 const entries = allVaultEntries
-  .map((entry: any) => {
-    const vaultIndex = entry.filePath?.indexOf('vault/');
-    const realSlug = (entry.filePath && vaultIndex !== -1)
-      ? entry.filePath.substring(vaultIndex + 6).replace(/\.md$/, '')
-      : entry.id;
-    return { entry, realSlug };
-  })
-  .filter(({ realSlug }: { realSlug: string }) => realSlug.startsWith(section + '/'))
-  .sort((a: { entry: any }, b: { entry: any }) => getMostRecentTimestamp(b.entry) - getMostRecentTimestamp(a.entry));
+  .map(entry => enrichVaultEntry(entry))
+  .filter(e => e.section === section)
+  .sort((a, b) => (b.sortTimestamp || 0) - (a.sortTimestamp || 0));
 
 const title = section.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
 ---
@@ -64,31 +51,100 @@ const title = section.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpp
 
   <!-- Entry list -->
   <div class="container max-w-5xl mx-auto px-6 py-10">
-    <div class="grid gap-3">
-      {entries.map(({ entry, realSlug }: { entry: any, realSlug: string }) => (
-        <a
-          href={`/${realSlug}/`}
-          class="group flex items-start gap-4 rounded-xl border bg-card px-5 py-4 shadow-sm hover:border-primary/50 hover:shadow-md transition-all"
-        >
-          <div class="mt-0.5 flex-shrink-0 rounded-md bg-primary/10 p-2 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
+    <div class:list={["grid gap-3", section === 'open-questions' && "sm:grid-cols-2"]}>
+      {entries.map((e) => {
+        const isPaper = e.section === 'papers';
+        const isDiscussion = e.section === 'discussions';
+        const isOpenQuestion = e.section === 'open-questions';
+        
+        return (
+          <a
+            href={e.href}
+            class:list={[
+              "group flex items-start gap-4 rounded-xl border px-5 py-4 shadow-sm hover:shadow-md transition-all",
+              isDiscussion ? "border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 hover:border-emerald-400/60" : "bg-card hover:border-primary/50"
+            ]}
+          >
+            <div class:list={[
+              "mt-0.5 flex-shrink-0 rounded-md p-2 transition-colors",
+              isPaper && "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground",
+              isDiscussion && "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white",
+              isOpenQuestion && "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 group-hover:bg-amber-500 group-hover:text-white",
+              !isPaper && !isDiscussion && !isOpenQuestion && "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground"
+            ]}>
+              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                {isPaper && (
+                  <>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </>
+                )}
+                {isDiscussion && <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>}
+                {isOpenQuestion && <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>}
+                {!isPaper && !isDiscussion && !isOpenQuestion && <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />}
+              </svg>
+            </div>
+            
+            <div class="flex-1 min-w-0">
+              <h3 class:list={[
+                "font-semibold leading-snug break-words transition-colors",
+                isDiscussion ? "text-emerald-900 dark:text-emerald-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-300" : "group-hover:text-primary"
+              ]}>
+                {e.title}
+              </h3>
+              
+              {/* Metadata row */}
+              <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                {e.authors && (
+                  <span class="flex items-center gap-1 text-xs text-muted-foreground">
+                    <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    {e.authors}
+                  </span>
+                )}
+                {e.date && (
+                  <span class="flex items-center gap-1 text-xs text-muted-foreground">
+                    <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    {e.date}
+                  </span>
+                )}
+                {e.domain && (
+                  <span class="rounded-full bg-primary/8 px-2 py-0.5 text-xs font-medium text-primary capitalize">{e.domain.replace(/-/g, ' ')}</span>
+                )}
+                {e.arxiv_id && (
+                  <span class="text-xs font-mono text-muted-foreground/70">{e.arxiv_id}</span>
+                )}
+                {isOpenQuestion && e.source_paper_count > 0 && (
+                  <span class="flex items-center gap-1 text-xs text-muted-foreground">
+                    <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    {e.source_paper_count} {e.source_paper_count === 1 ? 'source' : 'sources'}
+                  </span>
+                )}
+              </div>
+              
+              {/* Tags row */}
+              {e.tags && e.tags.length > 0 && (
+                <div class="mt-1.5 flex flex-wrap gap-1">
+                  {e.tags.map((tag: string) => (
+                    <span class="rounded-full border border-border/60 px-2 py-0.5 text-xs text-muted-foreground">{tag.replace(/-/g, ' ')}</span>
+                  ))}
+                </div>
+              )}
+
+              {/* Description (if exists and not isPaper/isDiscussion/isOpenQuestion) */}
+              {!isPaper && !isDiscussion && !isOpenQuestion && e.rawData?.description && (
+                <p class="text-sm text-muted-foreground mt-1 line-clamp-2">{e.rawData.description}</p>
+              )}
+            </div>
+            
+            <svg class:list={[
+              "h-4 w-4 flex-shrink-0 self-center group-hover:translate-x-1 transition-all",
+              isDiscussion ? "text-emerald-400/60 group-hover:text-emerald-600" : "text-muted-foreground/40 group-hover:text-primary"
+            ]} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m9 18 6-6-6-6"/>
             </svg>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="font-semibold leading-snug break-words group-hover:text-primary transition-colors">
-              {entry.data?.title || realSlug.split('/').pop()}
-            </h3>
-            {entry.data?.description && (
-              <p class="text-sm text-muted-foreground mt-0.5 line-clamp-2">{entry.data.description}</p>
-            )}
-          </div>
-          <svg class="h-4 w-4 text-muted-foreground/40 flex-shrink-0 mt-1 group-hover:text-primary group-hover:translate-x-1 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m9 18 6-6-6-6"/>
-          </svg>
-        </a>
-      ))}
+          </a>
+        );
+      })}
     </div>
   </div>
 </BaseLayout>

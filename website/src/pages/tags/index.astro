@@ -2,20 +2,25 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 
-// Get all blog posts
+// Get all blog posts and vault entries
 const allPosts = await getCollection("blog");
+const allVaultEntries = await getCollection("vault");
 
-// Extract all unique tags and count posts per tag
-const uniqueTags = [...new Set(allPosts.map((post) => post.data.tags).flat())];
+// Extract all unique tags and count items per tag
+const allTags = [
+  ...allPosts.map((post) => post.data.tags || []).flat(),
+  ...allVaultEntries.map((entry) => (entry.data as any).tags || []).flat()
+];
+const uniqueTags = [...new Set(allTags)];
 
 // Create array with tag counts
 const tagsWithCounts = uniqueTags.map((tag) => ({
   tag,
-  count: allPosts.filter((post) => post.data.tags.includes(tag)).length,
+  count: allTags.filter((t) => t === tag).length,
 }));
 
-// Sort tags alphabetically
-tagsWithCounts.sort((a, b) => a.tag.localeCompare(b.tag));
+// Sort tags by count (descending) then alphabetically
+tagsWithCounts.sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 ---
 
 <BaseLayout
