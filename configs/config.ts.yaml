@@ -3,15 +3,14 @@ llm_model: "gemini-flash-lite-latest"
 arxiv_keywords:
   - "time series"
   - "forecasting"
-arxiv_max_results_per_keyword: 5
-arxiv_total_cap: 20
+arxiv_max_results_per_keyword: 10
+arxiv_total_cap: 50
 federation_feeds: []
-public_feed_max_items: 20
+public_feed_max_items: 10
 
 # Skill configuration
 active_skills: 
   - "time-series"
-  - "general-ml"
 skills_dir: "skills"                       # Root directory for skills
 
 # Experimental domain expert agent (crawls HTML, consumes token quotas)

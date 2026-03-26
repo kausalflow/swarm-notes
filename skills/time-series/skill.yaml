@@ -12,3 +12,10 @@ preferred_tags:
   - sequential
 arxiv_categories:
   - eess.SP
+  - cs.LG
+  - cs.AI
+  - stat.ML
+  - stat.AP
+  - cs.MA
+  - stat.ME
+  - econ.EM
