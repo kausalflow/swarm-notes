@@ -24,6 +24,14 @@ export async function getStaticPaths() {
 
 const { section, allVaultEntries } = Astro.props;
 
+const getMostRecentTimestamp = (entry: any): number => {
+  const modified = entry?.data?.modified_at ? Date.parse(String(entry.data.modified_at)) : NaN;
+  if (!Number.isNaN(modified)) return modified;
+  const created = entry?.data?.created_at ? Date.parse(String(entry.data.created_at)) : NaN;
+  if (!Number.isNaN(created)) return created;
+  return 0;
+};
+
 // Filter entries for this section
 const entries = allVaultEntries
   .map((entry: any) => {
@@ -33,7 +41,8 @@ const entries = allVaultEntries
       : entry.id;
     return { entry, realSlug };
   })
-  .filter(({ realSlug }: { realSlug: string }) => realSlug.startsWith(section + '/'));
+  .filter(({ realSlug }: { realSlug: string }) => realSlug.startsWith(section + '/'))
+  .sort((a: { entry: any }, b: { entry: any }) => getMostRecentTimestamp(b.entry) - getMostRecentTimestamp(a.entry));
 
 const title = section.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
 ---
