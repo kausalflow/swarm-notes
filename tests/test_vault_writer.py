@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from swarm_notes.analyst import ConceptLink, OpenQuestion, PaperAnalysis, RejectedCandidate
 from swarm_notes.config import settings
-from swarm_notes.vault_writer import _build_body, _build_frontmatter, _write_concept_stub
+from swarm_notes.vault_writer import _build_body, _build_frontmatter, _write_concept_stub, _write_dataset_stub, write_paper
 import frontmatter
 
 
@@ -195,3 +195,60 @@ def test_write_concept_stub_tracks_related_paper_link(tmp_path, monkeypatch) -> 
     assert "[[openalex-2603-25670-uncertainty-guided-label-rebalancing-for-cps-safety-monitoring]]" in post.metadata["source_papers"]
     assert "## Related Papers" in post.content
     assert "- [[openalex-2603-25670-uncertainty-guided-label-rebalancing-for-cps-safety-monitoring]]" in post.content
+
+
+def test_write_dataset_stub_creates_dataset_file(tmp_path, monkeypatch) -> None:
+    tmp_datasets = tmp_path / "tmp-datasets"
+    vault_datasets = tmp_path / "vault-datasets"
+    tmp_datasets.mkdir(parents=True)
+    vault_datasets.mkdir(parents=True)
+
+    monkeypatch.setattr(settings, "tmp_datasets_dir", tmp_datasets)
+    monkeypatch.setattr(settings, "vault_datasets_dir", vault_datasets)
+
+    _write_dataset_stub("etth1", "ETTh1")
+
+    dataset_path = tmp_datasets / "etth1.md"
+    assert dataset_path.exists()
+    post = frontmatter.load(dataset_path)
+    assert post.metadata["slug"] == "etth1"
+    assert post.metadata["type"] == "dataset"
+    assert "Related Papers" not in post.content
+
+
+def test_write_paper_creates_dataset_stubs(tmp_path, monkeypatch) -> None:
+    tmp_papers = tmp_path / "tmp-papers"
+    tmp_concepts = tmp_path / "tmp-concepts"
+    tmp_datasets = tmp_path / "tmp-datasets"
+    vault_concepts = tmp_path / "vault-concepts"
+    vault_datasets = tmp_path / "vault-datasets"
+
+    for p in [tmp_papers, tmp_concepts, tmp_datasets, vault_concepts, vault_datasets]:
+        p.mkdir(parents=True)
+
+    monkeypatch.setattr(settings, "tmp_papers_dir", tmp_papers)
+    monkeypatch.setattr(settings, "tmp_concepts_dir", tmp_concepts)
+    monkeypatch.setattr(settings, "tmp_datasets_dir", tmp_datasets)
+    monkeypatch.setattr(settings, "vault_concepts_dir", vault_concepts)
+    monkeypatch.setattr(settings, "vault_datasets_dir", vault_datasets)
+
+    analysis = PaperAnalysis(
+        title="Dataset Stub Through Write",
+        authors=["Test Author"],
+        published="2026-03-27",
+        arxiv_id="2603.44444",
+        source="openalex",
+        url="https://arxiv.org/abs/2603.44444",
+        summary="A concise summary.",
+        key_contributions=["Contribution one."],
+        tags=["benchmark"],
+        architectures=[],
+        datasets=["ETTh1"],
+        concepts=[],
+        limitations="",
+        domain="time-series",
+        open_questions=[],
+    )
+
+    write_paper(analysis, "TimeSeriesSkill")
+    assert (tmp_datasets / "etth1.md").exists()
