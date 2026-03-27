@@ -2,7 +2,7 @@
 
 from unittest.mock import patch
 
-from swarm_notes.analyst import ConceptLink, OpenQuestion, PaperAnalysis
+from swarm_notes.analyst import ConceptLink, OpenQuestion, PaperAnalysis, RejectedCandidate
 from swarm_notes.vault_writer import _build_body
 
 
@@ -39,7 +39,15 @@ def test_build_body_includes_archivist_review_details() -> None:
             )
         ],
         critic_review_summary="Approved one concept and one open question.",
-        critic_rejected_candidates=["Rejected 'benchmark setup' because it is generic and paper-local."],
+        critic_rejected_candidates=[
+            RejectedCandidate(
+                candidate_type="concept",
+                candidate_slug="benchmark-setup",
+                candidate_title="Benchmark Setup",
+                reason_code="generic",
+                reason="Generic benchmark setup with no reusable methodological novelty.",
+            )
+        ],
     )
 
     with patch("swarm_notes.vault_writer._create_open_question"):
@@ -52,4 +60,6 @@ def test_build_body_includes_archivist_review_details() -> None:
     assert "### Approved Open Questions" in body
     assert "Reliable deployment depends on it." in body
     assert "### Rejected Candidates" in body
-    assert "Rejected 'benchmark setup' because it is generic and paper-local." in body
+    assert "[concept] Benchmark Setup" in body
+    assert "benchmark-setup" in body
+    assert "generic" in body
