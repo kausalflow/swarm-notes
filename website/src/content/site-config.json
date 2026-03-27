@@ -1,9 +1,13 @@
 {
   "site_name": "Swarm Notes",
   "site_description": "Automated research paper tracking and knowledge synthesis.",
+  "paper_keywords": [
+    "time series",
+    "forecasting"
+  ],
   "arxiv_keywords": [
     "time series",
     "forecasting"
   ],
-  "updated_at": "2026-03-25T21:50:39Z"
+  "updated_at": "2026-03-27T10:03:24Z"
 }
