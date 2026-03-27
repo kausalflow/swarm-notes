@@ -17,6 +17,15 @@ from swarm_notes.watcher import RawPaper
 logger = logging.getLogger(__name__)
 
 
+def _fallback_review_summary(review: CriticReview) -> str:
+    """Return a deterministic review summary when the model omits one."""
+    return (
+        "Archivist review kept only candidates judged central to the paper and reusable across future work. "
+        f"Approved {len(review.approved_concepts)} concept(s) and {len(review.approved_open_questions)} open question(s), "
+        f"with {len(review.rejected_candidates)} rejected candidate note(s)."
+    )
+
+
 class CriticReview(BaseModel):
     """Final approved knowledge artifacts after critic review."""
 
@@ -64,11 +73,15 @@ REVIEW POLICY:
 2. Default to approving nothing if the candidates are weak.
 3. Approve a concept only if it is central to the paper's contribution, likely to recur across future papers, and distinct enough to deserve its own note.
 4. Reject generic ML vocabulary, one-off implementation details, routine datasets, routine benchmarks, and paper-local terminology.
-5. Approve an open question only if it is a substantial unresolved bottleneck or research question that remains useful beyond this one paper.
-6. Reject boilerplate future work such as more experiments, larger models, more data, or better performance unless the candidate identifies a specific unresolved mechanism or limitation.
-7. Reuse an existing concept slug when the candidate is synonymous with something already in the vault.
-8. Be scarce. Approve at most 2 concepts and at most 2 open questions.
-9. Preserve evidence_excerpt and rationale fields when they help justify the approved item.
+5. Reject paper-internal subcomponents, helper modules, or local implementation details unless they are clearly reusable ideas that future papers would likely name and discuss in their own right.
+6. If both an overarching mechanism and one of its supporting submodules are proposed, prefer the overarching mechanism and reject the submodule unless the submodule is independently important.
+7. Approve an open question only if it is a substantial unresolved bottleneck or research question that remains useful beyond this one paper.
+8. Reject boilerplate future work such as more experiments, larger models, more data, or better performance unless the candidate identifies a specific unresolved mechanism or limitation.
+9. Reuse an existing concept slug when the candidate is synonymous with something already in the vault.
+10. Be scarce. Approve at most 2 concepts and at most 2 open questions.
+11. Preserve evidence_excerpt and rationale fields when they help justify the approved item.
+12. Always fill review_summary with 2-4 sentences explaining the approval standard you applied.
+13. For every rejected candidate, add one concise note to rejected_candidates that names the candidate and explains the reason for rejection.
 """
     if skill.critic_context:
         prompt += f"\n\nSKILL-SPECIFIC REVIEW CONTEXT:\n{skill.critic_context}"
@@ -110,7 +123,7 @@ def review_analysis(analysis: PaperAnalysis, paper: RawPaper, skill: SkillSpec) 
 
     analysis.concepts = review.approved_concepts
     analysis.open_questions = review.approved_open_questions
-    analysis.critic_review_summary = review.review_summary
+    analysis.critic_review_summary = review.review_summary or _fallback_review_summary(review)
     analysis.critic_rejected_candidates = review.rejected_candidates
 
     logger.info(
