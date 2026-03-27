@@ -46,6 +46,14 @@ jobs:
           CONFIG_FILE: ${{ github.event.inputs.config_file || 'configs/config.ts.yaml' }}
         run: uv run python -m swarm_notes.main --config "$CONFIG_FILE"
 
+      - name: Upload tmp_vault artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tmp-vault-${{ github.run_id }}
+          path: tmp_vault/**/*
+          if-no-files-found: ignore
+
       - name: Commit and push new vault files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:

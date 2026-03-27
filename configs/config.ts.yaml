@@ -6,7 +6,7 @@ paper_search:
     - "time series"
     - "forecasting"
     - "timeseries"
-  max_history_days: 30  # hard cutoff: do not keep results older than this many days
+  max_history_days: 3  # hard cutoff: do not keep results older than this many days
   max_results_per_keyword: 10
   total_cap: 30
   arxiv: {}
