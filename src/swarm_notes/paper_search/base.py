@@ -24,3 +24,6 @@ class PaperProvider(Protocol):
 
     def search(self, keyword: str, max_results: int) -> list[RawPaper]:
         """Return up to ``max_results`` papers for a keyword."""
+
+    def search_many(self, keywords: list[str], max_results: int) -> list[RawPaper]:
+        """Return up to ``max_results`` papers for many keywords."""

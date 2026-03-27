@@ -13,6 +13,7 @@ from swarm_notes.watcher import (
     OpenAlexPaperProvider,
     RawPaper,
     SemanticScholarPaperProvider,
+    _build_arxiv_search_query,
     _build_openalex_search_query,
     _build_paper_provider,
     _is_keyword_relevant_openalex_result,
@@ -255,23 +256,20 @@ def test_semantic_scholar_provider_retries_429(mock_sleep: MagicMock) -> None:
 
 
 def test_fetch_papers_uses_selected_provider() -> None:
-    mock_provider = MagicMock()
-    mock_provider.search.side_effect = [
-        [
-            RawPaper(
-                arxiv_id="1234.56789",
-                title="Provider Paper",
-                abstract="Abstract.",
-                authors=["Author"],
-                published="2024-01-01",
-                url="https://arxiv.org/abs/1234.56789",
-                primary_category="",
-                keywords_matched=["forecasting"],
-            )
-        ]
+    expected = [
+        RawPaper(
+            arxiv_id="1234.56789",
+            title="Provider Paper",
+            abstract="Abstract.",
+            authors=["Author"],
+            published="2024-01-01",
+            url="https://arxiv.org/abs/1234.56789",
+            primary_category="",
+            keywords_matched=["forecasting"],
+        )
     ]
 
-    with patch("swarm_notes.watcher._build_paper_provider", return_value=mock_provider) as mock_factory:
+    with patch("swarm_notes.watcher._fetch_papers", return_value=expected) as mock_fetch:
         papers = fetch_papers(
             keywords=["forecasting"],
             max_per_keyword=5,
@@ -279,9 +277,13 @@ def test_fetch_papers_uses_selected_provider() -> None:
             provider_name="semantic_scholar",
         )
 
-    assert len(papers) == 1
-    assert papers[0].arxiv_id == "1234.56789"
-    mock_factory.assert_called_once_with("semantic_scholar")
+    assert papers == expected
+    mock_fetch.assert_called_once_with(
+        keywords=["forecasting"],
+        max_per_keyword=5,
+        total_cap=5,
+        provider_name="semantic_scholar",
+    )
 
 
 @pytest.mark.integration
@@ -504,6 +506,11 @@ def test_build_openalex_search_query_boolean_or() -> None:
     assert query == '("time series" OR forecasting OR timeseries)'
 
 
+def test_build_arxiv_search_query_boolean_or() -> None:
+    query = _build_arxiv_search_query(["time series", "forecasting", "timeseries"])
+    assert query == '(all:"time series" OR all:forecasting OR all:timeseries)'
+
+
 def test_build_openalex_search_query_single() -> None:
     assert _build_openalex_search_query(["forecasting"]) == "forecasting"
 
@@ -584,6 +591,58 @@ def test_openalex_provider_skips_future_publication_date() -> None:
     papers = provider.search("forecasting", 10)
 
     assert papers == []
+
+
+def test_semantic_scholar_provider_search_many_deduplicates_and_merges_keywords() -> None:
+    payload_time = {
+        "data": [
+            {
+                "paperId": "paper-1",
+                "title": "Semantic Scholar Paper",
+                "abstract": "Semantic Scholar abstract.",
+                "authors": [{"name": "Jane Doe"}],
+                "publicationDate": "2026-03-25",
+                "year": 2026,
+                "url": "https://www.semanticscholar.org/paper/paper-1",
+                "externalIds": {"ArXiv": "2503.01234v2"},
+            }
+        ],
+    }
+    payload_forecasting = {
+        "data": [
+            {
+                "paperId": "paper-1",
+                "title": "Semantic Scholar Paper",
+                "abstract": "Semantic Scholar abstract.",
+                "authors": [{"name": "Jane Doe"}],
+                "publicationDate": "2026-03-25",
+                "year": 2026,
+                "url": "https://www.semanticscholar.org/paper/paper-1",
+                "externalIds": {"ArXiv": "2503.01234v2"},
+            }
+        ],
+    }
+
+    mock_session = MagicMock()
+    response_time = MagicMock()
+    response_time.raise_for_status.return_value = None
+    response_time.json.return_value = payload_time
+    response_forecasting = MagicMock()
+    response_forecasting.raise_for_status.return_value = None
+    response_forecasting.json.return_value = payload_forecasting
+    mock_session.get.side_effect = [response_time, response_forecasting]
+
+    provider = SemanticScholarPaperProvider(
+        api_key="semantic-scholar-key",
+        api_url="https://api.semanticscholar.org/graph/v1/paper/search",
+        session=mock_session,
+    )
+
+    papers = provider.search_many(["time series", "forecasting"], 5)
+
+    assert len(papers) == 1
+    assert papers[0].arxiv_id == "2503.01234"
+    assert papers[0].keywords_matched == ["time series", "forecasting"]
 
 
 def test_openalex_provider_respects_max_history_days() -> None:
