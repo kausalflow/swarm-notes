@@ -1,208 +1,246 @@
 [
   {
-    "paper_id": "2603.20063",
+    "paper_id": "2603.03760",
     "paper_source": "openalex",
-    "title": "Fine-tuning Timeseries Predictors Using Reinforcement Learning",
+    "title": "Harmonic Dataset Distillation for Time Series Forecasting",
     "authors": [
-      "Hugo Cazaux",
-      "Ralph Rudd",
-      "Hlynur Stefánsson",
-      "Sverrir Ólafsson",
-      "Eyjólfur Ingi Ásgeirsson"
+      "Seungha Hong",
+      "Sanghwan Jang",
+      "Wonbin Kweon",
+      "Suyeon Kim",
+      "Gyuseok Lee",
+      "Hwanjo Yu"
     ],
-    "published": "2026-03-20",
-    "url": "https://arxiv.org/abs/2603.20063",
+    "published": "2026-03-04",
+    "url": "https://arxiv.org/abs/2603.03760",
     "domain": "time-series",
     "tags": [
-      "reinforcement-learning",
-      "fine-tuning",
+      "dataset",
       "time-series",
       "forecasting",
-      "transfer-learning"
+      "frequency-domain-analysis",
+      "model_distillation"
     ],
-    "summary": "This work introduces and implements three reinforcement learning (RL) algorithms specifically designed for fine-tuning pre-trained supervised time series predictors, focusing on financial forecasting tasks. The core technical contribution is a detailed plan for successfully backpropagating the RL policy loss through the layers of a model initially trained via standard supervised learning. Empirical evaluations confirm that this RL fine-tuning leads to a notable performance increase and induces desirable transfer learning capabilities in the resulting models. The authors conclude by providing practical insights into the tuning process for adoption by practitioners in the field.",
-    "processed_at": "2026-03-27T11:35:32.048024+00:00"
+    "summary": "The paper addresses the computational challenges of large-scale Time Series Forecasting (TSF) by proposing Harmonic Dataset Distillation (HDT), a novel data distillation technique tailored for time series. HDT operates in the frequency domain by decomposing the time series into its sinusoidal basis using the Fast Fourier Transform (FFT) and performing Harmonic Matching. This frequency-domain approach ensures that distillation updates are applied globally, effectively capturing the core periodic structure without disrupting crucial temporal dependencies. Extensive experiments confirm that HDT offers superior cross-architecture generalization and scalability compared to conventional methods, validating its utility for practical, large-scale TSF applications.",
+    "processed_at": "2026-03-27T14:10:07.313774+00:00"
   },
   {
-    "arxiv_id": "2603.23502",
-    "title": "OccAny: Generalized Unconstrained Urban 3D Occupancy",
+    "paper_id": "2603.03902",
+    "paper_source": "openalex",
+    "title": "PatchDecomp: Interpretable Patch-Based Time Series Forecasting",
     "authors": [
-      "Anh-Quan Cao",
-      "Tuan-Hung Vu"
+      "Hiroki Tomioka",
+      "Genta Yoshimura"
     ],
-    "published": "2026-03-24",
-    "url": "https://arxiv.org/abs/2603.23502",
-    "domain": "computer-vision",
+    "published": "2026-03-04",
+    "url": "https://arxiv.org/abs/2603.03902",
+    "domain": "time-series",
     "tags": [
-      "object-detection",
-      "image-segmentation",
-      "robustness",
-      "zero-shot-learning"
-    ],
-    "summary": "This paper introduces OccAny, a novel framework addressing the poor generalization of existing 3D occupancy prediction methods by enabling unconstrained operation on out-of-domain, uncalibrated urban scenes using only monocular or sequential images. The core technical advancements include the introduction of Segmentation Forcing to refine occupancy prediction while enabling semantic mask output, and a Novel View Rendering pipeline for geometry completion via test-time augmentation. Experiments show that OccAny surpasses existing visual geometry foundation models on 3D occupancy prediction while maintaining competitive results against specialized in-domain methods across multiple input modalities. The model achieves robust metric occupancy and segmentation feature prediction in challenging, unconstrained environments.",
-    "processed_at": "2026-03-25T21:14:34.382436+00:00"
-  },
-  {
-    "arxiv_id": "2603.23494",
-    "title": "Active learning-enabled multi-objective design of thermally conductive and mechanically compliant polymers",
-    "authors": [
-      "Yuhan Liu",
-      "Jiaxin Xu",
-      "Renzheng Zhang",
-      "Meng Jiang",
-      "Tengfei Luo"
-    ],
-    "published": "2026-03-24",
-    "url": "https://arxiv.org/abs/2603.23494",
-    "domain": "chemistry",
-    "tags": [
-      "benchmark",
-      "dataset",
-      "evaluation",
-      "deep-kernel-learning"
-    ],
-    "summary": "This paper introduces an active learning (AL) framework powered by multi-objective Bayesian optimization (MOBO) to efficiently design novel polymers balancing high thermal conductivity (TC) and low mechanical modulus. The methodology begins with a Molecular Dynamics (MD) pipeline to establish an initial dataset, upon which independent Deep Kernel Learning (DKL) surrogate models are trained for property prediction and uncertainty quantification. The system iteratively uses the parallel noisy expected hypervolume improvement (qNEHVI) acquisition function to guide the selection of new candidates for MD simulation, significantly accelerating the discovery process under data scarcity. The framework successfully identified six Pareto-optimal polymer candidates, demonstrating a reduced development time and providing actionable insights for synthesizing multifunctional materials.",
-    "processed_at": "2026-03-25T21:14:34.382450+00:00"
-  },
-  {
-    "arxiv_id": "2603.23491",
-    "title": "Foveated Diffusion: Efficient Spatially Adaptive Image and Video Generation",
-    "authors": [
-      "Brian Chao",
-      "Lior Yariv",
-      "Howard Xiao",
-      "Gordon Wetzstein"
-    ],
-    "published": "2026-03-24",
-    "url": "https://arxiv.org/abs/2603.23491",
-    "domain": "computer-vision",
-    "tags": [
-      "diffusion-model",
-      "efficient-transformer",
-      "image-generation",
-      "video-generation",
-      "vision-language-model",
-      "llm"
-    ],
-    "summary": "This work addresses the increasing computational cost of high-resolution image and video generation with diffusion models by exploiting the non-uniform acuity of human vision. The proposed Foveated Diffusion method uses a gaze-dependent mask to generate content using a mixed-resolution token setting, allocating more tokens to the high-detail foveal region. A key technical contribution is a mechanism to construct these mixed-resolution tokens consistently, allowing an existing base diffusion model to be efficiently post-trained for foveated generation. Evaluations show that this technique maintains perceptual quality comparable to full-resolution generation while significantly reducing computational complexity and generation time.",
-    "processed_at": "2026-03-25T21:14:34.382455+00:00"
-  },
-  {
-    "arxiv_id": "2603.23490",
-    "title": "Dynamic Light Spanners in Doubling Metrics",
-    "authors": [
-      "Sujoy Bhore",
-      "Jonathan Conroy",
-      "Arnold Filtser"
-    ],
-    "published": "2026-03-24",
-    "url": "https://arxiv.org/abs/2603.23490",
-    "domain": "graph-learning",
-    "tags": [
-      "graph-learning",
-      "benchmark"
-    ],
-    "summary": "This paper introduces an efficient dynamic algorithm for maintaining a $(1+\\varepsilon)$-spanner for a set of points undergoing insertions and deletions within a metric space that possesses a constant doubling dimension. The core innovation lies in achieving update times that are polylogarithmic in the aspect ratio $\\Phi$ of the point set, specifically $\\operatorname{poly}(\\log \\Phi)$. Crucially, the algorithm maintains a spanner whose total weight is bounded by a constant factor times the weight of the Minimum Spanning Tree (MST) of the current point set. This work resolves an open problem by providing the first efficient dynamic structure for light-weight spanners in this setting, including low-dimensional Euclidean spaces.",
-    "processed_at": "2026-03-25T21:14:34.382460+00:00"
-  },
-  {
-    "arxiv_id": "2603.23488",
-    "title": "One View Is Enough! Monocular Training for In-the-Wild Novel View Generation",
-    "authors": [
-      "Adrien Ramanana Rahary",
-      "Nicolas Dufour",
-      "Patrick Perez",
-      "David Picard"
-    ],
-    "published": "2026-03-24",
-    "url": "https://arxiv.org/abs/2603.23488",
-    "domain": "computer-vision",
-    "tags": [
-      "self-supervised-learning",
-      "image-generation",
-      "computer-vision",
+      "time-series",
+      "forecasting",
+      "interpretability",
       "evaluation"
     ],
-    "summary": "This paper introduces OVIE, a novel framework for in-the-wild novel view synthesis that breaks the dependency on multi-view training supervision by utilizing only single, unpaired internet images. The core methodology involves using a monocular depth estimator as a transient geometric scaffold to lift source images into 3D space, apply view transformations, and generate pseudo-target views for training. To handle the inherent issues of single-view reconstruction, such as occlusions, the authors propose a masked training loss formulation restricting metrics to geometrically valid regions. OVIE demonstrates superior zero-shot performance against existing methods while boasting a 600x faster inference time, as the geometry estimation is discarded post-training.",
-    "processed_at": "2026-03-25T21:14:34.382465+00:00"
+    "summary": "PatchDecomp is a novel neural network architecture for time series forecasting designed to address the trade-off between high accuracy and model interpretability. The core methodology involves segmenting the input time series, including any associated exogenous variables, into discrete subsequences called patches. Predictions are then generated by an aggregation mechanism that explicitly calculates and combines the specific contribution of each individual patch to the final output. Experimental results confirm that PatchDecomp achieves competitive accuracy against leading forecasting models while simultaneously offering clear, visualizable explanations for its predictions based on patch-wise contributions.",
+    "processed_at": "2026-03-27T14:10:07.313791+00:00"
   },
   {
-    "arxiv_id": "2603.23480",
-    "title": "Stablecoins as Dry Powder: A Copula-Based Risk Analysis of Cryptocurrency Markets",
+    "paper_id": "2603.08707",
+    "paper_source": "openalex",
+    "title": "Impermanent: A Live Benchmark for Temporal Generalization in Time Series Forecasting",
     "authors": [
-      "Elliot Jones",
-      "Toshiko Matsui",
-      "William Knottenbelt"
+      "Azul Garza",
+      "Renée Rosillo",
+      "Rodrigo Mendoza-Smith",
+      "David Salinas",
+      "Andrew Williams",
+      "Arjun Ashok",
+      "Mononito Goswami",
+      "José Martín Juárez"
     ],
-    "published": "2026-03-24",
-    "url": "https://arxiv.org/abs/2603.23480",
-    "domain": "finance",
+    "published": "2026-03-09",
+    "url": "https://arxiv.org/abs/2603.08707",
+    "domain": "time-series",
     "tags": [
+      "benchmark",
       "time-series",
-      "anomaly-detection",
+      "evaluation",
       "forecasting",
-      "finance"
+      "robustness"
     ],
-    "summary": "This research investigates the systemic risk transmission role of stablecoins within the cryptocurrency ecosystem using copula-based econometric analysis. The authors quantify the flow of volatility and trading activity from stablecoins into the broader crypto market, highlighting stablecoins' function as 'dry powder.' Key findings show demonstrable Granger causality across multiple time horizons and significant improvements in cryptocurrency return forecasting accuracy (lower MSE) when stablecoin factors are included. Economically, utilizing these factors leads to reduced risk in volatility targeting strategies.",
-    "processed_at": "2026-03-25T21:14:34.382470+00:00"
+    "summary": "This paper introduces Impermanent, a novel live benchmark designed to rigorously evaluate the temporal generalization capabilities of time series forecasting models, particularly foundation models, under conditions of continuous open-world change. Existing static benchmarks are criticized for potential data leakage and for only measuring one-off accuracy rather than sustained performance under distribution shift. Impermanent addresses this by continuously updating its data streams—derived from GitHub repository activity like issues and pull requests—and scoring forecasts sequentially over a rolling window. This methodology moves the research focus toward assessing temporal robustness and performance stability as the environment naturally evolves, providing a more meaningful assessment of foundation-level generalization claims in time series.",
+    "processed_at": "2026-03-27T14:10:07.313795+00:00"
   },
   {
-    "arxiv_id": "2603.23465",
-    "title": "Statistical Efficiency of Single- and Multi-step Models for Forecasting and Control",
+    "paper_id": "2603.19899",
+    "paper_source": "openalex",
+    "title": "Deep Autocorrelation Modeling for Time-Series Forecasting: Progress and Prospects",
     "authors": [
-      "Anne Somalwar",
-      "Bruce D. Lee",
-      "George J. Pappas",
-      "Nikolai Matni"
+      "Hao Wang",
+      "Licheng Pan",
+      "Qingsong Wen",
+      "Jialin Yu",
+      "Zhichao Chen",
+      "Chunyuan Zheng",
+      "Xiaoxi Li",
+      "Zhixuan Chu",
+      "Chao Xu",
+      "Mingming Gong",
+      "Haoxuan Li",
+      "Yuan Lu",
+      "Zhouchen Lin",
+      "Philip H. S. Torr",
+      "Yan Liu"
     ],
-    "published": "2026-03-24",
-    "url": "https://arxiv.org/abs/2603.23465",
+    "published": "2026-03-20",
+    "url": "https://arxiv.org/abs/2603.19899",
     "domain": "time-series",
     "tags": [
       "time-series",
       "forecasting",
       "evaluation",
-      "reasoning"
+      "benchmark"
     ],
-    "summary": "This paper provides a foundational quantitative analysis of the statistical efficiency trade-off between single-step and multi-step time series predictors when applied to linear dynamical systems. The authors investigate three training regimes: single-step models, direct multi-step models, and single-step models trained with multi-step losses. They theoretically establish that if the model class perfectly matches the system dynamics, single-step models yield the lowest asymptotic prediction error. Conversely, when partial observability introduces model misspecification, direct multi-step predictors demonstrate superior accuracy by effectively reducing systemic bias. These established prediction trade-offs are shown to hold when the predictors are utilized within a closed-loop control framework.",
-    "processed_at": "2026-03-25T21:14:34.382483+00:00"
+    "summary": "This paper presents a comprehensive survey on deep time-series forecasting, framed specifically around the modeling of autocorrelation, which is a fundamental property of time-series data. The authors address two core challenges: designing architectures to capture autocorrelation in input history sequences and devising learning objectives to model autocorrelation in label sequences. The work introduces a novel taxonomy that explicitly covers both architectural design and learning objectives, unlike prior surveys that often neglect the latter. By adopting this unified, autocorrelation-centric perspective, the paper provides a deep analysis of the progression and insights driving recent advancements in the field.",
+    "processed_at": "2026-03-27T14:10:07.313798+00:00"
   },
   {
-    "arxiv_id": "2603.23323",
-    "title": "PNap: Lifecycle-aware Edge Multi-state sleep for Energy Efficient MEC",
+    "paper_id": "2602.22694",
+    "paper_source": "openalex",
+    "title": "Robust optimal reconciliation for hierarchical time series forecasting with M-estimation",
     "authors": [
-      "Federico Giarrè",
-      "Holger Karl"
+      "Zhichao Wang",
+      "Shanshan Wang",
+      "Wei Cao",
+      "Fei Yang"
     ],
-    "published": "2026-03-24",
-    "url": "https://arxiv.org/abs/2603.23323",
+    "published": "2026-02-26",
+    "url": "https://arxiv.org/abs/2602.22694",
+    "domain": "time-series",
+    "tags": [
+      "time-series",
+      "forecasting",
+      "robustness",
+      "anomaly-detection"
+    ],
+    "summary": "This paper addresses the challenge of producing coherent forecasts for Hierarchical Time Series (HTS) that are robust to anomalous or irregular base forecasts. The authors introduce a robust reconciliation framework based on M-estimation, which minimizes a robust loss function subject to the necessary aggregation constraints. The core of the methodology involves an efficient minimization procedure implemented via a modified Newton-Raphson algorithm utilizing local quadratic approximation. Experimental results confirm that this robust approach effectively handles series with non-normal errors and maintains high efficiency in clean datasets, as validated on Australian domestic tourism data.",
+    "processed_at": "2026-03-27T14:10:07.313801+00:00"
+  },
+  {
+    "paper_id": "2603.13361",
+    "paper_source": "openalex",
+    "title": "BrainCast: A Spatio-Temporal Forecasting Model for Whole-Brain fMRI Time Series Prediction",
+    "authors": [
+      "Yunlong Gao",
+      "Jinbo Yang",
+      "Li Xiao",
+      "Haiye Huo",
+      "Yang Ji",
+      "Hao Wang",
+      "Aiying Zhang",
+      "Yu-Ping Wang"
+    ],
+    "published": "2026-03-09",
+    "url": "https://arxiv.org/abs/2603.13361",
+    "domain": "time-series",
+    "tags": [
+      "time-series",
+      "forecasting",
+      "neural-signal-processing",
+      "multivariate-time-series",
+      "self-supervised-learning"
+    ],
+    "summary": "BrainCast is a novel spatio-temporal forecasting framework proposed to extend whole-brain fMRI time series data, mitigating issues arising from short clinical scan durations. The model treats fMRI forecasting as a multivariate time series problem, integrating three key modules: Spatial Interaction Awareness for inter-ROI dependencies via tokenized ROI series, Temporal Feature Refinement for capturing internal dynamics through energy component enhancement, and Spatio-temporal Pattern Alignment to merge the representations. Experimental validation on Human Connectome Project datasets shows BrainCast surpasses existing time series baselines, and the generated data proves beneficial for downstream tasks like cognitive ability prediction.",
+    "processed_at": "2026-03-27T14:10:07.313803+00:00"
+  },
+  {
+    "paper_id": "2603.02906",
+    "paper_source": "openalex",
+    "title": "Towards Accurate and Interpretable Time-series Forecasting: A Polynomial Learning Approach",
+    "authors": [
+      "Bo Liu",
+      "Shao-Bo Lin",
+      "Changmiao Wang",
+      "Xiaotong Liu"
+    ],
+    "published": "2026-03-03",
+    "url": "https://arxiv.org/abs/2603.02906",
+    "domain": "time-series",
+    "tags": [
+      "time-series",
+      "forecasting",
+      "interpretability",
+      "mathematical-reasoning"
+    ],
+    "summary": "This paper introduces Interpretable Polynomial Learning (IPL), a novel time-series forecasting method designed to overcome the trade-off between accuracy and interpretability common in existing models. IPL explicitly models complex temporal dependencies by representing the time-series function as a polynomial in terms of the original features and their cross-interactions up to an arbitrary order. This structural approach inherently provides feature-level interpretability while maintaining high predictive performance, which is demonstrated on Bitcoin price and antenna sensor data. The model's flexibility allows users to adjust the polynomial degree to balance the need for prediction accuracy against the requirement for model simplicity and interpretability, leading to better-justified early warning systems.",
+    "processed_at": "2026-03-27T14:10:07.313806+00:00"
+  },
+  {
+    "paper_id": "2603.08072",
+    "paper_source": "openalex",
+    "title": "Hybrid Quantum Neural Network for Multivariate Clinical Time Series Forecasting",
+    "authors": [
+      "Irene Iele",
+      "Floriano Caprio",
+      "P. Soda",
+      "Matteo Tortora"
+    ],
+    "published": "2026-03-09",
+    "url": "https://arxiv.org/abs/2603.08072",
+    "domain": "time-series",
+    "tags": [
+      "time-series",
+      "forecasting",
+      "rnn",
+      "gru",
+      "hybrid-quantum-neural-network",
+      "evaluation"
+    ],
+    "summary": "This paper introduces a hybrid quantum-classical architecture for multivariate, multi-horizon forecasting of physiological time series, including heart rate and respiratory rate, up to 60 seconds ahead. The model embeds a Variational Quantum Circuit (VQC) within a Gated Recurrent Unit (GRU) encoder, where the historical window is first summarized, and then quantum angles derived from this latent space parameterize the VQC. The quantum layer functions as a crucial non-linear feature mixer to model cross-variable dependencies before the final prediction layer. Evaluations on the BIDMC PPG and Respiration dataset show competitive accuracy and enhanced robustness against noise compared to established deep learning baselines, suggesting utility in small-cohort clinical forecasting.",
+    "processed_at": "2026-03-27T14:10:07.313810+00:00"
+  },
+  {
+    "paper_id": "2602.23581",
+    "paper_source": "openalex",
+    "title": "SDMixer: Sparse Dual-Mixer for Time Series Forecasting",
+    "authors": [
+      "Xiang Ao"
+    ],
+    "published": "2026-02-27",
+    "url": "https://arxiv.org/abs/2602.23581",
+    "domain": "time-series",
+    "tags": [
+      "time-series",
+      "forecasting",
+      "attention-mechanism",
+      "efficient-transformer"
+    ],
+    "summary": "The SDMixer model addresses challenges in multivariate time series forecasting, such as multi-scale characteristics and weak correlations, by employing a dual-stream framework. One stream operates in the frequency domain to capture global trends, while the other operates in the time domain to capture local dynamic features. A core component is a sparsity mechanism designed to aggressively filter noise and invalid information, thereby strengthening the accurate modeling of cross-variable dependencies. Experimental validation across several real-world datasets demonstrates that SDMixer sets a new state-of-the-art performance level.",
+    "processed_at": "2026-03-27T14:10:07.313813+00:00"
+  },
+  {
+    "paper_id": "2603.08032",
+    "paper_source": "openalex",
+    "title": "GCGNet: Graph-Consistent Generative Network for Time Series Forecasting with Exogenous Variables",
+    "authors": [
+      "Zhengyu Li",
+      "Xiangfei Qiu",
+      "Yuhan Zhu",
+      "Xingjian Wu",
+      "Jilin Hu",
+      "Chenjuan Guo",
+      "Bin Yang"
+    ],
+    "published": "2026-03-09",
+    "url": "https://arxiv.org/abs/2603.08032",
     "domain": "time-series",
     "tags": [
       "forecasting",
-      "anomaly-detection",
-      "energy-efficient",
-      "distributed-training"
-    ],
-    "summary": "This paper addresses the significant energy consumption in Multi-access Edge Computing (MEC) systems caused by maintaining unnecessary active servers during low-load periods. The proposed solution, PowerNap (PNap), is a lifecycle-aware orchestration framework that coordinates server sleep states with the required service lifecycle operations. By integrating traffic forecasting, PNap dynamically decides when to transition servers to deeper sleep states, thereby minimizing the active server count while preventing service disruptions. Experimental validation shows PNap achieves up to a 14.9% reduction in energy consumption compared to existing state-of-the-art methods while preserving service availability metrics.",
-    "processed_at": "2026-03-25T21:14:34.382489+00:00"
-  },
-  {
-    "arxiv_id": "2603.23294",
-    "title": "Granger Causality in Expectiles: an M-vine copula test",
-    "authors": [
-      "Roberto Fuentes-Martínez",
-      "Irene Crimaldi"
-    ],
-    "published": "2026-03-24",
-    "url": "https://arxiv.org/abs/2603.23294",
-    "domain": "finance",
-    "tags": [
-      "forecasting",
-      "anomaly-detection",
       "time-series",
-      "statistical-learning"
+      "graph-learning",
+      "variational-autoencoder"
     ],
-    "summary": "This paper introduces a model-free measure of Granger causality specifically tailored to expectiles, offering a robust generalization of mean-based causality that is ideal for risk quantification and distributional analysis. The authors construct a powerful statistical test based on M-vine copulas, which effectively models complex, non-linear, and non-Gaussian dependencies across multiple time series without imposing restrictive parametric forms on the joint distribution. The proposed test is shown to be strongly consistent and exhibits good finite-sample performance, notably revealing multivariate causal structures overlooked by pairwise methods. Practical relevance is highlighted through applications to international stock market indices.",
-    "processed_at": "2026-03-25T21:14:34.382497+00:00"
+    "summary": "GCGNet is proposed for time series forecasting with exogenous variables, aiming to capture joint temporal and channel correlations more effectively than methods that model them sequentially. It utilizes a Variational Generator to create initial coarse forecasts, which are then guided by a Graph Structure Aligner that checks consistency against robust graph representations of the true data correlations. A final Graph Refiner module is employed to refine these predictions, prevent output degeneration, and boost overall accuracy. Extensive experiments across 12 real-world datasets confirm that GCGNet surpasses existing state-of-the-art forecasting baselines.",
+    "processed_at": "2026-03-27T14:10:07.313816+00:00"
   }
 ]
