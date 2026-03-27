@@ -3,11 +3,13 @@
   "site_description": "Automated research paper tracking and knowledge synthesis.",
   "paper_keywords": [
     "time series",
-    "forecasting"
+    "forecasting",
+    "timeseries"
   ],
   "arxiv_keywords": [
     "time series",
-    "forecasting"
+    "forecasting",
+    "timeseries"
   ],
-  "updated_at": "2026-03-27T11:10:33Z"
+  "updated_at": "2026-03-27T11:35:08Z"
 }
