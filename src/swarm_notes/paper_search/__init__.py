@@ -69,11 +69,12 @@ def fetch_papers(
 def build_paper_provider(provider_name: str | None = None) -> PaperProvider:
     source_name = normalise_paper_source(provider_name or settings.paper_source)
     if source_name == "arxiv":
-        return ArxivPaperProvider()
+        return ArxivPaperProvider(max_history_days=settings.paper_max_history_days)
     if source_name == "semantic_scholar":
         return SemanticScholarPaperProvider(
             api_key=settings.semantic_scholar_api_key,
             api_url=settings.semantic_scholar_api_url,
+            max_history_days=settings.paper_max_history_days,
         )
     if source_name == "openalex":
         return OpenAlexPaperProvider(
@@ -81,6 +82,7 @@ def build_paper_provider(provider_name: str | None = None) -> PaperProvider:
             mailto=settings.openalex_mailto,
             relevance_mode=settings.openalex_relevance_mode,
             max_pages_per_window=settings.openalex_max_pages_per_window,
+            max_history_days=settings.paper_max_history_days,
         )
     raise ValueError(f"Unsupported paper_source '{provider_name or settings.paper_source}'")
 

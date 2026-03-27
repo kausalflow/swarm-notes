@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import socket
 import time
+from datetime import datetime, timedelta, timezone
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -31,8 +32,9 @@ _ARXIV_USER_AGENT = "swarm-notes/0.1 (+https://github.com/kausalflow/swarm-notes
 class ArxivPaperProvider:
     """Fetch papers from the ArXiv Atom API."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, max_history_days: int = 365) -> None:
         self._last_request_started_at: float | None = None
+        self._max_history_days = max(1, max_history_days)
 
     def search(self, keyword: str, max_results: int) -> list[RawPaper]:
         params = urllib.parse.urlencode(
@@ -54,7 +56,23 @@ class ArxivPaperProvider:
                 self._respect_rate_limit()
                 with urllib.request.urlopen(request, timeout=_ARXIV_QUERY_TIMEOUT_SECONDS) as response:  # noqa: S310
                     xml_bytes = response.read()
-                return parse_arxiv_atom_feed(xml_bytes, keyword)
+                papers = parse_arxiv_atom_feed(xml_bytes, keyword)
+                cutoff_date = (datetime.now(tz=timezone.utc) - timedelta(days=self._max_history_days)).date()
+                filtered: list[RawPaper] = []
+                for paper in papers:
+                    try:
+                        if datetime.strptime(paper.published, "%Y-%m-%d").date() < cutoff_date:
+                            logger.debug(
+                                "ArXiv result %s published %s is older than %s; skipping",
+                                paper.arxiv_id,
+                                paper.published,
+                                cutoff_date,
+                            )
+                            continue
+                    except ValueError:
+                        pass
+                    filtered.append(paper)
+                return filtered
             except Exception as exc:
                 if attempt == max_attempts or not self._is_retryable_error(exc):
                     logger.error("Failed to query ArXiv for '%s': %s", keyword, exc)

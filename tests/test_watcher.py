@@ -1,6 +1,7 @@
 """Tests for watcher.py."""
 
 from email.message import Message
+from datetime import datetime, timezone
 import urllib.error
 from unittest.mock import MagicMock, patch
 
@@ -112,8 +113,14 @@ def test_fetch_papers(mock_urlopen: MagicMock) -> None:
     Args:
         mock_urlopen: The mock object for urllib.request.urlopen.
     """
+    recent_date = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT12:00:00Z")
+    recent_atom_xml = MOCK_ATOM_XML.replace(
+        b"<published>2023-01-01T12:00:00Z</published>",
+        f"<published>{recent_date}</published>".encode("utf-8"),
+    )
+
     mock_response = MagicMock()
-    mock_response.read.return_value = MOCK_ATOM_XML
+    mock_response.read.return_value = recent_atom_xml
     mock_response.__enter__.return_value = mock_response
     mock_urlopen.return_value = mock_response
 
@@ -187,6 +194,39 @@ def test_semantic_scholar_provider_parses_arxiv_backed_results() -> None:
     ]
     mock_session.get.assert_called_once()
     assert mock_session.get.call_args.kwargs["headers"]["x-api-key"] == "semantic-scholar-key"
+
+
+def test_semantic_scholar_provider_respects_max_history_days() -> None:
+    stale_payload = {
+        "data": [
+            {
+                "paperId": "paper-old",
+                "title": "Old Paper",
+                "abstract": "Very old.",
+                "authors": [{"name": "Jane Doe"}],
+                "publicationDate": "2000-01-01",
+                "year": 2000,
+                "url": "https://www.semanticscholar.org/paper/paper-old",
+                "externalIds": {"ArXiv": "0001.00001v1"},
+            }
+        ],
+    }
+
+    mock_session = MagicMock()
+    mock_response = MagicMock()
+    mock_response.json.return_value = stale_payload
+    mock_response.raise_for_status.return_value = None
+    mock_session.get.return_value = mock_response
+
+    provider = SemanticScholarPaperProvider(
+        api_key="semantic-scholar-key",
+        api_url="https://api.semanticscholar.org/graph/v1/paper/search",
+        max_history_days=30,
+        session=mock_session,
+    )
+
+    papers = provider.search("time series", 5)
+    assert papers == []
 
 
 @patch("swarm_notes.paper_search.semantic_scholar.time.sleep")
@@ -542,6 +582,47 @@ def test_openalex_provider_skips_future_publication_date() -> None:
 
     provider = OpenAlexPaperProvider(session=mock_session)
     papers = provider.search("forecasting", 10)
+
+    assert papers == []
+
+
+def test_openalex_provider_respects_max_history_days() -> None:
+    stale_payload = {
+        "results": [
+            {
+                "id": "https://openalex.org/W3011111111",
+                "display_name": "Old OpenAlex test ArXiv Paper",
+                "abstract_inverted_index": {"test": [0], "text": [1]},
+                "authorships": [{"author": {"display_name": "A"}}],
+                "publication_date": "2000-01-01",
+                "ids": {
+                    "arxiv": "https://arxiv.org/abs/2503.22222v1",
+                },
+            }
+        ]
+    }
+
+    mock_session = MagicMock()
+    mock_response = MagicMock()
+    mock_response.json.return_value = stale_payload
+    mock_response.raise_for_status.return_value = None
+    mock_session.get.return_value = mock_response
+
+    provider = OpenAlexPaperProvider(session=mock_session, max_history_days=30)
+    papers = provider.search("test", 10)
+
+    assert papers == []
+
+
+@patch("urllib.request.urlopen")
+def test_arxiv_provider_respects_max_history_days(mock_urlopen: MagicMock) -> None:
+    mock_response = MagicMock()
+    mock_response.read.return_value = MOCK_ATOM_XML
+    mock_response.__enter__.return_value = mock_response
+    mock_urlopen.return_value = mock_response
+
+    provider = ArxivPaperProvider(max_history_days=30)
+    papers = provider.search("test", 1)
 
     assert papers == []
 

@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 _SEMANTIC_SCHOLAR_FIELDS = "title,abstract,authors,publicationDate,year,url,externalIds"
 _SEMANTIC_SCHOLAR_QUERY_TIMEOUT_SECONDS = 30
 _SEMANTIC_SCHOLAR_RETRY_DELAYS_SECONDS = (2.0, 5.0)
-_SEMANTIC_SCHOLAR_RECENT_DAYS = 7
 _SEMANTIC_SCHOLAR_USER_AGENT = "swarm-notes/0.1 (+https://github.com/kausalflow/swarm-notes)"
 
 
@@ -34,10 +33,12 @@ class SemanticScholarPaperProvider:
         *,
         api_key: str,
         api_url: str,
+        max_history_days: int = 365,
         session: requests.Session | None = None,
     ) -> None:
         self._api_key = api_key
         self._api_url = api_url
+        self._max_history_days = max(1, max_history_days)
         self._session = session or requests.Session()
 
     def search(self, keyword: str, max_results: int) -> list[RawPaper]:
@@ -111,7 +112,7 @@ class SemanticScholarPaperProvider:
 
     def _parse_search_response(self, payload: Mapping[str, Any], keyword: str) -> list[RawPaper]:
         papers: list[RawPaper] = []
-        cutoff_date = (datetime.now(tz=timezone.utc) - timedelta(days=_SEMANTIC_SCHOLAR_RECENT_DAYS)).date()
+        cutoff_date = (datetime.now(tz=timezone.utc) - timedelta(days=self._max_history_days)).date()
 
         for item in payload.get("data", []):
             if not isinstance(item, Mapping):
