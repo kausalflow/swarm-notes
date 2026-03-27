@@ -233,8 +233,6 @@ def _write_concept_stub(
     paper_slug: str = "",
 ) -> None:
     """Create or update a concept note and track source papers in metadata/content."""
-    from swarm_notes.config import settings
-
     staging_path = settings.tmp_concepts_dir / f"{slug}.md"
     vault_path = settings.vault_concepts_dir / f"{slug}.md"
     paper_ref = f"[[{paper_slug}]]" if paper_slug else ""
@@ -311,8 +309,6 @@ def _ensure_related_paper_link(content: str, paper_ref: str) -> str:
 
 def _write_dataset_stub(slug: str, display_name: str) -> None:
     """Write a dataset stub note if one does not already exist."""
-    from swarm_notes.config import settings
-
     staging_path = settings.tmp_datasets_dir / f"{slug}.md"
     vault_path = settings.vault_datasets_dir / f"{slug}.md"
 

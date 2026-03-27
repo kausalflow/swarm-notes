@@ -97,7 +97,7 @@ class OpenQuestion(BaseModel):
 class RejectedCandidate(BaseModel):
     """Structured rejection record produced by the critic for auditability."""
 
-    candidate_type: Literal["concept", "open_question"] = Field(
+    candidate_type: Literal["concept", "open_question", "dataset"] = Field(
         description="Whether the rejected candidate was a concept or open question."
     )
     candidate_slug: str = Field(
@@ -166,8 +166,9 @@ class PaperAnalysis(BaseModel):
     datasets: list[str] = Field(
         default_factory=list,
         description=(
-            "Names of datasets used for evaluation or training "
-            "(e.g. 'ImageNet', 'ETTh1', 'LAION-5B')."
+            "Names of CRITICAL datasets used for evaluation or training "
+            "(e.g. 'ImageNet', 'ETTh1', 'LAION-5B'). "
+            "Prefer 0-2 named datasets and omit generic aggregate labels."
         ),
     )
 
@@ -247,6 +248,9 @@ IMPORTANT RULES:
 9. Reject generic terminology, routine datasets, benchmark names, and umbrella phrases unless the paper makes them a distinct reusable idea.
 10. For concepts, ALWAYS check the EXISTING CONCEPTS IN VAULT list. If a highly synonymous concept already exists, you MUST exactly reuse its slug. Only create entirely new concepts if they represent a genuinely novel idea.
 11. Prefer 0-2 excellent concept candidates over 5 weak ones.
+12. Datasets are also candidate proposals for archival notes. Include only critical, named datasets that are central to evaluation claims.
+13. Reject generic or aggregate dataset labels like "real-world datasets", "benchmark datasets", "10 datasets", or unnamed proprietary buckets.
+14. Prefer 0-2 datasets. If uncertain a dataset is important enough for a standalone note, omit it.
 """
     if skill.analyst_system_prompt_override:
         return skill.analyst_system_prompt_override
