@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from pathlib import Path
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
@@ -63,6 +64,10 @@ class CriticReview(BaseModel):
 def _build_system_prompt(skill: SkillSpec) -> str:
     existing_concepts = get_existing_concept_slugs()
     existing_concepts_str = ", ".join(existing_concepts) if existing_concepts else "(No concepts currently exist in the vault)"
+    existing_open_questions = _get_existing_slugs(settings.vault_open_questions_dir)
+    existing_open_questions_str = ", ".join(existing_open_questions) if existing_open_questions else "(No open questions currently exist in the vault)"
+    existing_datasets = _get_existing_slugs(settings.vault_datasets_dir)
+    existing_datasets_str = ", ".join(existing_datasets) if existing_datasets else "(No datasets currently exist in the vault)"
 
     prompt = f"""You are a highly selective research archivist protecting a long-lived ML knowledge vault.
 
@@ -71,6 +76,12 @@ Your job is to decide which candidates deserve permanent standalone notes.
 
 EXISTING CONCEPTS IN VAULT:
 {existing_concepts_str}
+
+EXISTING OPEN QUESTIONS IN VAULT:
+{existing_open_questions_str}
+
+EXISTING DATASETS IN VAULT:
+{existing_datasets_str}
 
 SKILL CONTEXT ({skill.name}):
 {skill.extra_system_prompt}
@@ -88,10 +99,11 @@ REVIEW POLICY:
 10. Reject generic, aggregate, or counting-style dataset labels such as "real-world datasets", "benchmark datasets", "10 datasets", or unnamed proprietary buckets.
 11. Be scarce for datasets too: approve at most 2 datasets.
 12. Reuse an existing concept slug when the candidate is synonymous with something already in the vault.
-13. Be scarce. Approve at most 2 concepts and at most 2 open questions.
-14. Preserve evidence_excerpt and rationale fields when they help justify the approved item.
-15. Always fill review_summary with 2-4 sentences explaining the approval standard you applied.
-16. For every rejected candidate, you MUST append a structured object to rejected_candidates with ALL required fields:
+13. For open questions and datasets, compare candidates against existing vault lists and avoid creating near-duplicates. Reuse canonical existing slugs/names when appropriate.
+14. Be scarce. Approve at most 2 concepts and at most 2 open questions.
+15. Preserve evidence_excerpt and rationale fields when they help justify the approved item.
+16. Always fill review_summary with 2-4 sentences explaining the approval standard you applied.
+17. For every rejected candidate, you MUST append a structured object to rejected_candidates with ALL required fields:
     - candidate_type: "concept" or "open_question" or "dataset"
     - candidate_slug: slug string
     - candidate_title: display name/title string
@@ -154,3 +166,10 @@ def review_analysis(analysis: PaperAnalysis, paper: RawPaper, skill: SkillSpec) 
         logger.debug("Critic summary for %s: %s", paper.arxiv_id, review.review_summary)
 
     return analysis
+
+
+def _get_existing_slugs(directory: Path) -> list[str]:
+    """Return existing note slugs from a vault directory."""
+    if not directory.exists():
+        return []
+    return sorted(path.stem for path in directory.glob("*.md"))
