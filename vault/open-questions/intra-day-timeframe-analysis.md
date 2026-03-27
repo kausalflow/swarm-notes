@@ -1,8 +1,10 @@
 ---
 created_at: '2026-03-25T21:18:08Z'
+modified_at: '2026-03-27T15:44:20Z'
 source_papers:
 - '[[2603.23480-stablecoins-as-dry-powder-a-copula-based-risk-analysis-of-cr]]'
-title: Intra-Day Volatility Relationships
+- '[[openalex-2603.23480-stablecoins-as-dry-powder-a-copula-based-risk-analysis-of-cr]]'
+title: Intra-day Timeframe Replication
 ---
 
 **Background:** The effect of stablecoin price movements on cryptocurrency volatility is often analyzed using daily time series data, which aggregates intra-day activity into single daily observations. This aggregation can obscure rapid, short-term market reactions.
