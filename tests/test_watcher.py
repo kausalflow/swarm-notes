@@ -13,6 +13,7 @@ from swarm_notes.watcher import (
     RawPaper,
     SemanticScholarPaperProvider,
     _build_paper_provider,
+    _is_keyword_relevant_openalex_result,
     _query_arxiv,
     _reconstruct_openalex_abstract,
     fetch_papers,
@@ -65,12 +66,14 @@ MOCK_OPENALEX_JSON = {
     "results": [
         {
             "id": "https://openalex.org/W3001234567",
-            "display_name": "OpenAlex ArXiv Paper",
+            "display_name": "OpenAlex Time Series ArXiv Paper",
             "abstract_inverted_index": {
                 "Abstract": [0],
                 "of": [1],
-                "openalex": [2],
-                "paper": [3],
+                "time": [2],
+                "series": [3],
+                "openalex": [4],
+                "paper": [5],
             },
             "authorships": [
                 {"author": {"display_name": "Alice Smith"}},
@@ -288,7 +291,7 @@ def test_openalex_provider_skips_papers_without_arxiv_id() -> None:
 
     assert len(papers) == 1
     assert papers[0].arxiv_id == "2503.11111"
-    assert papers[0].title == "OpenAlex ArXiv Paper"
+    assert papers[0].title == "OpenAlex Time Series ArXiv Paper"
     assert papers[0].authors == ["Alice Smith", "Bob Jones"]
     assert papers[0].published == "2026-03-25"
     assert papers[0].url == "https://arxiv.org/abs/2503.11111"
@@ -305,9 +308,9 @@ def test_openalex_provider_reconstructs_abstract() -> None:
     mock_session.get.return_value = mock_response
 
     provider = OpenAlexPaperProvider(session=mock_session)
-    papers = provider.search("test", 10)
+    papers = provider.search("time series", 10)
 
-    assert papers[0].abstract == "Abstract of openalex paper"
+    assert papers[0].abstract == "Abstract of time series openalex paper"
 
 
 def test_openalex_provider_extracts_arxiv_id_from_locations() -> None:
@@ -315,8 +318,8 @@ def test_openalex_provider_extracts_arxiv_id_from_locations() -> None:
         "results": [
             {
                 "id": "https://openalex.org/W3011111111",
-                "display_name": "Location-backed ArXiv Paper",
-                "abstract_inverted_index": {"text": [0]},
+                "display_name": "Location-backed test ArXiv Paper",
+                "abstract_inverted_index": {"test": [0], "text": [1]},
                 "authorships": [{"author": {"display_name": "A"}}],
                 "publication_date": "2026-03-25",
                 "ids": {
@@ -412,4 +415,63 @@ def test_openalex_provider_omits_api_key_when_empty() -> None:
     call_params = mock_session.get.call_args.kwargs["params"]
     assert "api_key" not in call_params
     assert "mailto" not in call_params
+
+
+def test_keyword_relevance_openalex_result() -> None:
+    assert _is_keyword_relevant_openalex_result("time series", "A time series model", "")
+    assert _is_keyword_relevant_openalex_result("forecasting", "", "short-term forecasting")
+    assert not _is_keyword_relevant_openalex_result("time series", "graph partitions", "fair cuts")
+
+
+def test_keyword_relevance_openalex_phrase_mode_strict() -> None:
+    assert _is_keyword_relevant_openalex_result(
+        "time series",
+        "A time-series model",
+        "",
+        "phrase",
+    )
+    assert not _is_keyword_relevant_openalex_result(
+        "time series",
+        "A time model",
+        "series appears elsewhere",
+        "phrase",
+    )
+
+
+def test_keyword_relevance_openalex_all_tokens_mode_broader() -> None:
+    assert _is_keyword_relevant_openalex_result(
+        "time series",
+        "A time model",
+        "series appears elsewhere",
+        "all_tokens",
+    )
+
+
+def test_openalex_provider_skips_future_publication_date() -> None:
+    payload = {
+        "results": [
+            {
+                "id": "https://openalex.org/W3022222222",
+                "display_name": "Forecasting with diffusion",
+                "abstract_inverted_index": {"forecasting": [0]},
+                "authorships": [{"author": {"display_name": "A"}}],
+                "publication_date": "2050-01-01",
+                "ids": {
+                    "openalex": "https://openalex.org/W3022222222",
+                    "arxiv": "https://arxiv.org/abs/2601.12345",
+                },
+            }
+        ]
+    }
+
+    mock_session = MagicMock()
+    mock_response = MagicMock()
+    mock_response.json.return_value = payload
+    mock_response.raise_for_status.return_value = None
+    mock_session.get.return_value = mock_response
+
+    provider = OpenAlexPaperProvider(session=mock_session)
+    papers = provider.search("forecasting", 10)
+
+    assert papers == []
 

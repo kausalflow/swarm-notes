@@ -1,6 +1,7 @@
 # Example research-cruise configuration
 llm_model: "gemini-flash-lite-latest"
 paper_source: "openalex"  # "arxiv", "semantic_scholar", or "openalex"
+openalex_relevance_mode: "phrase"  # "phrase" (strict) or "all_tokens" (broader)
 # paper_source: "semantic_scholar"  # requires SEMANTIC_SCHOLAR_API_KEY in .env
 # paper_source: "arxiv"
 paper_keywords:
