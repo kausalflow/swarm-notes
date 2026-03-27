@@ -73,6 +73,7 @@ def test_review_analysis_generates_fallback_summary_when_missing(mock_agent_clas
     mock_result = MagicMock()
     mock_result.output.approved_concepts = analysis.concepts
     mock_result.output.approved_open_questions = []
+    mock_result.output.approved_datasets = []
     mock_result.output.review_summary = ""
     mock_result.output.rejected_candidates = []
 
@@ -83,7 +84,7 @@ def test_review_analysis_generates_fallback_summary_when_missing(mock_agent_clas
 
     assert result.critic_review_summary == (
         "Archivist review kept only candidates judged central to the paper and reusable across future work. "
-        "Approved 1 concept(s) and 0 open question(s), with 0 rejected candidate note(s)."
+        "Approved 1 concept(s), 0 open question(s), and 0 dataset(s), with 0 rejected candidate note(s)."
     )
 
 
@@ -110,6 +111,7 @@ def test_review_analysis_replaces_candidates_with_approved_items(mock_agent_clas
             evidence_excerpt="Future work includes robust calibration under drift.",
         )
     ]
+    analysis.datasets = ["ETTh1", "10 real-world datasets"]
 
     approved_concept = ConceptLink(
         slug="state-space-mixer",
@@ -126,14 +128,15 @@ def test_review_analysis_replaces_candidates_with_approved_items(mock_agent_clas
     mock_result = MagicMock()
     mock_result.output.approved_concepts = [approved_concept]
     mock_result.output.approved_open_questions = [approved_question]
+    mock_result.output.approved_datasets = ["ETTh1"]
     mock_result.output.review_summary = "Approved one concept and one open question."
     mock_result.output.rejected_candidates = [
         RejectedCandidate(
-            candidate_type="concept",
-            candidate_slug="benchmark-setup",
-            candidate_title="Benchmark Setup",
+            candidate_type="dataset",
+            candidate_slug="10-real-world-datasets",
+            candidate_title="10 real-world datasets",
             reason_code="generic",
-            reason="Generic benchmark setup with no reusable methodological novelty.",
+            reason="Aggregate dataset label with no specific reusable benchmark identity.",
         )
     ]
 
@@ -144,13 +147,14 @@ def test_review_analysis_replaces_candidates_with_approved_items(mock_agent_clas
 
     assert result.concepts == [approved_concept]
     assert result.open_questions == [approved_question]
+    assert result.datasets == ["ETTh1"]
     assert result.critic_review_summary == "Approved one concept and one open question."
     assert result.critic_rejected_candidates == [
         RejectedCandidate(
-            candidate_type="concept",
-            candidate_slug="benchmark-setup",
-            candidate_title="Benchmark Setup",
+            candidate_type="dataset",
+            candidate_slug="10-real-world-datasets",
+            candidate_title="10 real-world datasets",
             reason_code="generic",
-            reason="Generic benchmark setup with no reusable methodological novelty.",
+            reason="Aggregate dataset label with no specific reusable benchmark identity.",
         )
     ]
