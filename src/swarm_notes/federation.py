@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from swarm_notes.config import settings
+from swarm_notes.vault_manager import make_storage_id
 
 logger = logging.getLogger(__name__)
 
@@ -64,11 +65,12 @@ def run_federation(feed_urls: list[str] | None = None) -> None:
 def _process_entry(entry: dict, source_label: str) -> None:
     """Handle a single feed entry against the local vault."""
     paper_id = _get_entry_paper_id(entry)
+    paper_source = _get_entry_paper_source(entry)
     title = entry.get("title", "Untitled")
     summary = entry.get("summary", "")
 
     # Look for existing file in vault or staging
-    existing_path = _find_existing_paper(paper_id)
+    existing_path = _find_existing_paper(paper_source, paper_id)
 
     if existing_path is None:
         # New paper – write a lightweight stub into staging
@@ -84,15 +86,29 @@ def _process_entry(entry: dict, source_label: str) -> None:
         )
 
 
-def _find_existing_paper(paper_id: str) -> Path | None:
+def _find_existing_paper(paper_source: str, paper_id: str) -> Path | None:
     """Return the path of an existing paper file in staging or vault, or None."""
+    source_prefix = f"{paper_source}-"
+    source_and_id_prefix = f"{source_prefix}{paper_id}-"
+
     # Check staging first (files written in the current run)
     for path in settings.tmp_papers_dir.iterdir():
-        if path.is_file() and paper_id in path.name:
+        if not path.is_file():
+            continue
+        name = path.name
+        if name.startswith(source_and_id_prefix):
+            return path
+        # Legacy filename format fallback (arxiv-only): <paper_id>-<title>.md
+        if paper_source == "arxiv" and name.startswith(f"{paper_id}-"):
             return path
     # Then the live vault
     for path in settings.vault_papers_dir.iterdir():
-        if path.is_file() and paper_id in path.name:
+        if not path.is_file():
+            continue
+        name = path.name
+        if name.startswith(source_and_id_prefix):
+            return path
+        if paper_source == "arxiv" and name.startswith(f"{paper_id}-"):
             return path
     return None
 
@@ -134,6 +150,7 @@ def _append_external_perspective(
 def _write_federated_stub(entry: dict, source_label: str) -> None:
     """Write a lightweight Markdown stub for a paper discovered via federation."""
     paper_id = _get_entry_paper_id(entry) or "unknown"
+    paper_source = _get_entry_paper_source(entry)
     title = entry.get("title", "Untitled")
     authors = entry.get("authors", [])
     published = entry.get("published", "")
@@ -142,7 +159,7 @@ def _write_federated_stub(entry: dict, source_label: str) -> None:
     domain = entry.get("domain", "")
     summary = entry.get("summary", "")
 
-    slug = _make_slug(paper_id, title)
+    slug = _make_slug(paper_source, paper_id, title)
     out_path = settings.tmp_papers_dir / f"{slug}.md"
 
     if out_path.exists():
@@ -169,6 +186,7 @@ issued:
     - [{date_parts}]
 url: "{url}"
 paper_id: "{paper_id}"
+paper_source: "{paper_source}"
 domain: "{domain}"
 tags:
 {tag_lines}
@@ -198,6 +216,13 @@ processed_at: "{processed_at}"
 def _get_entry_paper_id(entry: dict) -> str:
     paper_id = entry.get("paper_id") or entry.get("arxiv_id")
     return paper_id.strip() if isinstance(paper_id, str) else ""
+
+
+def _get_entry_paper_source(entry: dict) -> str:
+    source = entry.get("paper_source")
+    if isinstance(source, str) and source.strip():
+        return source.strip().lower().replace("-", "_")
+    return "arxiv"
 
 
 # ---------------------------------------------------------------------------
@@ -236,9 +261,11 @@ def _label_from_url(url: str) -> str:
     return "Agent_unknown"
 
 
-def _make_slug(arxiv_id: str, title: str) -> str:
+def _make_slug(source: str, paper_id: str, title: str) -> str:
     title_slug = _slugify(title)[:60].rstrip("-")
-    return f"{arxiv_id}-{title_slug}"
+    source_slug = _slugify(source) or "arxiv"
+    storage_id = make_storage_id(source_slug, paper_id)
+    return f"{storage_id.replace(':', '-')}-{title_slug}"
 
 
 def _slugify(text: str) -> str:
