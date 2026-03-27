@@ -35,10 +35,14 @@ def extract_open_questions(arxiv_id: str, skill: SkillSpec | None = None) -> lis
             "You are a meticulous Domain Expert in machine learning. "
             "Carefully read the provided full text of a research paper and "
             "extract explicit 'open questions', 'future work', or 'unresolved problems' "
-            "mentioned by the authors. Return them as a precise, concise list of structured objects. "
+            "mentioned by the authors. Return them as a precise, concise list of structured candidate objects. "
             "If none are explicitly specified with sufficient detail, return an empty list! DO NOT hallucinate open questions if the authors don't discuss them. "
             "If multiple papers share generic open questions, ensure the titles and slugs are general enough to be reusable. "
-            "CRUCIAL: When writing the background and description, write them as universal, standalone concepts. DO NOT use phrases like 'In this paper', 'The authors', or 'This study'. Frame the context objectively."
+            "CRUCIAL: When writing the background and description, write them as universal, standalone concepts. DO NOT use phrases like 'In this paper', 'The authors', or 'This study'. Frame the context objectively. "
+            "These are candidate proposals for later archivist review, so default to zero unless the question is technically substantial, broadly reusable, and clearly unresolved. "
+            "For every proposed open question, fill importance_reason and evidence_excerpt with specific justification from the paper text. "
+            "Reject generic future work such as 'improve performance', 'run more experiments', or 'collect more data' unless the authors identify a specific unresolved bottleneck. "
+            "Prefer 0-2 excellent open-question candidates over a long list."
         )
         if skill and skill.domain_expert_context:
             system_prompt += f"\n\nSKILL-SPECIFIC CONTEXT:\n{skill.domain_expert_context}"
