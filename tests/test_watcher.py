@@ -514,7 +514,7 @@ def test_build_openalex_search_query_empty() -> None:
 
 def test_openalex_provider_paginates_until_cap() -> None:
     payload_page_1 = {
-        "meta": {"count": 2},
+        "meta": {"count": 100},
         "results": [
             {
                 "id": "https://openalex.org/W1",
@@ -527,7 +527,7 @@ def test_openalex_provider_paginates_until_cap() -> None:
         ],
     }
     payload_page_2 = {
-        "meta": {"count": 2},
+        "meta": {"count": 100},
         "results": [
             {
                 "id": "https://openalex.org/W2",
