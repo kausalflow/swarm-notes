@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import logging
+import socket
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -16,6 +19,9 @@ logger = logging.getLogger(__name__)
 _ARXIV_API_BASE = "https://export.arxiv.org/api/query"
 _ATOM_NS = "http://www.w3.org/2005/Atom"
 _ARXIV_NS = "http://arxiv.org/schemas/atom"
+_ARXIV_QUERY_TIMEOUT_SECONDS = 30
+_ARXIV_RETRY_DELAYS_SECONDS = (2.0, 5.0)
+_TRANSIENT_HTTP_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
 
 
 @dataclass
@@ -102,14 +108,47 @@ def _query_arxiv(keyword: str, max_results: int) -> list[RawPaper]:
     url = f"{_ARXIV_API_BASE}?{params}"
     logger.debug("ArXiv query: %s", url)
 
-    try:
-        with urllib.request.urlopen(url, timeout=30) as response:  # noqa: S310
-            xml_bytes = response.read()
-    except Exception as exc:
-        logger.error("Failed to query ArXiv for '%s': %s", keyword, exc)
-        return []
+    max_attempts = len(_ARXIV_RETRY_DELAYS_SECONDS) + 1
 
-    return _parse_atom_feed(xml_bytes, keyword)
+    for attempt in range(1, max_attempts + 1):
+        try:
+            with urllib.request.urlopen(url, timeout=_ARXIV_QUERY_TIMEOUT_SECONDS) as response:  # noqa: S310
+                xml_bytes = response.read()
+            return _parse_atom_feed(xml_bytes, keyword)
+        except Exception as exc:
+            if attempt == max_attempts or not _is_retryable_arxiv_error(exc):
+                logger.error("Failed to query ArXiv for '%s': %s", keyword, exc)
+                return []
+
+            delay = _ARXIV_RETRY_DELAYS_SECONDS[attempt - 1]
+            logger.warning(
+                "Transient ArXiv query failure for '%s' on attempt %d/%d: %s. Retrying in %.0f second(s).",
+                keyword,
+                attempt,
+                max_attempts,
+                exc,
+                delay,
+            )
+            time.sleep(delay)
+
+    return []
+
+
+def _is_retryable_arxiv_error(exc: Exception) -> bool:
+    """Return ``True`` when a query failed due to a transient network condition."""
+    if isinstance(exc, (TimeoutError, socket.timeout)):
+        return True
+
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code in _TRANSIENT_HTTP_STATUS_CODES
+
+    if isinstance(exc, urllib.error.URLError):
+        reason = exc.reason
+        if isinstance(reason, (TimeoutError, socket.timeout)):
+            return True
+        return isinstance(reason, str) and "timed out" in reason.lower()
+
+    return False
 
 
 def _parse_atom_feed(xml_bytes: bytes, keyword: str) -> list[RawPaper]:
