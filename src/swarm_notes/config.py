@@ -60,6 +60,40 @@ def _default_paper_total_cap() -> int:
     except ValueError:
         return 20
 
+
+class ArxivSearchSettings(BaseModel):
+    pass
+
+
+class SemanticScholarSearchSettings(BaseModel):
+    api_key: str = Field(default_factory=lambda: os.environ.get("SEMANTIC_SCHOLAR_API_KEY", ""))
+    api_url: str = Field(
+        default_factory=lambda: os.environ.get(
+            "SEMANTIC_SCHOLAR_API_URL",
+            "https://api.semanticscholar.org/graph/v1/paper/search",
+        )
+    )
+
+
+class OpenAlexSearchSettings(BaseModel):
+    api_key: str = Field(default_factory=lambda: os.environ.get("OPENALEX_API_KEY", ""))
+    mailto: str = Field(default_factory=lambda: os.environ.get("OPENALEX_MAILTO", ""))
+    relevance_mode: Literal["phrase", "all_tokens"] = Field(
+        default_factory=lambda: os.environ.get("OPENALEX_RELEVANCE_MODE", "phrase").strip().lower()
+    )
+
+
+class PaperSearchSettings(BaseModel):
+    source: Literal["arxiv", "semantic_scholar", "openalex"] = Field(
+        default_factory=_default_paper_source
+    )
+    keywords: list[str] = Field(default_factory=_default_paper_keywords)
+    max_results_per_keyword: int = Field(default_factory=_default_paper_max_results_per_keyword)
+    total_cap: int = Field(default_factory=_default_paper_total_cap)
+    arxiv: ArxivSearchSettings = Field(default_factory=ArxivSearchSettings)
+    semantic_scholar: SemanticScholarSearchSettings = Field(default_factory=SemanticScholarSearchSettings)
+    openalex: OpenAlexSearchSettings = Field(default_factory=OpenAlexSearchSettings)
+
 class Settings(BaseModel):
     # Vault paths
     vault_dir: Path = Field(default=REPO_ROOT / "vault")
@@ -90,32 +124,7 @@ class Settings(BaseModel):
     llm_model: str = Field(default="openai:gpt-4o-mini")
     
     # Watcher config
-    paper_source: Literal["arxiv", "semantic_scholar", "openalex"] = Field(
-        default_factory=_default_paper_source
-    )
-    paper_keywords: list[str] = Field(default_factory=_default_paper_keywords)
-    paper_max_results_per_keyword: int = Field(default_factory=_default_paper_max_results_per_keyword)
-    paper_total_cap: int = Field(default_factory=_default_paper_total_cap)
-    semantic_scholar_api_key: str = Field(
-        default_factory=lambda: os.environ.get("SEMANTIC_SCHOLAR_API_KEY", "")
-    )
-    semantic_scholar_api_url: str = Field(
-        default_factory=lambda: os.environ.get(
-            "SEMANTIC_SCHOLAR_API_URL",
-            "https://api.semanticscholar.org/graph/v1/paper/search",
-        )
-    )
-
-    # OpenAlex config (key and mailto are both optional)
-    openalex_api_key: str = Field(
-        default_factory=lambda: os.environ.get("OPENALEX_API_KEY", "")
-    )
-    openalex_mailto: str = Field(
-        default_factory=lambda: os.environ.get("OPENALEX_MAILTO", "")
-    )
-    openalex_relevance_mode: Literal["phrase", "all_tokens"] = Field(
-        default_factory=lambda: os.environ.get("OPENALEX_RELEVANCE_MODE", "phrase").strip().lower()
-    )
+    paper_search: PaperSearchSettings = Field(default_factory=PaperSearchSettings)
     
     # Federation config
     federation_feeds: list[str] = Field(default_factory=lambda: [
@@ -147,15 +156,51 @@ class Settings(BaseModel):
     # Backward-compatible aliases for pre-refactor names.
     @property
     def arxiv_keywords(self) -> list[str]:
-        return self.paper_keywords
+        return self.paper_search.keywords
 
     @property
     def arxiv_max_results_per_keyword(self) -> int:
-        return self.paper_max_results_per_keyword
+        return self.paper_search.max_results_per_keyword
 
     @property
     def arxiv_total_cap(self) -> int:
-        return self.paper_total_cap
+        return self.paper_search.total_cap
+
+    @property
+    def paper_source(self) -> Literal["arxiv", "semantic_scholar", "openalex"]:
+        return self.paper_search.source
+
+    @property
+    def paper_keywords(self) -> list[str]:
+        return self.paper_search.keywords
+
+    @property
+    def paper_max_results_per_keyword(self) -> int:
+        return self.paper_search.max_results_per_keyword
+
+    @property
+    def paper_total_cap(self) -> int:
+        return self.paper_search.total_cap
+
+    @property
+    def semantic_scholar_api_key(self) -> str:
+        return self.paper_search.semantic_scholar.api_key
+
+    @property
+    def semantic_scholar_api_url(self) -> str:
+        return self.paper_search.semantic_scholar.api_url
+
+    @property
+    def openalex_api_key(self) -> str:
+        return self.paper_search.openalex.api_key
+
+    @property
+    def openalex_mailto(self) -> str:
+        return self.paper_search.openalex.mailto
+
+    @property
+    def openalex_relevance_mode(self) -> Literal["phrase", "all_tokens"]:
+        return self.paper_search.openalex.relevance_mode
 
     @classmethod
     def load_from_yaml(cls, yaml_path: str | Path | None = None) -> "Settings":
@@ -178,16 +223,49 @@ class Settings(BaseModel):
             os.environ["GEMINI_API_KEY"] = llm_key
             data["gemini_api_key"] = llm_key
 
-        if "paper_source" in data and isinstance(data["paper_source"], str):
-            data["paper_source"] = data["paper_source"].strip().lower().replace("-", "_")
+        paper_search = data.get("paper_search") if isinstance(data.get("paper_search"), dict) else {}
 
-        # Backward compatibility with older arxiv_* YAML keys
-        if "paper_keywords" not in data and "arxiv_keywords" in data:
-            data["paper_keywords"] = data["arxiv_keywords"]
-        if "paper_max_results_per_keyword" not in data and "arxiv_max_results_per_keyword" in data:
-            data["paper_max_results_per_keyword"] = data["arxiv_max_results_per_keyword"]
-        if "paper_total_cap" not in data and "arxiv_total_cap" in data:
-            data["paper_total_cap"] = data["arxiv_total_cap"]
+        if "source" not in paper_search and "paper_source" in data:
+            paper_search["source"] = data["paper_source"]
+        if "keywords" not in paper_search and "paper_keywords" in data:
+            paper_search["keywords"] = data["paper_keywords"]
+        if "max_results_per_keyword" not in paper_search and "paper_max_results_per_keyword" in data:
+            paper_search["max_results_per_keyword"] = data["paper_max_results_per_keyword"]
+        if "total_cap" not in paper_search and "paper_total_cap" in data:
+            paper_search["total_cap"] = data["paper_total_cap"]
+
+        if "keywords" not in paper_search and "arxiv_keywords" in data:
+            paper_search["keywords"] = data["arxiv_keywords"]
+        if "max_results_per_keyword" not in paper_search and "arxiv_max_results_per_keyword" in data:
+            paper_search["max_results_per_keyword"] = data["arxiv_max_results_per_keyword"]
+        if "total_cap" not in paper_search and "arxiv_total_cap" in data:
+            paper_search["total_cap"] = data["arxiv_total_cap"]
+
+        semantic_scholar = paper_search.get("semantic_scholar") if isinstance(paper_search.get("semantic_scholar"), dict) else {}
+        openalex = paper_search.get("openalex") if isinstance(paper_search.get("openalex"), dict) else {}
+        arxiv = paper_search.get("arxiv") if isinstance(paper_search.get("arxiv"), dict) else {}
+
+        if "semantic_scholar_api_key" in data and "api_key" not in semantic_scholar:
+            semantic_scholar["api_key"] = data["semantic_scholar_api_key"]
+        if "semantic_scholar_api_url" in data and "api_url" not in semantic_scholar:
+            semantic_scholar["api_url"] = data["semantic_scholar_api_url"]
+
+        if "openalex_api_key" in data and "api_key" not in openalex:
+            openalex["api_key"] = data["openalex_api_key"]
+        if "openalex_mailto" in data and "mailto" not in openalex:
+            openalex["mailto"] = data["openalex_mailto"]
+        if "openalex_relevance_mode" in data and "relevance_mode" not in openalex:
+            openalex["relevance_mode"] = data["openalex_relevance_mode"]
+
+        if "source" in paper_search and isinstance(paper_search["source"], str):
+            paper_search["source"] = paper_search["source"].strip().lower().replace("-", "_")
+        if "relevance_mode" in openalex and isinstance(openalex["relevance_mode"], str):
+            openalex["relevance_mode"] = openalex["relevance_mode"].strip().lower()
+
+        paper_search["arxiv"] = arxiv
+        paper_search["semantic_scholar"] = semantic_scholar
+        paper_search["openalex"] = openalex
+        data["paper_search"] = paper_search
 
         return cls(**cast(dict[str, Any], data))
 

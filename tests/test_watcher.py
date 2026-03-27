@@ -136,7 +136,7 @@ def test_build_paper_provider_semantic_scholar() -> None:
     assert isinstance(provider, SemanticScholarPaperProvider)
 
 
-@patch("swarm_notes.watcher.time.sleep")
+@patch("swarm_notes.paper_search.arxiv.time.sleep")
 @patch("urllib.request.urlopen")
 def test_query_arxiv_honors_retry_after_for_429(mock_urlopen: MagicMock, mock_sleep: MagicMock) -> None:
     """ArXiv provider should honor Retry-After when rate limited."""
@@ -187,7 +187,7 @@ def test_semantic_scholar_provider_parses_arxiv_backed_results() -> None:
     assert mock_session.get.call_args.kwargs["headers"]["x-api-key"] == "semantic-scholar-key"
 
 
-@patch("swarm_notes.watcher.time.sleep")
+@patch("swarm_notes.paper_search.semantic_scholar.time.sleep")
 def test_semantic_scholar_provider_retries_429(mock_sleep: MagicMock) -> None:
     response = requests.Response()
     response.status_code = 429
@@ -362,7 +362,7 @@ def test_reconstruct_openalex_abstract_out_of_order() -> None:
     assert _reconstruct_openalex_abstract(index) == "Hello world"
 
 
-@patch("swarm_notes.watcher.time.sleep")
+@patch("swarm_notes.paper_search.openalex.time.sleep")
 def test_openalex_provider_retries_429(mock_sleep: MagicMock) -> None:
     response = requests.Response()
     response.status_code = 429

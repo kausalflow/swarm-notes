@@ -1,15 +1,21 @@
 # Example research-cruise configuration
 llm_model: "gemini-flash-lite-latest"
-paper_source: "openalex"  # "arxiv", "semantic_scholar", or "openalex"
-openalex_relevance_mode: "phrase"  # "phrase" (strict) or "all_tokens" (broader)
-# paper_source: "semantic_scholar"  # requires SEMANTIC_SCHOLAR_API_KEY in .env
-# paper_source: "arxiv"
-paper_keywords:
-  - "time series"
-  - "forecasting"
-  - "timeseries"
-paper_max_results_per_keyword: 10
-paper_total_cap: 50
+paper_search:
+  source: "openalex"  # "arxiv", "semantic_scholar", or "openalex"
+  keywords:
+    - "time series"
+    - "forecasting"
+    - "timeseries"
+  max_results_per_keyword: 10
+  total_cap: 50
+  arxiv: {}
+  semantic_scholar:
+    api_key: ""  # optional; can also come from SEMANTIC_SCHOLAR_API_KEY
+    api_url: "https://api.semanticscholar.org/graph/v1/paper/search"
+  openalex:
+    api_key: ""  # optional; can also come from OPENALEX_API_KEY
+    mailto: ""   # recommended for polite pool, e.g. name@example.com
+    relevance_mode: "phrase"  # "phrase" (strict) or "all_tokens" (broader)
 federation_feeds: []
 public_feed_max_items: 10
 
