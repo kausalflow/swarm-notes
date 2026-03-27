@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
@@ -94,6 +94,36 @@ class OpenQuestion(BaseModel):
     )
 
 
+class RejectedCandidate(BaseModel):
+    """Structured rejection record produced by the critic for auditability."""
+
+    candidate_type: Literal["concept", "open_question"] = Field(
+        description="Whether the rejected candidate was a concept or open question."
+    )
+    candidate_slug: str = Field(
+        description="Slug of the rejected candidate."
+    )
+    candidate_title: str = Field(
+        description="Display name or title of the rejected candidate."
+    )
+    reason_code: Literal[
+        "generic",
+        "paper_local",
+        "not_novel",
+        "not_reusable",
+        "weak_evidence",
+        "low_impact",
+        "duplicate_existing",
+        "subcomponent_of_broader_mechanism",
+        "other",
+    ] = Field(
+        description="Normalized rejection reason category for analytics and filtering."
+    )
+    reason: str = Field(
+        description="Concise human-readable reason for rejection."
+    )
+
+
 class PaperAnalysis(BaseModel):
     """Structured extraction output for a single academic paper."""
 
@@ -172,9 +202,9 @@ class PaperAnalysis(BaseModel):
         description="Short archivist review summary explaining why items were accepted or rejected.",
     )
 
-    critic_rejected_candidates: list[str] = Field(
+    critic_rejected_candidates: list[RejectedCandidate] = Field(
         default_factory=list,
-        description="Short notes describing candidate concepts or open questions rejected by the archivist review.",
+        description="Structured rejection records for candidate concepts or open questions rejected by the archivist review.",
     )
 
 

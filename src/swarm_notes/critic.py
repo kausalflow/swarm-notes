@@ -8,7 +8,7 @@ import logging
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 
-from swarm_notes.analyst import ConceptLink, OpenQuestion, PaperAnalysis
+from swarm_notes.analyst import ConceptLink, OpenQuestion, PaperAnalysis, RejectedCandidate
 from swarm_notes.config import settings
 from swarm_notes.router import SkillSpec
 from swarm_notes.vault_manager import get_existing_concept_slugs
@@ -47,9 +47,9 @@ class CriticReview(BaseModel):
         default="",
         description="Short note summarizing why items were approved or rejected.",
     )
-    rejected_candidates: list[str] = Field(
+    rejected_candidates: list[RejectedCandidate] = Field(
         default_factory=list,
-        description="Short rejection notes for candidates that were not approved.",
+        description="Structured rejection records for candidates that were not approved.",
     )
 
 
@@ -81,7 +81,12 @@ REVIEW POLICY:
 10. Be scarce. Approve at most 2 concepts and at most 2 open questions.
 11. Preserve evidence_excerpt and rationale fields when they help justify the approved item.
 12. Always fill review_summary with 2-4 sentences explaining the approval standard you applied.
-13. For every rejected candidate, add one concise note to rejected_candidates that names the candidate and explains the reason for rejection.
+13. For every rejected candidate, you MUST append a structured object to rejected_candidates with ALL required fields:
+    - candidate_type: "concept" or "open_question"
+    - candidate_slug: slug string
+    - candidate_title: display name/title string
+    - reason_code: one of [generic, paper_local, not_novel, not_reusable, weak_evidence, low_impact, duplicate_existing, subcomponent_of_broader_mechanism, other]
+    - reason: concise explanation (1 sentence)
 """
     if skill.critic_context:
         prompt += f"\n\nSKILL-SPECIFIC REVIEW CONTEXT:\n{skill.critic_context}"

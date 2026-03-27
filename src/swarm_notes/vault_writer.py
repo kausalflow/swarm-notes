@@ -188,7 +188,10 @@ def _build_body(analysis: PaperAnalysis) -> str:
         if analysis.critic_rejected_candidates:
             lines.append("### Rejected Candidates")
             for rejection in analysis.critic_rejected_candidates:
-                lines.append(f"- {rejection}")
+                lines.append(
+                    f"- [{rejection.candidate_type}] {rejection.candidate_title} "
+                    f"(`{rejection.candidate_slug}`) - {rejection.reason_code}: {rejection.reason}"
+                )
             lines.append("")
 
     # Datasets
