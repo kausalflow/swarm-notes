@@ -26,6 +26,24 @@ _PAPER_RETRY_DELAYS_SECONDS = (30.0, 90.0)
 _MAX_PAPER_RETRY_WAIT_SECONDS = 120.0
 
 
+def _configure_global_log_level(log_level: str) -> None:
+    """Configure root logger level for the whole application."""
+    level_name = log_level.strip().upper()
+    valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+    if level_name not in valid_levels:
+        raise typer.BadParameter(
+            f"Invalid log level '{log_level}'. Choose one of: {', '.join(sorted(valid_levels))}."
+        )
+
+    level = getattr(logging, level_name)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
+    for handler in root_logger.handlers:
+        handler.setLevel(level)
+
+    logger.debug("Global logging level set to %s", level_name)
+
+
 def _is_retryable_paper_error(exc: Exception) -> bool:
     """Return ``True`` for transient upstream failures worth retrying."""
     seen: set[int] = set()
@@ -94,8 +112,18 @@ def _process_paper_with_retries(paper, skill, src_config):
 
 
 @app.command()
-def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path to config.yaml")) -> None:
+def run(
+    config: str = typer.Option("config.yaml", "--config", "-c", help="Path to config.yaml"),
+    log_level: str = typer.Option(
+        "INFO",
+        "--log-level",
+        "-l",
+        help="Global logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL",
+    ),
+) -> None:
     """Run the full pipeline."""
+    _configure_global_log_level(log_level)
+
     from swarm_notes import config as src_config
     if Path(config).exists():
         src_config.load_yaml_config(config)

@@ -5,7 +5,9 @@ from swarm_notes.paper_search.arxiv import ArxivPaperProvider
 from swarm_notes.paper_search.base import PaperProvider, RawPaper
 from swarm_notes.paper_search.openalex import (
     OpenAlexPaperProvider,
+    build_openalex_search_query,
     is_keyword_relevant_openalex_result,
+    match_keywords_openalex_result,
     reconstruct_openalex_abstract,
 )
 from swarm_notes.paper_search.semantic_scholar import SemanticScholarPaperProvider
@@ -35,6 +37,11 @@ def fetch_papers(
         total_cap = settings.paper_total_cap
 
     provider = build_paper_provider(provider_name)
+
+    # OpenAlex supports boolean search expressions; query once across all keywords.
+    if isinstance(provider, OpenAlexPaperProvider):
+        return provider.search_many(keywords, min(total_cap, max_per_keyword * len(keywords)))[:total_cap]
+
     seen_ids: set[str] = set()
     papers: list[RawPaper] = []
 
@@ -73,6 +80,7 @@ def build_paper_provider(provider_name: str | None = None) -> PaperProvider:
             api_key=settings.openalex_api_key,
             mailto=settings.openalex_mailto,
             relevance_mode=settings.openalex_relevance_mode,
+            max_pages_per_window=settings.openalex_max_pages_per_window,
         )
     raise ValueError(f"Unsupported paper_source '{provider_name or settings.paper_source}'")
 
@@ -99,9 +107,11 @@ __all__ = [
     "PaperProvider",
     "RawPaper",
     "SemanticScholarPaperProvider",
+    "build_openalex_search_query",
     "build_paper_provider",
     "fetch_papers",
     "is_keyword_relevant_openalex_result",
+    "match_keywords_openalex_result",
     "normalise_paper_source",
     "query_arxiv",
     "query_semantic_scholar",

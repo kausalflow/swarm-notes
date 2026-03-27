@@ -10,12 +10,13 @@ paper_search:
   total_cap: 50
   arxiv: {}
   semantic_scholar:
-    api_key: ""  # optional; can also come from SEMANTIC_SCHOLAR_API_KEY
+    # api_key: ""  # optional; can also come from SEMANTIC_SCHOLAR_API_KEY
     api_url: "https://api.semanticscholar.org/graph/v1/paper/search"
   openalex:
-    api_key: ""  # optional; can also come from OPENALEX_API_KEY
-    mailto: ""   # recommended for polite pool, e.g. name@example.com
-    relevance_mode: "phrase"  # "phrase" (strict) or "all_tokens" (broader)
+    # api_key: ""  # optional; can also come from OPENALEX_API_KEY
+    # mailto: ""   # recommended for polite pool, e.g. name@example.com
+    relevance_mode: "all_tokens"  # "phrase" (strict) or "all_tokens" (broader)
+    max_pages_per_window: 5  # max OpenAlex pages to scan per recency window
 federation_feeds: []
 public_feed_max_items: 10
 
