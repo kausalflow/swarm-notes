@@ -196,16 +196,23 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
         # ------------------------------------------------------------------
         if analyses:
             logger.info("--- Step 6: Discussant (%d papers) ---", len(analyses))
-            from swarm_notes.discussant import discuss_papers
-            
-            # If all papers used the same skill, pass it to the discussant for better focus
-            primary_skill = None
-            if len(skills_used_map) == 1:
-                primary_skill = next(iter(skills_used_map.values()))
-            
-            discussion_md = discuss_papers(analyses, primary_skill)
-            from swarm_notes.vault_writer import append_daily_discussion
-            append_daily_discussion(discussion_md)
+            try:
+                from swarm_notes.discussant import discuss_papers
+                
+                # If all papers used the same skill, pass it to the discussant for better focus
+                primary_skill = None
+                if len(skills_used_map) == 1:
+                    primary_skill = next(iter(skills_used_map.values()))
+                
+                discussion_md = discuss_papers(analyses, primary_skill)
+                from swarm_notes.vault_writer import append_daily_discussion
+                append_daily_discussion(discussion_md)
+            except Exception as exc:
+                logger.error(
+                    "Discussant failed to synthesise insights: %s. Skipping discussion write.",
+                    exc,
+                    exc_info=True,
+                )
 
         # ------------------------------------------------------------------
         # 7. Update the public feed

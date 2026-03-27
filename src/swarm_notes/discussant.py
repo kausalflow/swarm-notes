@@ -38,10 +38,6 @@ def discuss_papers(analyses: list[PaperAnalysis], skill: SkillSpec | None = None
         prompt += f"Key Contributions: {', '.join(a.key_contributions)}\n"
         prompt += f"Limitations: {a.limitations}\n\n"
 
-    try:
-        logger.info("Discussant: synthesising insights from %d papers...", len(analyses))
-        result = discussant_agent.run_sync(prompt)
-        return result.output
-    except Exception as exc:
-        logger.error("Discussant: Failed to generate daily discussion: %s", exc)
-        return f"Failed to generate discussion. Error: {exc}"
+    logger.info("Discussant: synthesising insights from %d papers...", len(analyses))
+    result = discussant_agent.run_sync(prompt)
+    return result.output
