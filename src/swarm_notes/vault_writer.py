@@ -211,11 +211,6 @@ def _build_body(analysis: PaperAnalysis) -> str:
             lines.append(f"- [[{ds_slug}]]")
         lines.append("")
 
-    # Limitations
-    if analysis.limitations:
-        lines.append("## Limitations\n")
-        lines.append(f"{analysis.limitations}\n")
-
     # Links
     lines.append("## Links\n")
     lines.append(f"- [Abstract]({analysis.url})")

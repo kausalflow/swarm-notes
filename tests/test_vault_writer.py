@@ -151,6 +151,29 @@ def test_build_frontmatter_contains_concept_and_dataset_slugs() -> None:
     assert '  - "solar-energy-benchmark"' in fm
 
 
+def test_build_body_has_single_limitations_section() -> None:
+    analysis = PaperAnalysis(
+        title="Single Limitations",
+        authors=["Test Author"],
+        published="2026-03-27",
+        arxiv_id="2603.55555",
+        source="arxiv",
+        url="https://arxiv.org/abs/2603.55555",
+        summary="A concise summary.",
+        key_contributions=["Contribution one."],
+        tags=["benchmark"],
+        architectures=[],
+        datasets=["Solar-Energy benchmark"],
+        concepts=[],
+        limitations="This is a limitation.",
+        domain="time-series",
+        open_questions=[],
+    )
+
+    body = _build_body(analysis)
+    assert body.count("## Limitations") == 1
+
+
 def test_write_concept_stub_tracks_related_paper_link(tmp_path, monkeypatch) -> None:
     tmp_concepts = tmp_path / "tmp-concepts"
     vault_concepts = tmp_path / "vault-concepts"
