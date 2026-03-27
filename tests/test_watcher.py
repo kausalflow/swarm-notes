@@ -9,10 +9,12 @@ import requests
 
 from swarm_notes.watcher import (
     ArxivPaperProvider,
+    OpenAlexPaperProvider,
     RawPaper,
     SemanticScholarPaperProvider,
     _build_paper_provider,
     _query_arxiv,
+    _reconstruct_openalex_abstract,
     fetch_papers,
 )
 
@@ -38,8 +40,8 @@ MOCK_SEMANTIC_SCHOLAR_JSON = {
             "title": "Semantic Scholar Paper",
             "abstract": "Semantic Scholar abstract.",
             "authors": [{"name": "Jane Doe"}],
-            "publicationDate": "2025-03-12",
-            "year": 2025,
+            "publicationDate": "2026-03-25",
+            "year": 2026,
             "url": "https://www.semanticscholar.org/paper/paper-1",
             "externalIds": {"ArXiv": "2503.01234v2"},
             "openAccessPdf": {"url": "https://arxiv.org/pdf/2503.01234.pdf"},
@@ -49,10 +51,47 @@ MOCK_SEMANTIC_SCHOLAR_JSON = {
             "title": "No Arxiv ID",
             "abstract": "Should be skipped.",
             "authors": [{"name": "John Doe"}],
-            "publicationDate": "2024-07-01",
-            "year": 2024,
+            "publicationDate": "2026-03-20",
+            "year": 2026,
             "url": "https://www.semanticscholar.org/paper/paper-2",
             "externalIds": {"DOI": "10.1234/example"},
+        },
+    ],
+}
+
+
+MOCK_OPENALEX_JSON = {
+    "meta": {"count": 2, "db_response_time_ms": 12, "page": 1, "per_page": 10},
+    "results": [
+        {
+            "id": "https://openalex.org/W3001234567",
+            "display_name": "OpenAlex ArXiv Paper",
+            "abstract_inverted_index": {
+                "Abstract": [0],
+                "of": [1],
+                "openalex": [2],
+                "paper": [3],
+            },
+            "authorships": [
+                {"author": {"display_name": "Alice Smith"}},
+                {"author": {"display_name": "Bob Jones"}},
+            ],
+            "publication_date": "2026-03-25",
+            "ids": {
+                "openalex": "https://openalex.org/W3001234567",
+                "arxiv": "https://arxiv.org/abs/2503.11111",
+            },
+        },
+        {
+            "id": "https://openalex.org/W3009999999",
+            "display_name": "OpenAlex No-ArXiv Paper (should be skipped)",
+            "abstract_inverted_index": {"Skip": [0], "me": [1]},
+            "authorships": [{"author": {"display_name": "Carol White"}}],
+            "publication_date": "2026-03-24",
+            "ids": {
+                "openalex": "https://openalex.org/W3009999999",
+                "doi": "https://doi.org/10.1234/example",
+            },
         },
     ],
 }
@@ -134,7 +173,7 @@ def test_semantic_scholar_provider_parses_arxiv_backed_results() -> None:
             title="Semantic Scholar Paper",
             abstract="Semantic Scholar abstract.",
             authors=["Jane Doe"],
-            published="2025-03-12",
+            published="2026-03-25",
             url="https://arxiv.org/abs/2503.01234",
             primary_category="",
             source="semantic_scholar",
@@ -223,3 +262,154 @@ def test_fetch_papers_integration() -> None:
     assert papers[0].arxiv_id
     assert papers[0].url.startswith("https://arxiv.org/abs/")
     assert len(papers[0].title) > 0
+
+
+# ---------------------------------------------------------------------------
+# OpenAlex provider tests
+# ---------------------------------------------------------------------------
+
+
+def test_build_paper_provider_openalex() -> None:
+    provider = _build_paper_provider("openalex")
+
+    assert isinstance(provider, OpenAlexPaperProvider)
+
+
+def test_openalex_provider_skips_papers_without_arxiv_id() -> None:
+    """Provider must only return results that carry an ArXiv identifier."""
+    mock_session = MagicMock()
+    mock_response = MagicMock()
+    mock_response.json.return_value = MOCK_OPENALEX_JSON
+    mock_response.raise_for_status.return_value = None
+    mock_session.get.return_value = mock_response
+
+    provider = OpenAlexPaperProvider(session=mock_session)
+    papers = provider.search("time series", 10)
+
+    assert len(papers) == 1
+    assert papers[0].arxiv_id == "2503.11111"
+    assert papers[0].title == "OpenAlex ArXiv Paper"
+    assert papers[0].authors == ["Alice Smith", "Bob Jones"]
+    assert papers[0].published == "2026-03-25"
+    assert papers[0].url == "https://arxiv.org/abs/2503.11111"
+    assert papers[0].source == "openalex"
+    assert papers[0].keywords_matched == ["time series"]
+
+
+def test_openalex_provider_reconstructs_abstract() -> None:
+    """Abstract inverted index is correctly converted to plain text."""
+    mock_session = MagicMock()
+    mock_response = MagicMock()
+    mock_response.json.return_value = MOCK_OPENALEX_JSON
+    mock_response.raise_for_status.return_value = None
+    mock_session.get.return_value = mock_response
+
+    provider = OpenAlexPaperProvider(session=mock_session)
+    papers = provider.search("test", 10)
+
+    assert papers[0].abstract == "Abstract of openalex paper"
+
+
+def test_openalex_provider_extracts_arxiv_id_from_locations() -> None:
+    payload = {
+        "results": [
+            {
+                "id": "https://openalex.org/W3011111111",
+                "display_name": "Location-backed ArXiv Paper",
+                "abstract_inverted_index": {"text": [0]},
+                "authorships": [{"author": {"display_name": "A"}}],
+                "publication_date": "2026-03-25",
+                "ids": {
+                    "openalex": "https://openalex.org/W3011111111",
+                    "doi": "https://doi.org/10.1234/example",
+                },
+                "best_oa_location": {
+                    "landing_page_url": "https://arxiv.org/abs/2503.22222v1"
+                },
+            }
+        ]
+    }
+
+    mock_session = MagicMock()
+    mock_response = MagicMock()
+    mock_response.json.return_value = payload
+    mock_response.raise_for_status.return_value = None
+    mock_session.get.return_value = mock_response
+
+    provider = OpenAlexPaperProvider(session=mock_session)
+    papers = provider.search("test", 10)
+
+    assert len(papers) == 1
+    assert papers[0].arxiv_id == "2503.22222"
+    assert papers[0].url == "https://arxiv.org/abs/2503.22222"
+
+
+def test_reconstruct_openalex_abstract_empty() -> None:
+    assert _reconstruct_openalex_abstract(None) == ""
+    assert _reconstruct_openalex_abstract({}) == ""
+
+
+def test_reconstruct_openalex_abstract_basic() -> None:
+    index = {"Hello": [0], "world": [1]}
+    assert _reconstruct_openalex_abstract(index) == "Hello world"
+
+
+def test_reconstruct_openalex_abstract_out_of_order() -> None:
+    index = {"world": [1], "Hello": [0]}
+    assert _reconstruct_openalex_abstract(index) == "Hello world"
+
+
+@patch("swarm_notes.watcher.time.sleep")
+def test_openalex_provider_retries_429(mock_sleep: MagicMock) -> None:
+    response = requests.Response()
+    response.status_code = 429
+    response.headers["Retry-After"] = "5"
+    retry_error = requests.HTTPError("rate limited", response=response)
+
+    mock_session = MagicMock()
+    mock_response = MagicMock()
+    mock_response.json.return_value = MOCK_OPENALEX_JSON
+    mock_response.raise_for_status.return_value = None
+    mock_session.get.side_effect = [retry_error, mock_response]
+
+    provider = OpenAlexPaperProvider(session=mock_session)
+    papers = provider.search("time series", 1)
+
+    assert len(papers) == 1
+    assert mock_session.get.call_count == 2
+    mock_sleep.assert_called_once_with(5.0)
+
+
+def test_openalex_provider_passes_api_key_and_mailto() -> None:
+    mock_session = MagicMock()
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"results": []}
+    mock_response.raise_for_status.return_value = None
+    mock_session.get.return_value = mock_response
+
+    provider = OpenAlexPaperProvider(
+        api_key="mykey123",
+        mailto="researcher@example.com",
+        session=mock_session,
+    )
+    provider.search("test", 5)
+
+    call_params = mock_session.get.call_args.kwargs["params"]
+    assert call_params["api_key"] == "mykey123"
+    assert call_params["mailto"] == "researcher@example.com"
+
+
+def test_openalex_provider_omits_api_key_when_empty() -> None:
+    mock_session = MagicMock()
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"results": []}
+    mock_response.raise_for_status.return_value = None
+    mock_session.get.return_value = mock_response
+
+    provider = OpenAlexPaperProvider(session=mock_session)
+    provider.search("test", 5)
+
+    call_params = mock_session.get.call_args.kwargs["params"]
+    assert "api_key" not in call_params
+    assert "mailto" not in call_params
+

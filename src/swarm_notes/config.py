@@ -25,10 +25,12 @@ _DEFAULT_PAPER_KEYWORDS = [
 ]
 
 
-def _default_paper_source() -> Literal["arxiv", "semantic_scholar"]:
+def _default_paper_source() -> Literal["arxiv", "semantic_scholar", "openalex"]:
     source_name = os.environ.get("PAPER_SOURCE", "arxiv").strip().lower().replace("-", "_")
     if source_name == "semantic_scholar":
         return "semantic_scholar"
+    if source_name == "openalex":
+        return "openalex"
     return "arxiv"
 
 
@@ -88,7 +90,7 @@ class Settings(BaseModel):
     llm_model: str = Field(default="openai:gpt-4o-mini")
     
     # Watcher config
-    paper_source: Literal["arxiv", "semantic_scholar"] = Field(
+    paper_source: Literal["arxiv", "semantic_scholar", "openalex"] = Field(
         default_factory=_default_paper_source
     )
     paper_keywords: list[str] = Field(default_factory=_default_paper_keywords)
@@ -102,6 +104,14 @@ class Settings(BaseModel):
             "SEMANTIC_SCHOLAR_API_URL",
             "https://api.semanticscholar.org/graph/v1/paper/search",
         )
+    )
+
+    # OpenAlex config (key and mailto are both optional)
+    openalex_api_key: str = Field(
+        default_factory=lambda: os.environ.get("OPENALEX_API_KEY", "")
+    )
+    openalex_mailto: str = Field(
+        default_factory=lambda: os.environ.get("OPENALEX_MAILTO", "")
     )
     
     # Federation config
