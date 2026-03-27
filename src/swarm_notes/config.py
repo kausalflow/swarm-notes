@@ -61,6 +61,14 @@ def _default_paper_total_cap() -> int:
         return 20
 
 
+def _default_openalex_max_pages_per_window() -> int:
+    raw = os.environ.get("OPENALEX_MAX_PAGES_PER_WINDOW", "5")
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return 5
+
+
 class ArxivSearchSettings(BaseModel):
     pass
 
@@ -81,6 +89,7 @@ class OpenAlexSearchSettings(BaseModel):
     relevance_mode: Literal["phrase", "all_tokens"] = Field(
         default_factory=lambda: os.environ.get("OPENALEX_RELEVANCE_MODE", "phrase").strip().lower()
     )
+    max_pages_per_window: int = Field(default_factory=_default_openalex_max_pages_per_window)
 
 
 class PaperSearchSettings(BaseModel):
@@ -202,6 +211,10 @@ class Settings(BaseModel):
     def openalex_relevance_mode(self) -> Literal["phrase", "all_tokens"]:
         return self.paper_search.openalex.relevance_mode
 
+    @property
+    def openalex_max_pages_per_window(self) -> int:
+        return self.paper_search.openalex.max_pages_per_window
+
     @classmethod
     def load_from_yaml(cls, yaml_path: str | Path | None = None) -> "Settings":
         data: dict[str, Any] = {}
@@ -256,11 +269,18 @@ class Settings(BaseModel):
             openalex["mailto"] = data["openalex_mailto"]
         if "openalex_relevance_mode" in data and "relevance_mode" not in openalex:
             openalex["relevance_mode"] = data["openalex_relevance_mode"]
+        if "openalex_max_pages_per_window" in data and "max_pages_per_window" not in openalex:
+            openalex["max_pages_per_window"] = data["openalex_max_pages_per_window"]
 
         if "source" in paper_search and isinstance(paper_search["source"], str):
             paper_search["source"] = paper_search["source"].strip().lower().replace("-", "_")
         if "relevance_mode" in openalex and isinstance(openalex["relevance_mode"], str):
             openalex["relevance_mode"] = openalex["relevance_mode"].strip().lower()
+        if "max_pages_per_window" in openalex:
+            try:
+                openalex["max_pages_per_window"] = max(1, int(openalex["max_pages_per_window"]))
+            except (TypeError, ValueError):
+                openalex["max_pages_per_window"] = _default_openalex_max_pages_per_window()
 
         paper_search["arxiv"] = arxiv
         paper_search["semantic_scholar"] = semantic_scholar

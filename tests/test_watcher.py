@@ -12,8 +12,10 @@ from swarm_notes.watcher import (
     OpenAlexPaperProvider,
     RawPaper,
     SemanticScholarPaperProvider,
+    _build_openalex_search_query,
     _build_paper_provider,
     _is_keyword_relevant_openalex_result,
+    _match_keywords_openalex_result,
     _query_arxiv,
     _reconstruct_openalex_abstract,
     fetch_papers,
@@ -445,6 +447,74 @@ def test_keyword_relevance_openalex_all_tokens_mode_broader() -> None:
         "series appears elsewhere",
         "all_tokens",
     )
+
+
+def test_match_keywords_openalex_result_multiple_hits() -> None:
+    matched = _match_keywords_openalex_result(
+        ["time series", "forecasting", "diffusion"],
+        "Time-series forecasting with transformers",
+        "",
+        "all_tokens",
+    )
+    assert matched == ["time series", "forecasting"]
+
+
+def test_build_openalex_search_query_boolean_or() -> None:
+    query = _build_openalex_search_query(["time series", "forecasting", "timeseries"])
+    assert query == '("time series" OR forecasting OR timeseries)'
+
+
+def test_build_openalex_search_query_single() -> None:
+    assert _build_openalex_search_query(["forecasting"]) == "forecasting"
+
+
+def test_build_openalex_search_query_empty() -> None:
+    assert _build_openalex_search_query(["", "   "]) == ""
+
+
+def test_openalex_provider_paginates_until_cap() -> None:
+    payload_page_1 = {
+        "meta": {"count": 2},
+        "results": [
+            {
+                "id": "https://openalex.org/W1",
+                "display_name": "Time series paper",
+                "abstract_inverted_index": {"time": [0], "series": [1]},
+                "authorships": [{"author": {"display_name": "A"}}],
+                "publication_date": "2026-03-20",
+                "ids": {"arxiv": "https://arxiv.org/abs/2601.00001"},
+            }
+        ],
+    }
+    payload_page_2 = {
+        "meta": {"count": 2},
+        "results": [
+            {
+                "id": "https://openalex.org/W2",
+                "display_name": "Forecasting paper",
+                "abstract_inverted_index": {"forecasting": [0]},
+                "authorships": [{"author": {"display_name": "B"}}],
+                "publication_date": "2026-03-19",
+                "ids": {"arxiv": "https://arxiv.org/abs/2601.00002"},
+            }
+        ],
+    }
+
+    mock_session = MagicMock()
+    response_1 = MagicMock()
+    response_1.raise_for_status.return_value = None
+    response_1.json.return_value = payload_page_1
+    response_2 = MagicMock()
+    response_2.raise_for_status.return_value = None
+    response_2.json.return_value = payload_page_2
+    mock_session.get.side_effect = [response_1, response_2]
+
+    provider = OpenAlexPaperProvider(session=mock_session, max_pages_per_window=2)
+    papers = provider.search_many(["time series", "forecasting"], 2)
+
+    assert len(papers) == 2
+    assert {paper.arxiv_id for paper in papers} == {"2601.00001", "2601.00002"}
+    assert mock_session.get.call_count == 2
 
 
 def test_openalex_provider_skips_future_publication_date() -> None:

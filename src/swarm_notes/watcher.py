@@ -13,7 +13,9 @@ from swarm_notes.paper_search import PaperProvider
 from swarm_notes.paper_search import RawPaper
 from swarm_notes.paper_search import SemanticScholarPaperProvider
 from swarm_notes.paper_search import build_paper_provider as _build_paper_provider
+from swarm_notes.paper_search import build_openalex_search_query as _build_openalex_search_query
 from swarm_notes.paper_search import is_keyword_relevant_openalex_result as _is_keyword_relevant_openalex_result
+from swarm_notes.paper_search import match_keywords_openalex_result as _match_keywords_openalex_result
 from swarm_notes.paper_search import query_arxiv as _query_arxiv
 from swarm_notes.paper_search import query_semantic_scholar as _query_semantic_scholar
 from swarm_notes.paper_search import reconstruct_openalex_abstract as _reconstruct_openalex_abstract
@@ -68,7 +70,9 @@ __all__ = [
     "RawPaper",
     "SemanticScholarPaperProvider",
     "_build_paper_provider",
+    "_build_openalex_search_query",
     "_is_keyword_relevant_openalex_result",
+    "_match_keywords_openalex_result",
     "_query_arxiv",
     "_query_semantic_scholar",
     "_reconstruct_openalex_abstract",

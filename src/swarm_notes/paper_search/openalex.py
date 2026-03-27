@@ -26,6 +26,7 @@ _OPENALEX_API_BASE = "https://api.openalex.org/works"
 _OPENALEX_QUERY_TIMEOUT_SECONDS = 30
 _OPENALEX_RETRY_DELAYS_SECONDS = (2.0, 5.0)
 _OPENALEX_FALLBACK_RECENT_DAYS = (7, 30, 90, 365)
+_OPENALEX_MAX_PAGES_PER_WINDOW = 5
 _OPENALEX_SELECT_FIELDS = (
     "id,display_name,abstract_inverted_index,authorships,publication_date,ids,"
     "best_oa_location,primary_location,locations"
@@ -42,19 +43,34 @@ class OpenAlexPaperProvider:
         api_url: str = _OPENALEX_API_BASE,
         mailto: str = "",
         relevance_mode: str = "phrase",
+        max_pages_per_window: int = _OPENALEX_MAX_PAGES_PER_WINDOW,
         session: requests.Session | None = None,
     ) -> None:
         self._api_key = api_key
         self._api_url = api_url
         self._mailto = mailto
         self._relevance_mode = relevance_mode
+        self._max_pages_per_window = max(1, max_pages_per_window)
         self._session = session or requests.Session()
 
     def search(self, keyword: str, max_results: int) -> list[RawPaper]:
+        return self.search_many([keyword], max_results)
+
+    def search_many(self, keywords: list[str], max_results: int) -> list[RawPaper]:
+        """Search OpenAlex once using a combined keyword Boolean expression."""
+        if not keywords:
+            return []
+
+        combined_search = build_openalex_search_query(keywords)
         collected: dict[str, RawPaper] = {}
 
         for recent_days in _OPENALEX_FALLBACK_RECENT_DAYS:
-            batch = self._search_with_recent_window(keyword, max_results, recent_days)
+            batch = self._search_with_recent_window(
+                combined_search,
+                keywords,
+                max_results,
+                recent_days,
+            )
             for paper in batch:
                 collected.setdefault(paper.arxiv_id, paper)
 
@@ -63,21 +79,27 @@ class OpenAlexPaperProvider:
 
             if collected:
                 logger.info(
-                    "OpenAlex: found %d ArXiv-backed paper(s) for '%s' in the last %d day(s); widening window for more",
+                    "OpenAlex: found %d ArXiv-backed paper(s) for query '%s' in the last %d day(s); widening window for more",
                     len(collected),
-                    keyword,
+                    combined_search,
                     recent_days,
                 )
 
         return list(collected.values())[:max_results]
 
-    def _search_with_recent_window(self, keyword: str, max_results: int, recent_days: int) -> list[RawPaper]:
+    def _search_with_recent_window(
+        self,
+        query: str,
+        keywords: list[str],
+        max_results: int,
+        recent_days: int,
+    ) -> list[RawPaper]:
         today = datetime.now(tz=timezone.utc).date()
         cutoff = today - timedelta(days=recent_days)
-        params: dict[str, str] = {
-            "search": keyword,
-            "per_page": str(min(200, max(max_results * 20, 50))),
-            "sort": "publication_date:desc",
+        per_page = min(200, max(max_results * 20, 50))
+        params_base: dict[str, str] = {
+            "search": query,
+            "per_page": str(per_page),
             "select": _OPENALEX_SELECT_FIELDS,
             "filter": (
                 f"from_publication_date:{cutoff},"
@@ -86,35 +108,84 @@ class OpenAlexPaperProvider:
             ),
         }
         if self._api_key:
-            params["api_key"] = self._api_key
+            params_base["api_key"] = self._api_key
         if self._mailto:
-            params["mailto"] = self._mailto
+            params_base["mailto"] = self._mailto
 
+        collected: dict[str, RawPaper] = {}
+        for page in range(1, self._max_pages_per_window + 1):
+            params = dict(params_base)
+            params["page"] = str(page)
+
+            payload = self._fetch_with_retries(params, query, recent_days, page)
+            if payload is None:
+                break
+
+            batch = self._parse_search_response(payload, keywords)
+            for paper in batch:
+                collected.setdefault(paper.arxiv_id, paper)
+                if len(collected) >= max_results:
+                    break
+            if len(collected) >= max_results:
+                break
+
+            results = payload.get("results", [])
+            if not isinstance(results, list) or not results:
+                break
+
+            meta = payload.get("meta")
+            if isinstance(meta, Mapping):
+                total_count = meta.get("count")
+                if isinstance(total_count, int) and page * per_page >= total_count:
+                    break
+
+        return list(collected.values())
+
+    def _fetch_with_retries(
+        self,
+        params: dict[str, str],
+        query: str,
+        recent_days: int,
+        page: int,
+    ) -> Mapping[str, Any] | None:
         max_attempts = len(_OPENALEX_RETRY_DELAYS_SECONDS) + 1
         for attempt in range(1, max_attempts + 1):
             try:
+                prepared_url = requests.Request("GET", self._api_url, params=params).prepare().url
+                logger.debug(
+                    "OpenAlex API call (query='%s', window_days=%d, page=%d, attempt=%d/%d): %s",
+                    query,
+                    recent_days,
+                    page,
+                    attempt,
+                    max_attempts,
+                    prepared_url,
+                )
                 response = self._session.get(
                     self._api_url,
                     params=params,
                     timeout=_OPENALEX_QUERY_TIMEOUT_SECONDS,
                 )
                 response.raise_for_status()
-                return self._parse_search_response(response.json(), keyword)
+                payload = response.json()
+                return payload if isinstance(payload, Mapping) else None
             except requests.RequestException as exc:
                 if attempt == max_attempts or not self._is_retryable_error(exc):
                     logger.error(
-                        "Failed to query OpenAlex for '%s' (last %d day window): %s",
-                        keyword,
+                        "Failed to query OpenAlex for '%s' (last %d day window, page %d): %s",
+                        query,
                         recent_days,
+                        page,
                         exc,
                     )
-                    return []
+                    return None
 
                 delay = self._get_retry_delay(exc, attempt)
                 logger.warning(
-                    "Transient OpenAlex query failure for '%s' (last %d day window) on attempt %d/%d: %s. Retrying in %.0f second(s).",
-                    keyword,
+                    "Transient OpenAlex query failure for '%s' (last %d day window, page %d) on attempt %d/%d: %s. Retrying in %.0f second(s).",
+                    query,
                     recent_days,
+                    page,
                     attempt,
                     max_attempts,
                     exc,
@@ -122,7 +193,7 @@ class OpenAlexPaperProvider:
                 )
                 time.sleep(delay)
 
-        return []
+        return None
 
     def _is_retryable_error(self, exc: requests.RequestException) -> bool:
         if isinstance(exc, requests.Timeout):
@@ -143,7 +214,7 @@ class OpenAlexPaperProvider:
         except ValueError:
             return default_delay
 
-    def _parse_search_response(self, payload: Mapping[str, Any], keyword: str) -> list[RawPaper]:
+    def _parse_search_response(self, payload: Mapping[str, Any], keywords: list[str]) -> list[RawPaper]:
         papers: list[RawPaper] = []
         today = datetime.now(tz=timezone.utc).date()
         for item in payload.get("results", []):
@@ -160,7 +231,13 @@ class OpenAlexPaperProvider:
 
             abstract = reconstruct_openalex_abstract(item.get("abstract_inverted_index"))
             title = collapse_whitespace(item.get("display_name") or "Untitled")
-            if not is_keyword_relevant_openalex_result(keyword, title, abstract, self._relevance_mode):
+            matched_keywords = match_keywords_openalex_result(
+                keywords,
+                title,
+                abstract,
+                self._relevance_mode,
+            )
+            if not matched_keywords:
                 continue
 
             published = normalise_publication_date(item.get("publication_date"), None)
@@ -193,7 +270,7 @@ class OpenAlexPaperProvider:
                     url=f"https://arxiv.org/abs/{arxiv_id}",
                     primary_category="",
                     source="openalex",
-                    keywords_matched=[keyword],
+                    keywords_matched=matched_keywords,
                 )
             )
 
@@ -276,3 +353,38 @@ def is_keyword_relevant_openalex_result(
         return True
 
     return all(token in text for token in tokens)
+
+
+def match_keywords_openalex_result(
+    keywords: list[str],
+    title: str,
+    abstract: str,
+    relevance_mode: str = "phrase",
+) -> list[str]:
+    matched: list[str] = []
+    for keyword in keywords:
+        if is_keyword_relevant_openalex_result(keyword, title, abstract, relevance_mode):
+            matched.append(keyword)
+    return matched
+
+
+def build_openalex_search_query(keywords: list[str]) -> str:
+    """Build a single OpenAlex boolean search expression from keywords.
+
+    Example output: ("time series" OR forecasting OR timeseries)
+    """
+    cleaned = [kw.strip() for kw in keywords if kw and kw.strip()]
+    if not cleaned:
+        return ""
+
+    parts: list[str] = []
+    for keyword in cleaned:
+        escaped = keyword.replace('"', '\\"')
+        if any(ch.isspace() for ch in escaped):
+            parts.append(f'"{escaped}"')
+        else:
+            parts.append(escaped)
+
+    if len(parts) == 1:
+        return parts[0]
+    return f"({' OR '.join(parts)})"
