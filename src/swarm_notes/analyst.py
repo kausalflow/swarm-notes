@@ -167,6 +167,16 @@ class PaperAnalysis(BaseModel):
         description="List of open questions or future research identified by the domain expert.",
     )
 
+    critic_review_summary: str = Field(
+        default="",
+        description="Short archivist review summary explaining why items were accepted or rejected.",
+    )
+
+    critic_rejected_candidates: list[str] = Field(
+        default_factory=list,
+        description="Short notes describing candidate concepts or open questions rejected by the archivist review.",
+    )
+
 
 # ---------------------------------------------------------------------------
 # Agent factory

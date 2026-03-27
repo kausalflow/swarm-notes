@@ -76,7 +76,13 @@ def write_paper(analysis: PaperAnalysis, skill_name: str) -> Path:
 
     # Write concept stubs for any new concepts
     for concept in analysis.concepts:
-        _write_concept_stub(concept.slug, concept.display_name, concept.one_liner)
+        _write_concept_stub(
+            concept.slug,
+            concept.display_name,
+            concept.one_liner,
+            concept.importance_reason,
+            concept.evidence_excerpt,
+        )
 
     return out_path
 
@@ -157,6 +163,34 @@ def _build_body(analysis: PaperAnalysis) -> str:
             lines.append(f"- {rel_link}: {concept.one_liner}")
         lines.append("")
 
+    if analysis.critic_review_summary or analysis.critic_rejected_candidates:
+        lines.append("## Archivist Review\n")
+        if analysis.critic_review_summary:
+            lines.append(analysis.critic_review_summary)
+            lines.append("")
+
+        if analysis.concepts:
+            lines.append("### Approved Concepts")
+            for concept in analysis.concepts:
+                details = concept.importance_reason or concept.reusability_reason or concept.evidence_excerpt
+                if details:
+                    lines.append(f"- {concept.display_name}: {details}")
+            lines.append("")
+
+        if analysis.open_questions:
+            lines.append("### Approved Open Questions")
+            for question in analysis.open_questions:
+                details = question.importance_reason or question.evidence_excerpt
+                if details:
+                    lines.append(f"- {question.title}: {details}")
+            lines.append("")
+
+        if analysis.critic_rejected_candidates:
+            lines.append("### Rejected Candidates")
+            for rejection in analysis.critic_rejected_candidates:
+                lines.append(f"- {rejection}")
+            lines.append("")
+
     # Datasets
     if analysis.datasets:
         lines.append("## Datasets\n")
@@ -180,7 +214,13 @@ def _build_body(analysis: PaperAnalysis) -> str:
     return "\n".join(lines)
 
 
-def _write_concept_stub(slug: str, display_name: str, one_liner: str) -> None:
+def _write_concept_stub(
+    slug: str,
+    display_name: str,
+    one_liner: str,
+    importance_reason: str = "",
+    evidence_excerpt: str = "",
+) -> None:
     """Write a concept stub Markdown file if one does not already exist."""
     # Check staging first, then live vault (avoid overwriting existing)
     from swarm_notes.config import settings
@@ -209,6 +249,13 @@ created_at: "{now_utc}"
 
 {one_liner}
 
+"""
+    if importance_reason:
+        content += f"\n## Why It Matters\n\n{importance_reason}\n"
+    if evidence_excerpt:
+        content += f"\n## Evidence\n\n> {evidence_excerpt}\n"
+    content += """
+
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
@@ -232,6 +279,10 @@ def _create_open_question(question: OpenQuestion, analysis: PaperAnalysis) -> No
     now_utc = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     papers = []
     content = f"**Background:** {question.background}\n\n**Question / Future Work:** {question.description}"
+    if question.importance_reason:
+        content += f"\n\n**Why It Matters:** {question.importance_reason}"
+    if question.evidence_excerpt:
+        content += f"\n\n**Evidence:** {question.evidence_excerpt}"
     existing_created_at: str | None = None
 
     if staging_path.exists():

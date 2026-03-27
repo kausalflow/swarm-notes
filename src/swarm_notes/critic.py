@@ -38,6 +38,10 @@ class CriticReview(BaseModel):
         default="",
         description="Short note summarizing why items were approved or rejected.",
     )
+    rejected_candidates: list[str] = Field(
+        default_factory=list,
+        description="Short rejection notes for candidates that were not approved.",
+    )
 
 
 def _build_system_prompt(skill: SkillSpec) -> str:
@@ -106,6 +110,8 @@ def review_analysis(analysis: PaperAnalysis, paper: RawPaper, skill: SkillSpec) 
 
     analysis.concepts = review.approved_concepts
     analysis.open_questions = review.approved_open_questions
+    analysis.critic_review_summary = review.review_summary
+    analysis.critic_rejected_candidates = review.rejected_candidates
 
     logger.info(
         "Critic: paper %s approved %d concept(s) and %d open question(s)",

@@ -19,3 +19,9 @@ arxiv_categories:
   - cs.MA
   - stat.ME
   - econ.EM
+critic_context: |
+  Approve concepts only if they capture a reusable forecasting mechanism, temporal inductive bias,
+  representation, calibration method, or evaluation idea likely to recur across datasets and horizons.
+  Reject ordinary references to seasonality, benchmark names, prediction windows, or standard baselines unless the paper reframes them as a distinct method.
+  Approve open questions only when they expose unresolved issues in distribution shift,
+  long-horizon degradation, uncertainty estimation, multiscale structure, or cross-domain transfer.

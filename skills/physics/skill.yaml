@@ -12,3 +12,9 @@ preferred_tags:
 arxiv_categories:
   - physics.comp-ph
   - physics.data-an
+critic_context: |
+  Approve concepts only if they encode a reusable scientific-ML principle such as a constraint mechanism,
+  symmetry treatment, differentiable solver pattern, or physically grounded representation.
+  Reject generic references to PDEs, simulation datasets, or numerical experiments unless the paper contributes a distinct reusable idea.
+  Approve open questions only when they capture unresolved issues in physical consistency,
+  generalization across regimes, data assimilation, solver coupling, or uncertainty in scientific settings.

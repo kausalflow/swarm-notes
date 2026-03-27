@@ -16,3 +16,9 @@ preferred_tags:
   - machine-translation
 arxiv_categories:
   - cs.CL
+critic_context: |
+  Approve concepts only if they are durable NLP ideas such as a new decoding strategy,
+  representation scheme, alignment mechanism, or evaluation paradigm that should recur in later papers.
+  Reject routine mentions of model scale, datasets, prompting tricks, or benchmark lists unless the paper turns them into a reusable concept.
+  Approve open questions only when they reflect major unresolved issues in reasoning, grounding,
+  controllability, multilingual transfer, safety, or evaluation validity.
