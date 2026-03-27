@@ -1,0 +1,72 @@
+---
+# CSL-compatible fields
+title: "Interpretable PM2.5 Forecasting for Urban Air Quality: A Comparative Study of Operational Time-Series Models"
+author:
+  - literal: "Moazzam Umer Gondal"
+  - literal: "Hamad ul Qudous"
+  - literal: "Asma Ahmad Farhan"
+  - literal: "Sultan Alamri"
+issued:
+  date-parts:
+    - [2026, 3, 26]
+url: "https://arxiv.org/abs/2603.25495"
+
+# Custom fields
+paper_id: "2603.25495"
+paper_source: "arxiv"
+domain: "time-series"
+tags:
+  - "time-series"
+  - "forecasting"
+  - "evaluation"
+  - "interpretability"
+  - "anomaly-detection"
+architectures:
+  []
+datasets:
+  - "PM2.5 time-series data (Beijing)"
+skill: "TimeSeriesSkill"
+processed_at: "2026-03-27T09:10:18Z"
+created_at: "2026-03-27T09:10:18Z"
+---
+
+# Interpretable PM2.5 Forecasting for Urban Air Quality: A Comparative Study of Operational Time-Series Models
+
+**Authors**: Moazzam Umer Gondal, Hamad ul Qudous, Asma Ahmad Farhan, Sultan Alamri
+**Date**: 2026-03-26
+**Paper ID**: [arxiv:2603.25495](https://arxiv.org/abs/2603.25495)
+
+## Summary
+
+This comparative study evaluates lightweight, interpretable time-series models (SARIMAX, Facebook Prophet, NeuralProphet) for short-term hourly PM2.5 forecasting in Beijing using a leakage-aware workflow. The models were tested under both adaptive (weekly walk-forward refitting) and frozen-model regimes enhanced with online residual correction. Results indicated that Facebook Prophet performed best under walk-forward refitting, while SARIMAX with residual correction achieved the lowest error in the frozen regime, suggesting strong operational utility for simpler models. The findings advocate for additive forecasting strategies as a practical, accurate, and efficient alternative to complex deep learning frameworks for urban air quality management.
+
+## Key Contributions
+
+- Developed a leakage-aware forecasting workflow incorporating chronological partitioning, feature selection, and exogenous-driver modeling for hourly PM2.5 prediction.
+- Demonstrated that Facebook Prophet, under weekly walk-forward refitting, achieves competitive accuracy (MAE 37.61) while significantly outperforming NeuralProphet in computational efficiency.
+- Showed that SARIMAX with online residual correction in a frozen-model regime achieved the lowest overall error (MAE 32.50), outperforming the walk-forward Prophet model.
+- Quantified the trade-off between prediction accuracy and runtime, noting that online residual correction drastically reduced the operational runtime of Prophet while maintaining near walk-forward accuracy.
+
+## Limitations
+
+The study primarily focuses on hourly PM2.5 prediction in Beijing and may not generalize perfectly to other pollutants or geographies. The evaluation of lightweight models might not fully capture the potential of more complex, resource-intensive models not included in the comparison.
+
+## Open Questions & Future Work
+
+- [[lightweight-hybrid-extensions-for-pollution-forecasting]]
+- [[generalization-of-lightweight-adaptation-strategies]]
+- [[federated-learning-for-distributed-air-quality-monitoring]]
+
+## Datasets
+
+- [PM2.5 time-series data (Beijing)](../datasets/pm25-time-series-data-beijing.md)
+
+## Limitations
+
+The study primarily focuses on hourly PM2.5 prediction in Beijing and may not generalize perfectly to other pollutants or geographies. The evaluation of lightweight models might not fully capture the potential of more complex, resource-intensive models not included in the comparison.
+
+## Links
+
+- [ArXiv Abstract](https://arxiv.org/abs/2603.25495)
+- [PDF](https://arxiv.org/pdf/2603.25495)
+

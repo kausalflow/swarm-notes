@@ -1,0 +1,80 @@
+---
+# CSL-compatible fields
+title: "Multi-mission Investigation of X-ray Superorbital Modulation in the Supergiant High Mass X-ray Binary 4U 1538-52"
+author:
+  - literal: "H. I. Cohen"
+  - literal: "N. Islam"
+  - literal: "R. H. D. Corbet"
+  - literal: "A. Lange"
+  - literal: "K. Pottschmidt"
+  - literal: "E. Bozzo"
+  - literal: "P. Romano"
+  - literal: "R. Ballhausen"
+  - literal: "C. Malacaria"
+  - literal: "J. B. Coley"
+issued:
+  date-parts:
+    - [2026, 3, 25]
+url: "https://arxiv.org/abs/2603.24561"
+
+# Custom fields
+paper_id: "2603.24561"
+paper_source: "arxiv"
+domain: "astrophysics"
+tags:
+  - "astrophysics"
+  - "time-series"
+  - "evaluation"
+architectures:
+  []
+datasets:
+  - "Swift-BAT"
+  - "MAXI-GSC"
+  - "NuSTAR"
+  - "NICER"
+skill: "GeneralMLSkill"
+processed_at: "2026-03-26T07:10:41Z"
+created_at: "2026-03-26T07:10:41Z"
+---
+
+# Multi-mission Investigation of X-ray Superorbital Modulation in the Supergiant High Mass X-ray Binary 4U 1538-52
+
+**Authors**: H. I. Cohen, N. Islam, R. H. D. Corbet, A. Lange, K. Pottschmidt, E. Bozzo, P. Romano, R. Ballhausen, C. Malacaria, J. B. Coley
+**Date**: 2026-03-25
+**Paper ID**: [arxiv:2603.24561](https://arxiv.org/abs/2603.24561)
+
+## Summary
+
+This study investigates the superorbital X-ray modulation and pulse period evolution in the High-Mass X-ray Binary 4U 1538-52 by combining long-term monitoring data (Swift-BAT, MAXI-GSC) with high-resolution pointed observations (NuSTAR, NICER). The authors confirmed the superorbital periodicity in intensity profiles but found a notable absence of corresponding changes in the pulse profiles or spectral characteristics across different phases. This lack of correlation across timing and spectral domains strongly suggests that the observed modulations are driven by external, large-scale inhomogeneities within the stellar wind of the supergiant companion, rather than changes intrinsic to the accretion column or neutron star itself. The findings constrain the physical mechanisms responsible for the long-term behavior of this binary system.
+
+## Key Contributions
+
+- Confirmed the presence of superorbital modulations in 4U 1538-52 using long-term lightcurves from Swift-BAT and MAXI-GSC.
+- Found no significant correlation between pulse profile/spectral parameter changes and variations across superorbital, orbital, or pulse-change intervals.
+- Investigated the relationship between superorbital modulation and long-term pulse period evolution using multi-instrument data spanning years.
+- Concluded that the modulations are likely caused by large-scale structures (e.g., Co-Rotating Interaction regions) in the supergiant companion's stellar wind.
+
+## Limitations
+
+The analysis primarily relies on X-ray observational data, and definitive proof of the wind structure mechanism requires complementary data or high-resolution imaging that is not always available for such systems.
+
+## Open Questions & Future Work
+
+- [[linking-superorbital-modulation-and-pulse-period-changes]]
+
+## Datasets
+
+- [Swift-BAT](../datasets/swift-bat.md)
+- [MAXI-GSC](../datasets/maxi-gsc.md)
+- [NuSTAR](../datasets/nustar.md)
+- [NICER](../datasets/nicer.md)
+
+## Limitations
+
+The analysis primarily relies on X-ray observational data, and definitive proof of the wind structure mechanism requires complementary data or high-resolution imaging that is not always available for such systems.
+
+## Links
+
+- [ArXiv Abstract](https://arxiv.org/abs/2603.24561)
+- [PDF](https://arxiv.org/pdf/2603.24561)
+

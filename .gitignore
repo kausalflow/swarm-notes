@@ -26,3 +26,5 @@ tmp_vault/
 .pytest_cache/
 .coverage
 htmlcov/
+
+vault_backups/*

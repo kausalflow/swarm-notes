@@ -1,0 +1,73 @@
+---
+# CSL-compatible fields
+title: "Forecasting with Guidance: Representation-Level Supervision for Time Series Forecasting"
+author:
+  - literal: "Jiacheng Wang"
+  - literal: "Liang Fan"
+  - literal: "Baihua Li"
+  - literal: "Luyan Zhang"
+issued:
+  date-parts:
+    - [2026, 3, 25]
+url: "https://arxiv.org/abs/2603.24262"
+
+# Custom fields
+paper_id: "2603.24262"
+paper_source: "arxiv"
+domain: "time-series"
+tags:
+  - "time-series"
+  - "forecasting"
+  - "self-supervised-learning"
+  - "pre-training"
+  - "transfer-learning"
+architectures:
+  []
+datasets:
+  - "diverse datasets"
+skill: "GeneralMLSkill"
+processed_at: "2026-03-26T07:11:11Z"
+created_at: "2026-03-26T07:11:11Z"
+---
+
+# Forecasting with Guidance: Representation-Level Supervision for Time Series Forecasting
+
+**Authors**: Jiacheng Wang, Liang Fan, Baihua Li, Luyan Zhang
+**Date**: 2026-03-25
+**Paper ID**: [arxiv:2603.24262](https://arxiv.org/abs/2603.24262)
+
+## Summary
+
+The paper addresses the limitation of standard end-to-end time series forecasting methods, which often produce smooth predictions by discarding salient patterns during training under simple error objectives. To resolve this, the authors introduce ReGuider, a versatile plug-in technique that incorporates knowledge from pre-trained time series foundation models as semantic teachers. ReGuider operates by extracting intermediate embeddings from the teacher model and enforcing representation-level supervision to align them with the target model's encoder embeddings. This technique guides the encoder to learn richer and more expressive temporal representations, leading to substantial improvements in downstream forecasting accuracy across various architectures and datasets.
+
+## Key Contributions
+
+- Proposed ReGuider, a plug-in method for time series forecasting that utilizes representation-level supervision from pre-trained teacher models.
+- The method aligns the intermediate encoder embeddings of the target model with those of the teacher model, encouraging the learning of more expressive temporal representations.
+- Demonstrated consistent performance improvements across various existing time series forecasting architectures and diverse datasets using the proposed guidance mechanism.
+
+## Limitations
+
+The effectiveness is reliant on the quality and availability of a suitable pre-trained time series foundation model to act as a teacher.
+
+## Open Questions & Future Work
+
+- [[guider-foundation-model-adaptation]]
+
+## Key Concepts
+
+- [Representation-Level Guidance for Forecasting](../concepts/representation-level-guidance-forecasting.md): A method that uses intermediate embeddings from a pre-trained teacher model to supervise the encoder of a target time series forecasting model, improving the expressiveness of learned representations.
+
+## Datasets
+
+- [diverse datasets](../datasets/diverse-datasets.md)
+
+## Limitations
+
+The effectiveness is reliant on the quality and availability of a suitable pre-trained time series foundation model to act as a teacher.
+
+## Links
+
+- [ArXiv Abstract](https://arxiv.org/abs/2603.24262)
+- [PDF](https://arxiv.org/pdf/2603.24262)
+
