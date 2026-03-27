@@ -7,7 +7,7 @@ paper_search:
     - "forecasting"
     - "timeseries"
   max_results_per_keyword: 10
-  total_cap: 50
+  total_cap: 30
   arxiv: {}
   semantic_scholar:
     # api_key: ""  # optional; can also come from SEMANTIC_SCHOLAR_API_KEY
