@@ -89,6 +89,10 @@ def write_paper(analysis: PaperAnalysis, skill_name: str) -> Path:
             slug,
         )
 
+    # Ensure dataset notes exist for linked dataset slugs.
+    for dataset_name in analysis.datasets:
+        _write_dataset_stub(_slugify(dataset_name), dataset_name)
+
     return out_path
 
 
@@ -303,6 +307,36 @@ def _ensure_related_paper_link(content: str, paper_ref: str) -> str:
     if "## Related Papers" in trimmed:
         return f"{trimmed}\n- {paper_ref}\n"
     return f"{trimmed}\n\n## Related Papers\n\n- {paper_ref}\n"
+
+
+def _write_dataset_stub(slug: str, display_name: str) -> None:
+    """Write a dataset stub note if one does not already exist."""
+    from swarm_notes.config import settings
+
+    staging_path = settings.tmp_datasets_dir / f"{slug}.md"
+    vault_path = settings.vault_datasets_dir / f"{slug}.md"
+
+    if staging_path.exists() or vault_path.exists():
+        logger.debug("Dataset stub already exists for '%s' - skipping", slug)
+        return
+
+    now_utc = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    content = f"""\
+---
+title: "{_yaml_escape(display_name)}"
+slug: "{slug}"
+type: dataset
+generated_stub: true
+processed_at: "{now_utc}"
+created_at: "{now_utc}"
+---
+
+# {display_name}
+
+> *Auto-generated dataset stub. Edit this file to add more details.*
+"""
+    staging_path.write_text(content, encoding="utf-8")
+    logger.info("VaultWriter: created dataset stub -> %s", staging_path)
 
 
 def _yaml_list(values: list[str]) -> str:
