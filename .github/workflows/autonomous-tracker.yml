@@ -48,7 +48,7 @@ jobs:
 
       - name: Upload tmp_vault artifact
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tmp-vault-${{ github.run_id }}
           path: tmp_vault/**/*
