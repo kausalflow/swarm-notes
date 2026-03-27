@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from swarm_notes.config import settings
-from swarm_notes.paper_search.arxiv import ArxivPaperProvider
+from swarm_notes.paper_search.arxiv import ArxivPaperProvider, build_arxiv_search_query
 from swarm_notes.paper_search.base import PaperProvider, RawPaper
 from swarm_notes.paper_search.openalex import (
     OpenAlexPaperProvider,
@@ -38,32 +38,7 @@ def fetch_papers(
 
     provider = build_paper_provider(provider_name)
 
-    # OpenAlex supports boolean search expressions; query once across all keywords.
-    if isinstance(provider, OpenAlexPaperProvider):
-        return provider.search_many(keywords, min(total_cap, max_per_keyword * len(keywords)))[:total_cap]
-
-    seen_ids: set[str] = set()
-    papers: list[RawPaper] = []
-
-    for keyword in keywords:
-        if len(papers) >= total_cap:
-            break
-
-        remaining = total_cap - len(papers)
-        batch = provider.search(keyword, min(max_per_keyword, remaining))
-
-        for paper in batch:
-            if paper.arxiv_id not in seen_ids:
-                seen_ids.add(paper.arxiv_id)
-                papers.append(paper)
-            else:
-                for existing in papers:
-                    if existing.arxiv_id == paper.arxiv_id:
-                        if keyword not in existing.keywords_matched:
-                            existing.keywords_matched.append(keyword)
-                        break
-
-    return papers
+    return provider.search_many(keywords, min(total_cap, max_per_keyword * len(keywords)))[:total_cap]
 
 
 def build_paper_provider(provider_name: str | None = None) -> PaperProvider:
@@ -109,6 +84,7 @@ __all__ = [
     "PaperProvider",
     "RawPaper",
     "SemanticScholarPaperProvider",
+    "build_arxiv_search_query",
     "build_openalex_search_query",
     "build_paper_provider",
     "fetch_papers",

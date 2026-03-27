@@ -37,9 +37,19 @@ class ArxivPaperProvider:
         self._max_history_days = max(1, max_history_days)
 
     def search(self, keyword: str, max_results: int) -> list[RawPaper]:
+        return self._search_with_query(f"all:{keyword}", max_results, [keyword])
+
+    def search_many(self, keywords: list[str], max_results: int) -> list[RawPaper]:
+        cleaned = [keyword.strip() for keyword in keywords if keyword and keyword.strip()]
+        if not cleaned:
+            return []
+        query = build_arxiv_search_query(cleaned)
+        return self._search_with_query(query, max_results, cleaned)
+
+    def _search_with_query(self, query: str, max_results: int, keywords: list[str]) -> list[RawPaper]:
         params = urllib.parse.urlencode(
             {
-                "search_query": f"all:{keyword}",
+                "search_query": query,
                 "start": 0,
                 "max_results": max_results,
                 "sortBy": "submittedDate",
@@ -56,7 +66,7 @@ class ArxivPaperProvider:
                 self._respect_rate_limit()
                 with urllib.request.urlopen(request, timeout=_ARXIV_QUERY_TIMEOUT_SECONDS) as response:  # noqa: S310
                     xml_bytes = response.read()
-                papers = parse_arxiv_atom_feed(xml_bytes, keyword)
+                papers = parse_arxiv_atom_feed(xml_bytes, keywords)
                 cutoff_date = (datetime.now(tz=timezone.utc) - timedelta(days=self._max_history_days)).date()
                 filtered: list[RawPaper] = []
                 for paper in papers:
@@ -75,13 +85,13 @@ class ArxivPaperProvider:
                 return filtered
             except Exception as exc:
                 if attempt == max_attempts or not self._is_retryable_error(exc):
-                    logger.error("Failed to query ArXiv for '%s': %s", keyword, exc)
+                    logger.error("Failed to query ArXiv for '%s': %s", query, exc)
                     return []
 
                 delay = self._get_retry_delay(exc, attempt)
                 logger.warning(
                     "Transient ArXiv query failure for '%s' on attempt %d/%d: %s. Retrying in %.0f second(s).",
-                    keyword,
+                    query,
                     attempt,
                     max_attempts,
                     exc,
@@ -133,7 +143,7 @@ class ArxivPaperProvider:
             return default_delay
 
 
-def parse_arxiv_atom_feed(xml_bytes: bytes, keyword: str) -> list[RawPaper]:
+def parse_arxiv_atom_feed(xml_bytes: bytes, keywords: list[str]) -> list[RawPaper]:
     try:
         root = ET.fromstring(xml_bytes)  # noqa: S314
     except ET.ParseError as exc:
@@ -160,8 +170,27 @@ def parse_arxiv_atom_feed(xml_bytes: bytes, keyword: str) -> list[RawPaper]:
                 url=f"https://arxiv.org/abs/{arxiv_id}",
                 primary_category=primary_category_el.get("term", "") if primary_category_el is not None else "",
                 source="arxiv",
-                keywords_matched=[keyword],
+                keywords_matched=list(keywords),
             )
         )
 
     return papers
+
+
+def build_arxiv_search_query(keywords: list[str]) -> str:
+    """Build a boolean OR arXiv search query across the ``all`` field."""
+    cleaned = [keyword.strip() for keyword in keywords if keyword and keyword.strip()]
+    if not cleaned:
+        return ""
+
+    parts: list[str] = []
+    for keyword in cleaned:
+        escaped = keyword.replace('"', '\\"')
+        if any(ch.isspace() for ch in escaped):
+            parts.append(f'all:"{escaped}"')
+        else:
+            parts.append(f"all:{escaped}")
+
+    if len(parts) == 1:
+        return parts[0]
+    return f"({' OR '.join(parts)})"

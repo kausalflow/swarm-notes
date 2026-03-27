@@ -42,8 +42,36 @@ class SemanticScholarPaperProvider:
         self._session = session or requests.Session()
 
     def search(self, keyword: str, max_results: int) -> list[RawPaper]:
+        return self._search_query(keyword, max_results, [keyword])
+
+    def search_many(self, keywords: list[str], max_results: int) -> list[RawPaper]:
+        cleaned = [keyword.strip() for keyword in keywords if keyword and keyword.strip()]
+        if not cleaned:
+            return []
+
+        # /paper/search treats query as plain text (no boolean query syntax), so keep
+        # keyword fan-out internal for one consistent provider API.
+        seen: dict[str, RawPaper] = {}
+        for keyword in cleaned:
+            remaining = max_results - len(seen)
+            if remaining <= 0:
+                break
+
+            batch = self._search_query(keyword, remaining, [keyword])
+            for paper in batch:
+                existing = seen.get(paper.arxiv_id)
+                if existing is None:
+                    seen[paper.arxiv_id] = paper
+                    continue
+                for matched in paper.keywords_matched:
+                    if matched not in existing.keywords_matched:
+                        existing.keywords_matched.append(matched)
+
+        return list(seen.values())[:max_results]
+
+    def _search_query(self, query: str, max_results: int, keywords_matched: list[str]) -> list[RawPaper]:
         params = {
-            "query": keyword,
+            "query": query,
             "limit": str(max_results),
             "fields": _SEMANTIC_SCHOLAR_FIELDS,
         }
@@ -70,16 +98,16 @@ class SemanticScholarPaperProvider:
                     timeout=_SEMANTIC_SCHOLAR_QUERY_TIMEOUT_SECONDS,
                 )
                 response.raise_for_status()
-                return self._parse_search_response(response.json(), keyword)
+                return self._parse_search_response(response.json(), keywords_matched)
             except requests.RequestException as exc:
                 if attempt == max_attempts or not self._is_retryable_error(exc):
-                    logger.error("Failed to query Semantic Scholar for '%s': %s", keyword, exc)
+                    logger.error("Failed to query Semantic Scholar for '%s': %s", query, exc)
                     return []
 
                 delay = self._get_retry_delay(exc, attempt)
                 logger.warning(
                     "Transient Semantic Scholar query failure for '%s' on attempt %d/%d: %s. Retrying in %.0f second(s).",
-                    keyword,
+                    query,
                     attempt,
                     max_attempts,
                     exc,
@@ -110,7 +138,7 @@ class SemanticScholarPaperProvider:
         except ValueError:
             return default_delay
 
-    def _parse_search_response(self, payload: Mapping[str, Any], keyword: str) -> list[RawPaper]:
+    def _parse_search_response(self, payload: Mapping[str, Any], keywords_matched: list[str]) -> list[RawPaper]:
         papers: list[RawPaper] = []
         cutoff_date = (datetime.now(tz=timezone.utc) - timedelta(days=self._max_history_days)).date()
 
@@ -157,7 +185,7 @@ class SemanticScholarPaperProvider:
                     url=f"https://arxiv.org/abs/{arxiv_id}",
                     primary_category="",
                     source="semantic_scholar",
-                    keywords_matched=[keyword],
+                    keywords_matched=list(keywords_matched),
                 )
             )
 
