@@ -61,6 +61,16 @@ def _default_paper_total_cap() -> int:
         return 20
 
 
+def _default_paper_max_history_days() -> int:
+    raw = os.environ.get("PAPER_MAX_HISTORY_DAYS") or os.environ.get("ARXIV_MAX_HISTORY_DAYS")
+    if not raw:
+        return 365
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return 365
+
+
 def _default_openalex_max_pages_per_window() -> int:
     raw = os.environ.get("OPENALEX_MAX_PAGES_PER_WINDOW", "5")
     try:
@@ -99,6 +109,7 @@ class PaperSearchSettings(BaseModel):
     keywords: list[str] = Field(default_factory=_default_paper_keywords)
     max_results_per_keyword: int = Field(default_factory=_default_paper_max_results_per_keyword)
     total_cap: int = Field(default_factory=_default_paper_total_cap)
+    max_history_days: int = Field(default_factory=_default_paper_max_history_days)
     arxiv: ArxivSearchSettings = Field(default_factory=ArxivSearchSettings)
     semantic_scholar: SemanticScholarSearchSettings = Field(default_factory=SemanticScholarSearchSettings)
     openalex: OpenAlexSearchSettings = Field(default_factory=OpenAlexSearchSettings)
@@ -192,6 +203,10 @@ class Settings(BaseModel):
         return self.paper_search.total_cap
 
     @property
+    def paper_max_history_days(self) -> int:
+        return self.paper_search.max_history_days
+
+    @property
     def semantic_scholar_api_key(self) -> str:
         return self.paper_search.semantic_scholar.api_key
 
@@ -246,6 +261,8 @@ class Settings(BaseModel):
             paper_search["max_results_per_keyword"] = data["paper_max_results_per_keyword"]
         if "total_cap" not in paper_search and "paper_total_cap" in data:
             paper_search["total_cap"] = data["paper_total_cap"]
+        if "max_history_days" not in paper_search and "paper_max_history_days" in data:
+            paper_search["max_history_days"] = data["paper_max_history_days"]
 
         if "keywords" not in paper_search and "arxiv_keywords" in data:
             paper_search["keywords"] = data["arxiv_keywords"]
@@ -253,6 +270,8 @@ class Settings(BaseModel):
             paper_search["max_results_per_keyword"] = data["arxiv_max_results_per_keyword"]
         if "total_cap" not in paper_search and "arxiv_total_cap" in data:
             paper_search["total_cap"] = data["arxiv_total_cap"]
+        if "max_history_days" not in paper_search and "arxiv_max_history_days" in data:
+            paper_search["max_history_days"] = data["arxiv_max_history_days"]
 
         semantic_scholar = paper_search.get("semantic_scholar") if isinstance(paper_search.get("semantic_scholar"), dict) else {}
         openalex = paper_search.get("openalex") if isinstance(paper_search.get("openalex"), dict) else {}
@@ -274,6 +293,11 @@ class Settings(BaseModel):
 
         if "source" in paper_search and isinstance(paper_search["source"], str):
             paper_search["source"] = paper_search["source"].strip().lower().replace("-", "_")
+        if "max_history_days" in paper_search:
+            try:
+                paper_search["max_history_days"] = max(1, int(paper_search["max_history_days"]))
+            except (TypeError, ValueError):
+                paper_search["max_history_days"] = _default_paper_max_history_days()
         if "relevance_mode" in openalex and isinstance(openalex["relevance_mode"], str):
             openalex["relevance_mode"] = openalex["relevance_mode"].strip().lower()
         if "max_pages_per_window" in openalex:

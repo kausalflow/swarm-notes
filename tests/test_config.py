@@ -99,6 +99,10 @@ class TestPaperSourceConfig:
         cfg = _reload_config({"OPENALEX_MAX_PAGES_PER_WINDOW": "7"})
         assert cfg.settings.openalex_max_pages_per_window == 7
 
+    def test_paper_max_history_days_loaded_from_env(self):
+        cfg = _reload_config({"PAPER_MAX_HISTORY_DAYS": "14"})
+        assert cfg.settings.paper_max_history_days == 14
+
     def test_paper_keywords_loaded_from_new_env(self):
         cfg = _reload_config({"PAPER_KEYWORDS": "time series,forecasting"})
         assert cfg.settings.paper_keywords == ["time series", "forecasting"]
@@ -173,6 +177,28 @@ class TestPaperSourceConfig:
 
             assert loaded.paper_source == "openalex"
             assert loaded.openalex_max_pages_per_window == 9
+
+    def test_yaml_can_set_paper_max_history_days(self):
+        with TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "config.yaml"
+            config_path.write_text(
+                (
+                    'paper_search:\n'
+                    '  source: "openalex"\n'
+                    '  max_history_days: 21\n'
+                ),
+                encoding="utf-8",
+            )
+
+            sys.modules.pop("swarm_notes.config", None)
+            with patch.dict("os.environ", {}, clear=True):
+                with patch("dotenv.load_dotenv"):
+                    import swarm_notes.config as cfg
+
+                loaded = cfg.Settings.load_from_yaml(config_path)
+
+            assert loaded.paper_source == "openalex"
+            assert loaded.paper_max_history_days == 21
 
     def test_legacy_arxiv_yaml_keys_are_mapped(self):
         with TemporaryDirectory() as temp_dir:

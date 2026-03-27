@@ -44,6 +44,7 @@ class OpenAlexPaperProvider:
         mailto: str = "",
         relevance_mode: str = "phrase",
         max_pages_per_window: int = _OPENALEX_MAX_PAGES_PER_WINDOW,
+        max_history_days: int = 365,
         session: requests.Session | None = None,
     ) -> None:
         self._api_key = api_key
@@ -51,6 +52,7 @@ class OpenAlexPaperProvider:
         self._mailto = mailto
         self._relevance_mode = relevance_mode
         self._max_pages_per_window = max(1, max_pages_per_window)
+        self._max_history_days = max(1, max_history_days)
         self._session = session or requests.Session()
 
     def search(self, keyword: str, max_results: int) -> list[RawPaper]:
@@ -64,7 +66,7 @@ class OpenAlexPaperProvider:
         combined_search = build_openalex_search_query(keywords)
         collected: dict[str, RawPaper] = {}
 
-        for recent_days in _OPENALEX_FALLBACK_RECENT_DAYS:
+        for recent_days in self._recent_windows():
             batch = self._search_with_recent_window(
                 combined_search,
                 keywords,
@@ -86,6 +88,12 @@ class OpenAlexPaperProvider:
                 )
 
         return list(collected.values())[:max_results]
+
+    def _recent_windows(self) -> list[int]:
+        windows: list[int] = [days for days in _OPENALEX_FALLBACK_RECENT_DAYS if days <= self._max_history_days]
+        if self._max_history_days not in windows:
+            windows.append(self._max_history_days)
+        return sorted(set(windows))
 
     def _search_with_recent_window(
         self,
@@ -121,7 +129,7 @@ class OpenAlexPaperProvider:
             if payload is None:
                 break
 
-            batch = self._parse_search_response(payload, keywords)
+            batch = self._parse_search_response(payload, keywords, oldest_allowed_date=cutoff)
             for paper in batch:
                 collected.setdefault(paper.arxiv_id, paper)
                 if len(collected) >= max_results:
@@ -214,7 +222,13 @@ class OpenAlexPaperProvider:
         except ValueError:
             return default_delay
 
-    def _parse_search_response(self, payload: Mapping[str, Any], keywords: list[str]) -> list[RawPaper]:
+    def _parse_search_response(
+        self,
+        payload: Mapping[str, Any],
+        keywords: list[str],
+        *,
+        oldest_allowed_date,
+    ) -> list[RawPaper]:
         papers: list[RawPaper] = []
         today = datetime.now(tz=timezone.utc).date()
         for item in payload.get("results", []):
@@ -242,11 +256,20 @@ class OpenAlexPaperProvider:
 
             published = normalise_publication_date(item.get("publication_date"), None)
             try:
-                if datetime.strptime(published, "%Y-%m-%d").date() > today:
+                published_date = datetime.strptime(published, "%Y-%m-%d").date()
+                if published_date > today:
                     logger.debug(
                         "OpenAlex result %s has future publication_date %s; skipping",
                         arxiv_id,
                         published,
+                    )
+                    continue
+                if published_date < oldest_allowed_date:
+                    logger.debug(
+                        "OpenAlex result %s published %s is older than %s; skipping",
+                        arxiv_id,
+                        published,
+                        oldest_allowed_date,
                     )
                     continue
             except ValueError:
