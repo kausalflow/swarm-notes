@@ -42,6 +42,10 @@ architectures:
 {architecture_lines}
 datasets:
 {dataset_lines}
+concept_slugs:
+{concept_slug_lines}
+dataset_slugs:
+{dataset_slug_lines}
 skill: "{skill}"
 processed_at: "{processed_at}"
 created_at: "{created_at}"
@@ -108,6 +112,8 @@ def _build_frontmatter(analysis: PaperAnalysis, skill_name: str) -> str:
         "\n".join(f'  - "{a}"' for a in analysis.architectures) or "  []"
     )
     dataset_lines = "\n".join(f'  - "{d}"' for d in analysis.datasets) or "  []"
+    concept_slug_lines = "\n".join(f'  - "{c.slug}"' for c in analysis.concepts) or "  []"
+    dataset_slug_lines = "\n".join(f'  - "{_slugify(d)}"' for d in analysis.datasets) or "  []"
 
     now_utc = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -122,6 +128,8 @@ def _build_frontmatter(analysis: PaperAnalysis, skill_name: str) -> str:
         tag_lines=tag_lines,
         architecture_lines=architecture_lines,
         dataset_lines=dataset_lines,
+        concept_slug_lines=concept_slug_lines,
+        dataset_slug_lines=dataset_slug_lines,
         skill=skill_name,
         processed_at=now_utc,
         created_at=now_utc,
@@ -160,7 +168,7 @@ def _build_body(analysis: PaperAnalysis) -> str:
     if analysis.concepts:
         lines.append("## Key Concepts\n")
         for concept in analysis.concepts:
-            wiki_link = f"[[../concepts/{concept.slug}|{concept.display_name}]]"
+            wiki_link = f"[[{concept.slug}]]"
             lines.append(f"- {wiki_link}: {concept.one_liner}")
         lines.append("")
 
@@ -200,8 +208,7 @@ def _build_body(analysis: PaperAnalysis) -> str:
         lines.append("## Datasets\n")
         for ds in analysis.datasets:
             ds_slug = _slugify(ds)
-            rel_link = f"[{ds}](../datasets/{ds_slug}.md)"
-            lines.append(f"- {rel_link}")
+            lines.append(f"- [[{ds_slug}]]")
         lines.append("")
 
     # Limitations

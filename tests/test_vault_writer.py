@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from swarm_notes.analyst import ConceptLink, OpenQuestion, PaperAnalysis, RejectedCandidate
 from swarm_notes.config import settings
-from swarm_notes.vault_writer import _build_body, _write_concept_stub
+from swarm_notes.vault_writer import _build_body, _build_frontmatter, _write_concept_stub
 import frontmatter
 
 
@@ -93,7 +93,62 @@ def test_build_body_uses_wiki_links_for_concepts() -> None:
     )
 
     body = _build_body(analysis)
-    assert "[[../concepts/kr-excitation-regulation-framework|KR Excitation Regulation Framework]]" in body
+    assert "[[kr-excitation-regulation-framework]]" in body
+
+
+def test_build_body_uses_wiki_links_for_datasets() -> None:
+    analysis = PaperAnalysis(
+        title="Dataset Link Style",
+        authors=["Test Author"],
+        published="2026-03-27",
+        arxiv_id="2603.77777",
+        source="arxiv",
+        url="https://arxiv.org/abs/2603.77777",
+        summary="A concise summary.",
+        key_contributions=["Contribution one."],
+        tags=["benchmark"],
+        architectures=[],
+        datasets=["Solar-Energy benchmark"],
+        concepts=[],
+        limitations="",
+        domain="time-series",
+        open_questions=[],
+    )
+
+    body = _build_body(analysis)
+    assert "- [[solar-energy-benchmark]]" in body
+
+
+def test_build_frontmatter_contains_concept_and_dataset_slugs() -> None:
+    analysis = PaperAnalysis(
+        title="Frontmatter Slug Fields",
+        authors=["Test Author"],
+        published="2026-03-27",
+        arxiv_id="2603.66666",
+        source="arxiv",
+        url="https://arxiv.org/abs/2603.66666",
+        summary="A concise summary.",
+        key_contributions=["Contribution one."],
+        tags=["benchmark"],
+        architectures=[],
+        datasets=["Solar-Energy benchmark"],
+        concepts=[
+            ConceptLink(
+                slug="metric-advantage-mcts",
+                display_name="Metric-Advantage Monte Carlo Tree Search",
+                one_liner="A search strategy using normalized advantage scores.",
+            )
+        ],
+        limitations="",
+        domain="time-series",
+        open_questions=[],
+    )
+
+    fm = _build_frontmatter(analysis, "TimeSeriesSkill")
+    assert "concept_slugs:" in fm
+    assert '  - "metric-advantage-mcts"' in fm
+    assert "dataset_slugs:" in fm
+    assert '  - "solar-energy-benchmark"' in fm
 
 
 def test_write_concept_stub_tracks_related_paper_link(tmp_path, monkeypatch) -> None:
