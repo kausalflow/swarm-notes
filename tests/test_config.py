@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import os
 import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 
@@ -79,3 +81,71 @@ class TestGeminiApiKeyPropagation:
                 import swarm_notes.config as cfg  # noqa: F401
 
             assert os.environ.get("GEMINI_API_KEY") == existing
+
+class TestPaperSourceConfig:
+    def test_paper_source_defaults_to_arxiv(self):
+        cfg = _reload_config({})
+        assert cfg.settings.paper_source == "arxiv"
+
+    def test_semantic_scholar_api_key_loaded_from_env(self):
+        cfg = _reload_config({"SEMANTIC_SCHOLAR_API_KEY": "test-key"})
+        assert cfg.settings.semantic_scholar_api_key == "test-key"
+
+    def test_paper_keywords_loaded_from_new_env(self):
+        cfg = _reload_config({"PAPER_KEYWORDS": "time series,forecasting"})
+        assert cfg.settings.paper_keywords == ["time series", "forecasting"]
+
+    def test_legacy_arxiv_env_names_still_work(self):
+        cfg = _reload_config(
+            {
+                "ARXIV_KEYWORDS": "time series,forecasting",
+                "ARXIV_MAX_RESULTS_PER_KEYWORD": "11",
+                "ARXIV_TOTAL_CAP": "55",
+            }
+        )
+        assert cfg.settings.paper_keywords == ["time series", "forecasting"]
+        assert cfg.settings.paper_max_results_per_keyword == 11
+        assert cfg.settings.paper_total_cap == 55
+
+    def test_yaml_can_switch_to_semantic_scholar(self):
+        with TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "config.yaml"
+            config_path.write_text(
+                'paper_source: "semantic_scholar"\nsemantic_scholar_api_key: "yaml-key"\n',
+                encoding="utf-8",
+            )
+
+            sys.modules.pop("swarm_notes.config", None)
+            with patch.dict("os.environ", {}, clear=True):
+                with patch("dotenv.load_dotenv"):
+                    import swarm_notes.config as cfg
+
+                loaded = cfg.Settings.load_from_yaml(config_path)
+
+            assert loaded.paper_source == "semantic_scholar"
+            assert loaded.semantic_scholar_api_key == "yaml-key"
+
+    def test_legacy_arxiv_yaml_keys_are_mapped(self):
+        with TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "config.yaml"
+            config_path.write_text(
+                (
+                    'arxiv_keywords:\n'
+                    '  - "time series"\n'
+                    '  - "forecasting"\n'
+                    'arxiv_max_results_per_keyword: 9\n'
+                    'arxiv_total_cap: 44\n'
+                ),
+                encoding="utf-8",
+            )
+
+            sys.modules.pop("swarm_notes.config", None)
+            with patch.dict("os.environ", {}, clear=True):
+                with patch("dotenv.load_dotenv"):
+                    import swarm_notes.config as cfg
+
+                loaded = cfg.Settings.load_from_yaml(config_path)
+
+            assert loaded.paper_keywords == ["time series", "forecasting"]
+            assert loaded.paper_max_results_per_keyword == 9
+            assert loaded.paper_total_cap == 44

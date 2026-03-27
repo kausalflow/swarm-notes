@@ -26,6 +26,9 @@ const sectionMeta: Record<string, { label: string; desc: string; icon: string }>
 
 import siteConfig from '../content/site-config.json';
 
+const configWithKeywords = siteConfig as { paper_keywords?: string[]; arxiv_keywords?: string[] };
+const trackedKeywords: string[] = configWithKeywords.paper_keywords ?? configWithKeywords.arxiv_keywords ?? [];
+
 const jsonIndex = JSON.stringify(searchIndex);
 ---
 
@@ -48,9 +51,9 @@ const jsonIndex = JSON.stringify(searchIndex);
         {siteConfig.site_name}
       </h1>
       <!-- Research topic pills -->
-      {siteConfig.arxiv_keywords.length > 0 && (
+      {trackedKeywords.length > 0 && (
         <div class="flex flex-wrap justify-center gap-2 mb-8">
-          for keywords: {siteConfig.arxiv_keywords.map((kw: string) => (
+          for keywords: {trackedKeywords.map((kw: string) => (
             <span class="rounded-full border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
               {kw}
             </span>

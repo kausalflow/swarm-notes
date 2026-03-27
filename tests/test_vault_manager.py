@@ -4,6 +4,8 @@ This module contains unit tests to ensure that the initialisation,
 staging, discarding, and committing of the vault work correctly.
 """
 
+import pytest
+
 from unittest.mock import MagicMock, patch
 
 from swarm_notes import vault_manager
@@ -76,3 +78,49 @@ def test_discard_staging() -> None:
         with patch("shutil.rmtree") as mock_rmtree:
             vault_manager.discard_staging()
             mock_rmtree.assert_called_once()
+
+
+def test_get_existing_storage_ids_supports_legacy_and_source_prefixed_filenames(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    vault_papers_dir = tmp_path / "vault_papers"
+    tmp_papers_dir = tmp_path / "tmp_papers"
+    vault_papers_dir.mkdir()
+    tmp_papers_dir.mkdir()
+
+    # Legacy format: <paper_id>-<title>.md (implied arxiv source).
+    (vault_papers_dir / "2503.01234-paper-one.md").write_text("", encoding="utf-8")
+    # New format: <source>-<paper_id>-<title>.md.
+    (tmp_papers_dir / "semantic_scholar-2503.01235-paper-two.md").write_text("", encoding="utf-8")
+
+    monkeypatch.setattr(vault_manager.settings, "vault_papers_dir", vault_papers_dir)
+    monkeypatch.setattr(vault_manager.settings, "tmp_papers_dir", tmp_papers_dir)
+
+    storage_ids = vault_manager.get_existing_storage_ids()
+
+    assert storage_ids == {
+        "arxiv:2503.01234",
+        "semantic_scholar:2503.01235",
+    }
+
+
+def test_get_existing_arxiv_ids_filters_non_arxiv_sources(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    vault_papers_dir = tmp_path / "vault_papers"
+    tmp_papers_dir = tmp_path / "tmp_papers"
+    vault_papers_dir.mkdir()
+    tmp_papers_dir.mkdir()
+
+    (vault_papers_dir / "2503.01234-paper-one.md").write_text("", encoding="utf-8")
+    (tmp_papers_dir / "semantic_scholar-2503.01235-paper-two.md").write_text("", encoding="utf-8")
+    (tmp_papers_dir / "arxiv-2503.01236-paper-three.md").write_text("", encoding="utf-8")
+
+    monkeypatch.setattr(vault_manager.settings, "vault_papers_dir", vault_papers_dir)
+    monkeypatch.setattr(vault_manager.settings, "tmp_papers_dir", tmp_papers_dir)
+
+    arxiv_ids = vault_manager.get_existing_arxiv_ids()
+
+    assert arxiv_ids == {"2503.01234", "2503.01236"}

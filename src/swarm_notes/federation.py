@@ -53,8 +53,8 @@ def run_federation(feed_urls: list[str] | None = None) -> None:
 
         source_label = _label_from_url(url)
         for entry in entries:
-            arxiv_id = entry.get("arxiv_id", "")
-            if not arxiv_id:
+            paper_id = _get_entry_paper_id(entry)
+            if not paper_id:
                 continue
             _process_entry(entry, source_label)
 
@@ -63,20 +63,20 @@ def run_federation(feed_urls: list[str] | None = None) -> None:
 
 def _process_entry(entry: dict, source_label: str) -> None:
     """Handle a single feed entry against the local vault."""
-    arxiv_id = entry.get("arxiv_id", "")
+    paper_id = _get_entry_paper_id(entry)
     title = entry.get("title", "Untitled")
     summary = entry.get("summary", "")
 
     # Look for existing file in vault or staging
-    existing_path = _find_existing_paper(arxiv_id)
+    existing_path = _find_existing_paper(paper_id)
 
     if existing_path is None:
         # New paper – write a lightweight stub into staging
         _write_federated_stub(entry, source_label)
-        logger.info("Federation: new paper %s added from %s", arxiv_id, source_label)
+        logger.info("Federation: new paper %s added from %s", paper_id, source_label)
     else:
         # Paper exists – append external perspective without overwriting
-        _append_external_perspective(existing_path, summary, title, source_label, arxiv_id)
+        _append_external_perspective(existing_path, summary, title, source_label, paper_id)
         logger.info(
             "Federation: appended perspective from %s to %s",
             source_label,
@@ -84,15 +84,15 @@ def _process_entry(entry: dict, source_label: str) -> None:
         )
 
 
-def _find_existing_paper(arxiv_id: str) -> Path | None:
+def _find_existing_paper(paper_id: str) -> Path | None:
     """Return the path of an existing paper file in staging or vault, or None."""
     # Check staging first (files written in the current run)
     for path in settings.tmp_papers_dir.iterdir():
-        if path.is_file() and arxiv_id in path.name:
+        if path.is_file() and paper_id in path.name:
             return path
     # Then the live vault
     for path in settings.vault_papers_dir.iterdir():
-        if path.is_file() and arxiv_id in path.name:
+        if path.is_file() and paper_id in path.name:
             return path
     return None
 
@@ -102,7 +102,7 @@ def _append_external_perspective(
     summary: str,
     title: str,
     source_label: str,
-    arxiv_id: str,
+    paper_id: str,
 ) -> None:
     """Append an external summary block to an existing paper file.
 
@@ -133,7 +133,7 @@ def _append_external_perspective(
 
 def _write_federated_stub(entry: dict, source_label: str) -> None:
     """Write a lightweight Markdown stub for a paper discovered via federation."""
-    arxiv_id = entry.get("arxiv_id", "unknown")
+    paper_id = _get_entry_paper_id(entry) or "unknown"
     title = entry.get("title", "Untitled")
     authors = entry.get("authors", [])
     published = entry.get("published", "")
@@ -142,7 +142,7 @@ def _write_federated_stub(entry: dict, source_label: str) -> None:
     domain = entry.get("domain", "")
     summary = entry.get("summary", "")
 
-    slug = _make_slug(arxiv_id, title)
+    slug = _make_slug(paper_id, title)
     out_path = settings.tmp_papers_dir / f"{slug}.md"
 
     if out_path.exists():
@@ -168,7 +168,7 @@ issued:
   date-parts:
     - [{date_parts}]
 url: "{url}"
-arxiv_id: "{arxiv_id}"
+paper_id: "{paper_id}"
 domain: "{domain}"
 tags:
 {tag_lines}
@@ -189,10 +189,15 @@ processed_at: "{processed_at}"
 
 ## Links
 
-- [ArXiv Abstract]({url})
+- [Abstract]({url})
 - [PDF]({url.replace('abs', 'pdf')})
 """
     out_path.write_text(content, encoding="utf-8")
+
+
+def _get_entry_paper_id(entry: dict) -> str:
+    paper_id = entry.get("paper_id") or entry.get("arxiv_id")
+    return paper_id.strip() if isinstance(paper_id, str) else ""
 
 
 # ---------------------------------------------------------------------------

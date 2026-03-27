@@ -58,7 +58,7 @@ research-cruise/
 ├── swarm_notes/
 │   ├── config.py                    # Configuration & env vars
 │   ├── vault_manager.py             # Staging pattern (tmp_vault → vault)
-│   ├── watcher.py                   # ArXiv API watcher agent
+│   ├── watcher.py                   # Configurable paper-source watcher
 │   ├── router.py                    # Skill registry router
 │   ├── analyst.py                   # pydantic-ai extraction agent
 │   ├── vault_writer.py              # Markdown writer + public_feed.json
@@ -86,7 +86,11 @@ pip install -r requirements.txt
 export LLM_API_KEY="sk-..."
 
 # Optionally customise keywords
-export ARXIV_KEYWORDS="mamba,diffusion model,retrieval augmented generation"
+export PAPER_KEYWORDS="mamba,diffusion model,retrieval augmented generation"
+
+# Optional: switch the watcher to Semantic Scholar
+export PAPER_SOURCE="semantic_scholar"
+export SEMANTIC_SCHOLAR_API_KEY="..."
 
 # Run the pipeline
 python -m swarm_notes.main
@@ -98,11 +102,17 @@ python -m swarm_notes.main
 |---|---|---|
 | `LLM_API_KEY` | *(required)* | API key for the LLM provider |
 | `LLM_MODEL` | `openai:gpt-4o-mini` | pydantic-ai model string |
-| `ARXIV_KEYWORDS` | See `config.py` | Comma-separated search terms |
-| `ARXIV_MAX_RESULTS_PER_KEYWORD` | `5` | Papers fetched per keyword |
-| `ARXIV_TOTAL_CAP` | `20` | Hard cap on total papers per run |
+| `PAPER_SOURCE` | `arxiv` | Paper search backend: `arxiv` or `semantic_scholar` |
+| `PAPER_KEYWORDS` | See `config.py` | Comma-separated search terms |
+| `PAPER_MAX_RESULTS_PER_KEYWORD` | `5` | Papers fetched per keyword |
+| `PAPER_TOTAL_CAP` | `20` | Hard cap on total papers per run |
+| `SEMANTIC_SCHOLAR_API_KEY` | *(empty)* | Optional Semantic Scholar API key sent as `x-api-key` |
 | `FEDERATION_FEEDS` | *(empty)* | Comma-separated external feed URLs |
 | `PUBLIC_FEED_MAX_ITEMS` | `20` | Max entries kept in `public_feed.json` |
+
+When `PAPER_SOURCE=semantic_scholar`, the watcher queries Semantic Scholar's Graph API and keeps only results that can be mapped back to an ArXiv identifier. That preserves compatibility with the rest of the pipeline, which still stores papers by `arxiv_id`.
+
+Legacy `ARXIV_KEYWORDS`, `ARXIV_MAX_RESULTS_PER_KEYWORD`, and `ARXIV_TOTAL_CAP` are still accepted for backward compatibility, but `PAPER_*` names are now canonical.
 
 ## CI/CD Setup
 
