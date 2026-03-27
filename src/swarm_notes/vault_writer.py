@@ -74,7 +74,7 @@ def write_paper(analysis: PaperAnalysis, skill_name: str) -> Path:
     out_path.write_text(content, encoding="utf-8")
     logger.info("VaultWriter: wrote paper → %s", out_path)
 
-    # Write concept stubs for any new concepts
+    # Upsert concept notes and track this paper as a source mention.
     for concept in analysis.concepts:
         _write_concept_stub(
             concept.slug,
@@ -82,6 +82,7 @@ def write_paper(analysis: PaperAnalysis, skill_name: str) -> Path:
             concept.one_liner,
             concept.importance_reason,
             concept.evidence_excerpt,
+            slug,
         )
 
     return out_path
@@ -159,8 +160,8 @@ def _build_body(analysis: PaperAnalysis) -> str:
     if analysis.concepts:
         lines.append("## Key Concepts\n")
         for concept in analysis.concepts:
-            rel_link = f"[{concept.display_name}](../concepts/{concept.slug}.md)"
-            lines.append(f"- {rel_link}: {concept.one_liner}")
+            wiki_link = f"[[../concepts/{concept.slug}|{concept.display_name}]]"
+            lines.append(f"- {wiki_link}: {concept.one_liner}")
         lines.append("")
 
     if analysis.critic_review_summary or analysis.critic_rejected_candidates:
@@ -223,25 +224,50 @@ def _write_concept_stub(
     one_liner: str,
     importance_reason: str = "",
     evidence_excerpt: str = "",
+    paper_slug: str = "",
 ) -> None:
-    """Write a concept stub Markdown file if one does not already exist."""
-    # Check staging first, then live vault (avoid overwriting existing)
+    """Create or update a concept note and track source papers in metadata/content."""
     from swarm_notes.config import settings
 
     staging_path = settings.tmp_concepts_dir / f"{slug}.md"
     vault_path = settings.vault_concepts_dir / f"{slug}.md"
+    paper_ref = f"[[{paper_slug}]]" if paper_slug else ""
 
-    if staging_path.exists() or vault_path.exists():
-        logger.debug("Concept stub already exists for '%s' – skipping", slug)
-        return
+    if vault_path.exists() and not staging_path.exists():
+        shutil.copy2(vault_path, staging_path)
 
     now_utc = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    if staging_path.exists():
+        try:
+            post = frontmatter.load(staging_path)
+            source_papers = post.metadata.get("source_papers", [])
+            if not isinstance(source_papers, list):
+                source_papers = [source_papers]
+            if paper_ref and paper_ref not in source_papers:
+                source_papers.append(paper_ref)
+
+            post.metadata["source_papers"] = source_papers
+            post.metadata["modified_at"] = now_utc
+            post.content = _ensure_related_paper_link(post.content, paper_ref)
+
+            with staging_path.open("wb") as f:
+                frontmatter.dump(post, f)
+
+            logger.info("VaultWriter: updated concept note → %s", staging_path)
+            return
+        except Exception as exc:
+            logger.warning("VaultWriter: Failed to update concept frontmatter for %s: %s", slug, exc)
+
+    source_papers = [paper_ref] if paper_ref else []
     content = f"""\
 ---
 title: "{_yaml_escape(display_name)}"
 slug: "{slug}"
 type: concept
 generated_stub: true
+source_papers:
+{_yaml_list(source_papers)}
 processed_at: "{now_utc}"
 created_at: "{now_utc}"
 ---
@@ -257,14 +283,29 @@ created_at: "{now_utc}"
         content += f"\n## Why It Matters\n\n{importance_reason}\n"
     if evidence_excerpt:
         content += f"\n## Evidence\n\n> {evidence_excerpt}\n"
-    content += """
+    content += "\n## Related Papers\n\n"
+    if paper_ref:
+        content += f"- {paper_ref}\n"
 
-## Related Papers
-
-<!-- Papers that mention this concept will be linked here -->
-"""
     staging_path.write_text(content, encoding="utf-8")
     logger.info("VaultWriter: created concept stub → %s", staging_path)
+
+
+def _ensure_related_paper_link(content: str, paper_ref: str) -> str:
+    """Ensure a concept body has a Related Papers section containing *paper_ref*."""
+    if not paper_ref:
+        return content
+    if paper_ref in content:
+        return content
+    trimmed = content.rstrip()
+    if "## Related Papers" in trimmed:
+        return f"{trimmed}\n- {paper_ref}\n"
+    return f"{trimmed}\n\n## Related Papers\n\n- {paper_ref}\n"
+
+
+def _yaml_list(values: list[str]) -> str:
+    """Render a YAML list with sane fallback for empty lists."""
+    return "\n".join(f"  - \"{_yaml_escape(v)}\"" for v in values) if values else "  []"
 
 
 def _create_open_question(question: OpenQuestion, analysis: PaperAnalysis) -> None:
