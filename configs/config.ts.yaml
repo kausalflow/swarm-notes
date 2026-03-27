@@ -1,6 +1,7 @@
 # Example research-cruise configuration
 llm_model: "gemini-flash-lite-latest"
-paper_source: "arxiv"  # "arxiv" or "semantic_scholar"
+# paper_source: "arxiv"  # "arxiv" or "semantic_scholar"
+paper_source: "semantic_scholar"  # "arxiv" or "semantic_scholar"
 paper_keywords:
   - "time series"
   - "forecasting"
