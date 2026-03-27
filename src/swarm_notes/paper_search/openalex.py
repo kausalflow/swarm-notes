@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 _OPENALEX_API_BASE = "https://api.openalex.org/works"
 _OPENALEX_QUERY_TIMEOUT_SECONDS = 30
 _OPENALEX_RETRY_DELAYS_SECONDS = (2.0, 5.0)
-_OPENALEX_FALLBACK_RECENT_DAYS = (7, 30, 90, 365)
 _OPENALEX_MAX_PAGES_PER_WINDOW = 5
 _OPENALEX_SELECT_FIELDS = (
     "id,display_name,abstract_inverted_index,authorships,publication_date,ids,"
@@ -64,36 +63,19 @@ class OpenAlexPaperProvider:
             return []
 
         combined_search = build_openalex_search_query(keywords)
-        collected: dict[str, RawPaper] = {}
-
-        for recent_days in self._recent_windows():
-            batch = self._search_with_recent_window(
-                combined_search,
-                keywords,
-                max_results,
-                recent_days,
-            )
-            for paper in batch:
-                collected.setdefault(paper.arxiv_id, paper)
-
-            if len(collected) >= max_results:
-                break
-
-            if collected:
-                logger.info(
-                    "OpenAlex: found %d ArXiv-backed paper(s) for query '%s' in the last %d day(s); widening window for more",
-                    len(collected),
-                    combined_search,
-                    recent_days,
-                )
-
-        return list(collected.values())[:max_results]
-
-    def _recent_windows(self) -> list[int]:
-        windows: list[int] = [days for days in _OPENALEX_FALLBACK_RECENT_DAYS if days <= self._max_history_days]
-        if self._max_history_days not in windows:
-            windows.append(self._max_history_days)
-        return sorted(set(windows))
+        batch = self._search_with_recent_window(
+            combined_search,
+            keywords,
+            max_results,
+            self._max_history_days,
+        )
+        logger.info(
+            "OpenAlex: found %d ArXiv-backed paper(s) for query '%s' within the last %d day(s)",
+            len(batch),
+            combined_search,
+            self._max_history_days,
+        )
+        return batch[:max_results]
 
     def _search_with_recent_window(
         self,
