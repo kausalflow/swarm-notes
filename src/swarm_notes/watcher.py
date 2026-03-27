@@ -327,36 +327,27 @@ class OpenAlexPaperProvider:
         api_key: str = "",
         api_url: str = _OPENALEX_API_BASE,
         mailto: str = "",
+        relevance_mode: str = "phrase",
         session: requests.Session | None = None,
     ) -> None:
         self._api_key = api_key
         self._api_url = api_url
         self._mailto = mailto
+        self._relevance_mode = relevance_mode
         self._session = session or requests.Session()
 
     def search(self, keyword: str, max_results: int) -> list[RawPaper]:
         collected: dict[str, RawPaper] = {}
 
-        search_plans: list[tuple[str, int | None]] = [
-            (keyword, recent_days) for recent_days in _OPENALEX_FALLBACK_RECENT_DAYS
-        ]
-        # If strict recency windows return nothing, broaden recall.
-        search_plans.extend(
-            [
-                (f"{keyword} arxiv", None),
-                (keyword, None),
-            ]
-        )
-
-        for query, recent_days in search_plans:
-            batch = self._search_with_recent_window(query, max_results, recent_days)
+        for recent_days in _OPENALEX_FALLBACK_RECENT_DAYS:
+            batch = self._search_with_recent_window(keyword, max_results, recent_days)
             for paper in batch:
                 collected.setdefault(paper.arxiv_id, paper)
 
             if len(collected) >= max_results:
                 break
 
-            if collected and recent_days is not None:
+            if collected:
                 logger.info(
                     "OpenAlex: found %d ArXiv-backed paper(s) for '%s' in the last %d day(s); widening window for more",
                     len(collected),
@@ -367,19 +358,24 @@ class OpenAlexPaperProvider:
         papers = list(collected.values())[:max_results]
         return papers
 
-    def _search_with_recent_window(self, keyword: str, max_results: int, recent_days: int | None) -> list[RawPaper]:
+    def _search_with_recent_window(self, keyword: str, max_results: int, recent_days: int) -> list[RawPaper]:
         from datetime import timedelta
 
+        today = datetime.now(tz=timezone.utc).date()
+        cutoff = today - timedelta(days=recent_days)
         params: dict[str, str] = {
             "search": keyword,
             # Request a larger candidate pool since Option A filters to ArXiv-backed entries.
             "per_page": str(min(200, max(max_results * 20, 50))),
             "sort": "publication_date:desc",
             "select": _OPENALEX_SELECT_FIELDS,
+            # Keep results bounded to plausible research papers and prevent future-dated noise.
+            "filter": (
+                f"from_publication_date:{cutoff},"
+                f"to_publication_date:{today},"
+                "has_abstract:true,type:article|preprint"
+            ),
         }
-        if recent_days is not None:
-            cutoff = (datetime.now(tz=timezone.utc) - timedelta(days=recent_days)).date()
-            params["filter"] = f"from_publication_date:{cutoff}"
         if self._api_key:
             params["api_key"] = self._api_key
         if self._mailto:
@@ -397,41 +393,24 @@ class OpenAlexPaperProvider:
                 return self._parse_search_response(response.json(), keyword)
             except requests.RequestException as exc:
                 if attempt == max_attempts or not self._is_retryable_error(exc):
-                    if recent_days is None:
-                        logger.error(
-                            "Failed to query OpenAlex for '%s' (no publication date filter): %s",
-                            keyword,
-                            exc,
-                        )
-                    else:
-                        logger.error(
-                            "Failed to query OpenAlex for '%s' (last %d day window): %s",
-                            keyword,
-                            recent_days,
-                            exc,
-                        )
+                    logger.error(
+                        "Failed to query OpenAlex for '%s' (last %d day window): %s",
+                        keyword,
+                        recent_days,
+                        exc,
+                    )
                     return []
 
                 delay = self._get_retry_delay(exc, attempt)
-                if recent_days is None:
-                    logger.warning(
-                        "Transient OpenAlex query failure for '%s' (no publication date filter) on attempt %d/%d: %s. Retrying in %.0f second(s).",
-                        keyword,
-                        attempt,
-                        max_attempts,
-                        exc,
-                        delay,
-                    )
-                else:
-                    logger.warning(
-                        "Transient OpenAlex query failure for '%s' (last %d day window) on attempt %d/%d: %s. Retrying in %.0f second(s).",
-                        keyword,
-                        recent_days,
-                        attempt,
-                        max_attempts,
-                        exc,
-                        delay,
-                    )
+                logger.warning(
+                    "Transient OpenAlex query failure for '%s' (last %d day window) on attempt %d/%d: %s. Retrying in %.0f second(s).",
+                    keyword,
+                    recent_days,
+                    attempt,
+                    max_attempts,
+                    exc,
+                    delay,
+                )
                 time.sleep(delay)
 
         return []
@@ -457,6 +436,7 @@ class OpenAlexPaperProvider:
 
     def _parse_search_response(self, payload: Mapping[str, Any], keyword: str) -> list[RawPaper]:
         papers: list[RawPaper] = []
+        today = datetime.now(tz=timezone.utc).date()
         for item in payload.get("results", []):
             if not isinstance(item, Mapping):
                 continue
@@ -472,6 +452,27 @@ class OpenAlexPaperProvider:
                 continue
 
             abstract = _reconstruct_openalex_abstract(item.get("abstract_inverted_index"))
+            title = _collapse_whitespace(item.get("display_name") or "Untitled")
+            if not _is_keyword_relevant_openalex_result(
+                keyword,
+                title,
+                abstract,
+                self._relevance_mode,
+            ):
+                continue
+
+            published = _normalise_publication_date(item.get("publication_date"), None)
+            try:
+                if datetime.strptime(published, "%Y-%m-%d").date() > today:
+                    logger.debug(
+                        "OpenAlex result %s has future publication_date %s; skipping",
+                        arxiv_id,
+                        published,
+                    )
+                    continue
+            except ValueError:
+                pass
+
             authors = [
                 authorship["author"]["display_name"]
                 for authorship in item.get("authorships", [])
@@ -483,10 +484,10 @@ class OpenAlexPaperProvider:
             papers.append(
                 RawPaper(
                     arxiv_id=arxiv_id,
-                    title=_collapse_whitespace(item.get("display_name") or "Untitled"),
+                    title=title,
                     abstract=_collapse_whitespace(abstract),
                     authors=authors,
-                    published=_normalise_publication_date(item.get("publication_date"), None),
+                    published=published,
                     url=f"https://arxiv.org/abs/{arxiv_id}",
                     primary_category="",
                     source="openalex",
@@ -536,6 +537,31 @@ def _extract_openalex_arxiv_id(item: Mapping[str, Any]) -> str | None:
                         return arxiv_id
 
     return None
+
+
+def _is_keyword_relevant_openalex_result(
+    keyword: str,
+    title: str,
+    abstract: str,
+    relevance_mode: str = "phrase",
+) -> bool:
+    text = f"{title} {abstract}".lower()
+    normalized = " ".join(keyword.lower().split())
+    normalized_text = " ".join(re.split(r"\W+", text))
+    if not normalized:
+        return True
+
+    if normalized in text or normalized in normalized_text:
+        return True
+
+    if relevance_mode == "phrase":
+        return False
+
+    tokens = [token for token in re.split(r"\W+", normalized) if len(token) >= 3]
+    if not tokens:
+        return True
+
+    return all(token in text for token in tokens)
 
 
 def fetch_papers(
@@ -593,6 +619,7 @@ def _build_paper_provider(provider_name: str | None = None) -> PaperProvider:
         return OpenAlexPaperProvider(
             api_key=settings.openalex_api_key,
             mailto=settings.openalex_mailto,
+            relevance_mode=settings.openalex_relevance_mode,
         )
     raise ValueError(f"Unsupported paper_source '{provider_name or settings.paper_source}'")
 

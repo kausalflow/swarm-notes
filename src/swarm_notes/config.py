@@ -113,6 +113,9 @@ class Settings(BaseModel):
     openalex_mailto: str = Field(
         default_factory=lambda: os.environ.get("OPENALEX_MAILTO", "")
     )
+    openalex_relevance_mode: Literal["phrase", "all_tokens"] = Field(
+        default_factory=lambda: os.environ.get("OPENALEX_RELEVANCE_MODE", "phrase").strip().lower()
+    )
     
     # Federation config
     federation_feeds: list[str] = Field(default_factory=lambda: [
