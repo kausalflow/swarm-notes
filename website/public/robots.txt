@@ -1,8 +1,8 @@
-# robots.txt for AstroDeck
-# https://astrodeck.dev
+# robots.txt for Swarm Notes
+# https://swarmnotes.kausalflow.com
 
 User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://astrodeck.dev/sitemap-index.xml
+Sitemap: https://swarmnotes.kausalflow.com/sitemap-index.xml

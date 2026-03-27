@@ -8,9 +8,9 @@ export async function GET(context: import('astro').APIContext) {
   );
 
   return rss({
-    title: 'AstroDeck Blog',
-    description: 'Articles, tutorials, and updates from the AstroDeck project',
-    site: context.site ?? 'https://astrodeck.dev',
+    title: 'Swarm Notes RSS Feed',
+    description: 'Articles, tutorials, and updates from the Swarm Notes project',
+    site: context.site ?? 'https://swarm-notes.kausalflow.com',
     items: sortedPosts.map((post) => ({
       title: post.data.title,
       pubDate: post.data.pubDate,
