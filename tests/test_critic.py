@@ -60,6 +60,34 @@ def test_review_analysis_skips_agent_when_no_candidates() -> None:
 
 
 @patch("swarm_notes.critic.Agent")
+def test_review_analysis_generates_fallback_summary_when_missing(mock_agent_class: MagicMock) -> None:
+    analysis = _build_analysis()
+    analysis.concepts = [
+        ConceptLink(
+            slug="state-space-mixer",
+            display_name="State Space Mixer",
+            one_liner="A selective mixer for long-horizon dynamics.",
+        )
+    ]
+
+    mock_result = MagicMock()
+    mock_result.output.approved_concepts = analysis.concepts
+    mock_result.output.approved_open_questions = []
+    mock_result.output.review_summary = ""
+    mock_result.output.rejected_candidates = []
+
+    mock_agent = mock_agent_class.return_value
+    mock_agent.run_sync.return_value = mock_result
+
+    result = review_analysis(analysis, _build_paper(), _build_skill())
+
+    assert result.critic_review_summary == (
+        "Archivist review kept only candidates judged central to the paper and reusable across future work. "
+        "Approved 1 concept(s) and 0 open question(s), with 0 rejected candidate note(s)."
+    )
+
+
+@patch("swarm_notes.critic.Agent")
 def test_review_analysis_replaces_candidates_with_approved_items(mock_agent_class: MagicMock) -> None:
     analysis = _build_analysis()
     analysis.concepts = [
