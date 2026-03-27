@@ -40,6 +40,27 @@ class ConceptLink(BaseModel):
     one_liner: str = Field(
         description="One sentence that defines this concept in the context of the paper."
     )
+    importance_reason: str = Field(
+        default="",
+        description=(
+            "Why this concept is central to the paper's contribution or novelty. "
+            "Leave empty if not applicable."
+        ),
+    )
+    reusability_reason: str = Field(
+        default="",
+        description=(
+            "Why this concept is likely to recur across future papers and deserves "
+            "a permanent vault note. Leave empty if not applicable."
+        ),
+    )
+    evidence_excerpt: str = Field(
+        default="",
+        description=(
+            "Short phrase or sentence from the title or abstract supporting this concept. "
+            "Leave empty if not applicable."
+        ),
+    )
 
 
 class OpenQuestion(BaseModel):
@@ -56,6 +77,20 @@ class OpenQuestion(BaseModel):
     )
     description: str = Field(
         description="Detailed explanation of the open question or future work."
+    )
+    importance_reason: str = Field(
+        default="",
+        description=(
+            "Why this open question is technically important and worth tracking across papers. "
+            "Leave empty if not applicable."
+        ),
+    )
+    evidence_excerpt: str = Field(
+        default="",
+        description=(
+            "Short phrase or sentence from the paper text supporting that this question is explicit and unresolved. "
+            "Leave empty if not applicable."
+        ),
     )
 
 
@@ -166,7 +201,12 @@ IMPORTANT RULES:
 3. Select architectures ONLY from the taxonomy architectures list above (or leave empty).
 4. The summary must be 3-5 sentences, technically precise but accessible.
 5. Key contributions must be specific, not generic ("we propose X" → "X achieves Y on Z benchmark").
-6. For concepts, ALWAYS check the EXISTING CONCEPTS IN VAULT list. If a highly synonymous concept already exists, you MUST exactly reuse its slug. Only create entirely new concepts if they represent a genuinely novel idea.
+6. Concepts are candidate proposals for a later archivist review, not a dump of every term in the paper.
+7. Default to zero concepts unless a concept is central to the paper's novelty and likely to matter beyond this single paper.
+8. For each proposed concept, fill importance_reason, reusability_reason, and evidence_excerpt with concrete, specific justification from the title or abstract.
+9. Reject generic terminology, routine datasets, benchmark names, and umbrella phrases unless the paper makes them a distinct reusable idea.
+10. For concepts, ALWAYS check the EXISTING CONCEPTS IN VAULT list. If a highly synonymous concept already exists, you MUST exactly reuse its slug. Only create entirely new concepts if they represent a genuinely novel idea.
+11. Prefer 0-2 excellent concept candidates over 5 weak ones.
 """
     if skill.analyst_system_prompt_override:
         return skill.analyst_system_prompt_override

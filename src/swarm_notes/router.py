@@ -39,6 +39,7 @@ class SkillSpec(BaseModel):
     analyst_system_prompt_override: str | None = None
     discussant_context: str | None = None
     domain_expert_context: str | None = None
+    critic_context: str | None = None
 
 
 # Global registry populated at runtime

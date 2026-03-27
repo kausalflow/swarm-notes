@@ -61,6 +61,7 @@ def _is_retryable_paper_error(exc: Exception) -> bool:
 def _process_single_paper(paper, skill, src_config):
     """Process one paper once and return its analysis."""
     from swarm_notes import analyst
+    from swarm_notes.critic import review_analysis
     from swarm_notes.vault_writer import write_paper
 
     analysis = analyst.analyse(paper, skill)
@@ -69,6 +70,8 @@ def _process_single_paper(paper, skill, src_config):
         from swarm_notes.domain_expert import extract_open_questions
 
         analysis.open_questions = extract_open_questions(paper.arxiv_id, skill)
+
+    analysis = review_analysis(analysis, paper, skill)
 
     write_paper(analysis, skill.name)
     return analysis
