@@ -1,0 +1,78 @@
+---
+# CSL-compatible fields
+title: "A Distribution-to-Distribution Neural Probabilistic Forecasting Framework for Dynamical Systems"
+author:
+  - literal: "Tianlin Yang"
+  - literal: "Hailiang Du"
+  - literal: "Louis Aslett"
+issued:
+  date-parts:
+    - [2026, 3, 26]
+url: "https://arxiv.org/abs/2603.25370"
+
+# Custom fields
+paper_id: "2603.25370"
+paper_source: "arxiv"
+domain: "time-series"
+tags:
+  - "time-series"
+  - "forecasting"
+  - "distributional-forecasting"
+  - "kernel-method"
+  - "neural-network"
+  - "evaluation"
+architectures:
+  []
+datasets:
+  - "Lorenz63"
+skill: "TimeSeriesSkill"
+processed_at: "2026-03-27T09:10:32Z"
+created_at: "2026-03-27T09:10:32Z"
+---
+
+# A Distribution-to-Distribution Neural Probabilistic Forecasting Framework for Dynamical Systems
+
+**Authors**: Tianlin Yang, Hailiang Du, Louis Aslett
+**Date**: 2026-03-26
+**Paper ID**: [arxiv:2603.25370](https://arxiv.org/abs/2603.25370)
+
+## Summary
+
+This paper introduces a Distribution-to-Distribution (D2D) neural probabilistic forecasting framework designed to model the evolution of uncertainty directly as a dynamical object, moving beyond trajectory-based ensemble methods. The architecture incorporates a distributional encoding using kernel mean embeddings to represent input distributions and a decoder parameterized by mixture density networks for the output. By training directly on probabilistic forecast skill, the framework enables recursive propagation of predictive uncertainty within a unified end-to-end neural network. Experiments on the Lorenz63 chaotic system show that the D2D model successfully captures complex distributional dynamics and produces forecasts competitive with traditional benchmarks without relying on explicit ensemble simulation. This work proposes a new paradigm where predictive distributions are learned and evolved directly, offering a more principled approach to uncertainty quantification.
+
+## Key Contributions
+
+- Development of a novel Distribution-to-Distribution (D2D) neural framework that learns to propagate uncertainty directly as a dynamical object, rather than relying on sampling or ensembles.
+- Introduction of a distributional encoding/decoding structure using Kernel Mean Embeddings for inputs and Mixture Density Networks for parameterized outputs.
+- Demonstration that the D2D model captures nontrivial distributional evolution on the Lorenz63 chaotic system, offering skillful probabilistic forecasts without explicit ensemble simulation.
+- Validation that the probabilistic forecast skill of the D2D model is competitive with, and sometimes superior to, a simplified perfect model benchmark.
+
+## Limitations
+
+The current evaluation is primarily demonstrated on a synthetic, low-dimensional chaotic system (Lorenz63), and its performance on high-dimensional, real-world time-series datasets with complex dependencies remains to be fully established.
+
+## Open Questions & Future Work
+
+- [[logarithmic-score-universal-criterion]]
+- [[joint-distributional-forecasting-extension]]
+- [[weighted-iterative-training-objective]]
+
+## Key Concepts
+
+- [Distribution-to-Distribution Forecasting](../concepts/distribution-to-distribution-forecasting.md): A neural framework for probabilistic forecasting that operates directly on probability distributions rather than ensembles or deterministic trajectories.
+- [Kernel Mean Embedding](../concepts/kernel-mean-embedding.md): A method used in the D2D framework to non-parametrically represent input probability distributions for the neural forecasting module.
+- [Mixture Density Network](../concepts/mixture-density-network.md): A type of output layer used to parameterize the predicted probability distribution as a mixture of simpler distributions.
+
+## Datasets
+
+- [Lorenz63](../datasets/lorenz63.md)
+
+## Limitations
+
+The current evaluation is primarily demonstrated on a synthetic, low-dimensional chaotic system (Lorenz63), and its performance on high-dimensional, real-world time-series datasets with complex dependencies remains to be fully established.
+
+## Links
+
+- [ArXiv Abstract](https://arxiv.org/abs/2603.25370)
+- [PDF](https://arxiv.org/pdf/2603.25370)
+

@@ -1,0 +1,72 @@
+---
+# CSL-compatible fields
+title: "Active learning-enabled multi-objective design of thermally conductive and mechanically compliant polymers"
+author:
+  - literal: "Yuhan Liu"
+  - literal: "Jiaxin Xu"
+  - literal: "Renzheng Zhang"
+  - literal: "Meng Jiang"
+  - literal: "Tengfei Luo"
+issued:
+  date-parts:
+    - [2026, 3, 24]
+url: "https://arxiv.org/abs/2603.23494"
+
+# Custom fields
+paper_id: "2603.23494"
+paper_source: "arxiv"
+domain: "chemistry"
+tags:
+  - "active-learning"
+  - "bayesian-optimization"
+  - "machine-learning"
+  - "simulation"
+  - "chemistry"
+  - "material-science"
+  - "benchmark"
+  - "evaluation"
+architectures:
+  []
+datasets:
+  []
+skill: "GeneralMLSkill"
+processed_at: "2026-03-25T21:17:56Z"
+created_at: "2026-03-25T21:17:56Z"
+---
+
+# Active learning-enabled multi-objective design of thermally conductive and mechanically compliant polymers
+
+**Authors**: Yuhan Liu, Jiaxin Xu, Renzheng Zhang, Meng Jiang, Tengfei Luo
+**Date**: 2026-03-24
+**Paper ID**: [arxiv:2603.23494](https://arxiv.org/abs/2603.23494)
+
+## Summary
+
+This paper introduces an active learning (AL) framework utilizing multi-objective Bayesian optimization (MOBO) to accelerate the discovery of polymers balancing high thermal conductivity (TC) and mechanical compliance (low modulus). The methodology trains Deep Kernel Learning (DKL) surrogate models on data generated via a molecular dynamics (MD) pipeline to predict properties and uncertainties. The framework iteratively selects optimal candidates using the qNEHVI acquisition function, successfully identifying six Pareto-optimal material candidates that mitigate the typical TC-modulus trade-off. This approach demonstrates an effective strategy to reduce development time and provide actionable guidance for designing multifunctional materials by efficiently navigating sparse, high-dimensional design spaces.
+
+## Key Contributions
+
+- Developed an active learning (AL) framework powered by Multi-Objective Bayesian Optimization (MOBO) to simultaneously optimize for high thermal conductivity (TC) and low bulk modulus in polymers.
+- Integrated Deep Kernel Learning (DKL) surrogate models with a high-throughput molecular dynamics (MD) pipeline to predict polymer properties and associated uncertainties efficiently.
+- Employed the parallel noisy expected hypervolume improvement (qNEHVI) acquisition function to guide the iterative exploration and exploitation of the polymer design space.
+- Identified six candidate polymers on the Pareto front representing optimal trade-offs, validated by interpretability analysis and synthesizability assessment.
+
+## Limitations
+
+The study relies on the accuracy of the initial high-throughput Molecular Dynamics (MD) pipeline for generating the initial dataset and subsequent property predictions. The generalizability of the learned surrogate models to entirely new chemical spaces outside the initial training distribution remains to be fully explored.
+
+## Key Concepts
+
+- [Multi-Objective Bayesian Optimization](../concepts/multi-objective-bayesian-optimization.md): A Bayesian optimization framework used to simultaneously optimize multiple, often conflicting, objectives.
+- [Deep Kernel Learning](../concepts/deep-kernel-learning.md): A machine learning technique that combines deep neural networks with Gaussian processes (kernel methods) to model complex functions and quantify uncertainty.
+- [Noisy Expected Hypervolume Improvement](../concepts/noisy-expected-hypervolume-improvement.md): An acquisition function used in Multi-Objective Bayesian Optimization to select the next most promising set of samples by maximizing the expected improvement in the hypervolume metric under noisy evaluations.
+
+## Limitations
+
+The study relies on the accuracy of the initial high-throughput Molecular Dynamics (MD) pipeline for generating the initial dataset and subsequent property predictions. The generalizability of the learned surrogate models to entirely new chemical spaces outside the initial training distribution remains to be fully explored.
+
+## Links
+
+- [ArXiv Abstract](https://arxiv.org/abs/2603.23494)
+- [PDF](https://arxiv.org/pdf/2603.23494)
+

@@ -1,0 +1,63 @@
+---
+# CSL-compatible fields
+title: "Not a fragment, but the whole: Map-based evaluation of data-driven Fire Danger Index models"
+author:
+  - literal: "Shahbaz Alvi"
+  - literal: "Italo Epicoco"
+  - literal: "Jose Maria Costa Saura"
+issued:
+  date-parts:
+    - [2026, 3, 26]
+url: "https://arxiv.org/abs/2603.25469"
+
+# Custom fields
+paper_id: "2603.25469"
+paper_source: "arxiv"
+domain: "time-series"
+tags:
+  - "forecasting"
+  - "anomaly-detection"
+  - "evaluation"
+  - "time-series"
+architectures:
+  []
+datasets:
+  []
+skill: "TimeSeriesSkill"
+processed_at: "2026-03-27T09:10:21Z"
+created_at: "2026-03-27T09:10:21Z"
+---
+
+# Not a fragment, but the whole: Map-based evaluation of data-driven Fire Danger Index models
+
+**Authors**: Shahbaz Alvi, Italo Epicoco, Jose Maria Costa Saura
+**Date**: 2026-03-26
+**Paper ID**: [arxiv:2603.25469](https://arxiv.org/abs/2603.25469)
+
+## Summary
+
+This paper addresses the limitations of standard machine learning evaluation metrics when applied to operational Fire Danger Index (FDI) forecasting, which often ignores the critical impact of false positives. The authors propose a novel evaluation method specifically designed to align model performance with real-world decision-making processes in forest fire prediction. They conduct a systematic assessment of model performance, emphasizing the trade-off between correctly identifying fire activity and minimizing false alarms. Crucially, the study demonstrates that utilizing an ensemble approach to the underlying ML models significantly enhances fire identification capabilities while simultaneously reducing the rate of false positive predictions.
+
+## Key Contributions
+
+- Proposed a novel evaluation methodology for Fire Danger Index (FDI) models that aligns with real-world decision-making, moving beyond standard ML classification metrics.
+- Systematically assessed model performance by explicitly focusing on both accurate fire identification and the reduction of costly false positive predictions (false alarms).
+- Demonstrated that ensembling multiple machine learning models leads to improvements in both fire identification accuracy and the suppression of false positives.
+
+## Limitations
+
+The paper focuses on the daily FDI model evaluation paradigm and its operational alignment, but the generalizability of the proposed evaluation method to other complex event forecasting tasks is not explicitly detailed.
+
+## Open Questions & Future Work
+
+- [[convlstm-future-exploration-fire-forecasting]]
+
+## Limitations
+
+The paper focuses on the daily FDI model evaluation paradigm and its operational alignment, but the generalizability of the proposed evaluation method to other complex event forecasting tasks is not explicitly detailed.
+
+## Links
+
+- [ArXiv Abstract](https://arxiv.org/abs/2603.25469)
+- [PDF](https://arxiv.org/pdf/2603.25469)
+
