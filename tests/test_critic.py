@@ -3,7 +3,8 @@
 from unittest.mock import MagicMock, patch
 
 from swarm_notes.analyst import ConceptLink, OpenQuestion, PaperAnalysis, RejectedCandidate
-from swarm_notes.critic import review_analysis
+from swarm_notes.critic import review_analysis, _build_system_prompt
+from swarm_notes.config import settings
 from swarm_notes.router import SkillSpec
 from swarm_notes.watcher import RawPaper
 
@@ -158,3 +159,28 @@ def test_review_analysis_replaces_candidates_with_approved_items(mock_agent_clas
             reason="Aggregate dataset label with no specific reusable benchmark identity.",
         )
     ]
+
+
+def test_build_system_prompt_includes_existing_open_questions_and_datasets(tmp_path, monkeypatch) -> None:
+    concepts_dir = tmp_path / "concepts"
+    open_questions_dir = tmp_path / "open-questions"
+    datasets_dir = tmp_path / "datasets"
+
+    concepts_dir.mkdir(parents=True)
+    open_questions_dir.mkdir(parents=True)
+    datasets_dir.mkdir(parents=True)
+
+    (concepts_dir / "global-steerable-reasoning.md").write_text("# concept", encoding="utf-8")
+    (open_questions_dir / "context-pruning-for-cost-reduction.md").write_text("# open question", encoding="utf-8")
+    (datasets_dir / "etth1.md").write_text("# dataset", encoding="utf-8")
+
+    monkeypatch.setattr(settings, "vault_concepts_dir", concepts_dir)
+    monkeypatch.setattr(settings, "vault_open_questions_dir", open_questions_dir)
+    monkeypatch.setattr(settings, "vault_datasets_dir", datasets_dir)
+
+    prompt = _build_system_prompt(_build_skill())
+
+    assert "EXISTING OPEN QUESTIONS IN VAULT:" in prompt
+    assert "context-pruning-for-cost-reduction" in prompt
+    assert "EXISTING DATASETS IN VAULT:" in prompt
+    assert "etth1" in prompt
