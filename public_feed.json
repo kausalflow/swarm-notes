@@ -1,5 +1,29 @@
 [
   {
+    "paper_id": "2603.20063",
+    "paper_source": "openalex",
+    "title": "Fine-tuning Timeseries Predictors Using Reinforcement Learning",
+    "authors": [
+      "Hugo Cazaux",
+      "Ralph Rudd",
+      "Hlynur Stefánsson",
+      "Sverrir Ólafsson",
+      "Eyjólfur Ingi Ásgeirsson"
+    ],
+    "published": "2026-03-20",
+    "url": "https://arxiv.org/abs/2603.20063",
+    "domain": "time-series",
+    "tags": [
+      "reinforcement-learning",
+      "fine-tuning",
+      "time-series",
+      "forecasting",
+      "transfer-learning"
+    ],
+    "summary": "This work introduces and implements three reinforcement learning (RL) algorithms specifically designed for fine-tuning pre-trained supervised time series predictors, focusing on financial forecasting tasks. The core technical contribution is a detailed plan for successfully backpropagating the RL policy loss through the layers of a model initially trained via standard supervised learning. Empirical evaluations confirm that this RL fine-tuning leads to a notable performance increase and induces desirable transfer learning capabilities in the resulting models. The authors conclude by providing practical insights into the tuning process for adoption by practitioners in the field.",
+    "processed_at": "2026-03-27T11:35:32.048024+00:00"
+  },
+  {
     "arxiv_id": "2603.23502",
     "title": "OccAny: Generalized Unconstrained Urban 3D Occupancy",
     "authors": [
@@ -180,30 +204,5 @@
     ],
     "summary": "This paper introduces a model-free measure of Granger causality specifically tailored to expectiles, offering a robust generalization of mean-based causality that is ideal for risk quantification and distributional analysis. The authors construct a powerful statistical test based on M-vine copulas, which effectively models complex, non-linear, and non-Gaussian dependencies across multiple time series without imposing restrictive parametric forms on the joint distribution. The proposed test is shown to be strongly consistent and exhibits good finite-sample performance, notably revealing multivariate causal structures overlooked by pairwise methods. Practical relevance is highlighted through applications to international stock market indices.",
     "processed_at": "2026-03-25T21:14:34.382497+00:00"
-  },
-  {
-    "arxiv_id": "2603.23284",
-    "title": "WaveSFNet: A Wavelet-Based Codec and Spatial--Frequency Dual-Domain Gating Network for Spatiotemporal Prediction",
-    "authors": [
-      "Xinyong Cai",
-      "Runming Xie",
-      "Hu Chen",
-      "Yuankai Wu"
-    ],
-    "published": "2026-03-24",
-    "url": "https://arxiv.org/abs/2603.23284",
-    "domain": "computer-vision",
-    "tags": [
-      "vision-transformer",
-      "attention-mechanism",
-      "efficient-transformer",
-      "object-detection",
-      "image-segmentation",
-      "time-series",
-      "benchmark",
-      "dataset"
-    ],
-    "summary": "WaveSFNet addresses the challenge of multi-step spatiotemporal prediction by developing an efficient, recurrent-free framework that balances modeling long-range dynamics with preserving sharp, high-frequency details. The core innovation is a wavelet-based codec integrated with a dual-domain gated spatiotemporal translator. The translator first injects adjacent-frame differences to emphasize motion, and then fuses information via a novel mechanism that combines large-kernel spatial modeling with frequency-domain global modulation. Experimental results across Moving MNIST, TaxiBJ, and WeatherBench demonstrate that WaveSFNet maintains high prediction accuracy while exhibiting low computational overhead.",
-    "processed_at": "2026-03-25T21:14:34.382502+00:00"
   }
 ]
