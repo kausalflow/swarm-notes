@@ -3,7 +3,9 @@
 from unittest.mock import patch
 
 from swarm_notes.analyst import ConceptLink, OpenQuestion, PaperAnalysis, RejectedCandidate
-from swarm_notes.vault_writer import _build_body
+from swarm_notes.config import settings
+from swarm_notes.vault_writer import _build_body, _write_concept_stub
+import frontmatter
 
 
 def test_build_body_includes_archivist_review_details() -> None:
@@ -63,3 +65,55 @@ def test_build_body_includes_archivist_review_details() -> None:
     assert "[concept] Benchmark Setup" in body
     assert "benchmark-setup" in body
     assert "generic" in body
+
+
+def test_build_body_uses_wiki_links_for_concepts() -> None:
+    analysis = PaperAnalysis(
+        title="Concept Link Style",
+        authors=["Test Author"],
+        published="2026-03-27",
+        arxiv_id="2603.99999",
+        source="arxiv",
+        url="https://arxiv.org/abs/2603.99999",
+        summary="A concise summary.",
+        key_contributions=["Contribution one."],
+        tags=["benchmark"],
+        architectures=[],
+        datasets=[],
+        concepts=[
+            ConceptLink(
+                slug="kr-excitation-regulation-framework",
+                display_name="KR Excitation Regulation Framework",
+                one_liner="A framework for deriving robust CSD indicators.",
+            )
+        ],
+        limitations="",
+        domain="time-series",
+        open_questions=[],
+    )
+
+    body = _build_body(analysis)
+    assert "[[../concepts/kr-excitation-regulation-framework|KR Excitation Regulation Framework]]" in body
+
+
+def test_write_concept_stub_tracks_related_paper_link(tmp_path, monkeypatch) -> None:
+    tmp_concepts = tmp_path / "tmp-concepts"
+    vault_concepts = tmp_path / "vault-concepts"
+    tmp_concepts.mkdir(parents=True)
+    vault_concepts.mkdir(parents=True)
+
+    monkeypatch.setattr(settings, "tmp_concepts_dir", tmp_concepts)
+    monkeypatch.setattr(settings, "vault_concepts_dir", vault_concepts)
+
+    _write_concept_stub(
+        slug="uncertainty-guided-label-rebalancing",
+        display_name="Uncertainty-Guided Label Rebalancing",
+        one_liner="A relabeling mechanism based on uncertainty.",
+        paper_slug="openalex-2603-25670-uncertainty-guided-label-rebalancing-for-cps-safety-monitoring",
+    )
+
+    concept_path = tmp_concepts / "uncertainty-guided-label-rebalancing.md"
+    post = frontmatter.load(concept_path)
+    assert "[[openalex-2603-25670-uncertainty-guided-label-rebalancing-for-cps-safety-monitoring]]" in post.metadata["source_papers"]
+    assert "## Related Papers" in post.content
+    assert "- [[openalex-2603-25670-uncertainty-guided-label-rebalancing-for-cps-safety-monitoring]]" in post.content
