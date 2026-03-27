@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import time
 from pathlib import Path
 
 import typer
@@ -20,6 +21,77 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+_TRANSIENT_HTTP_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+_PAPER_RETRY_DELAYS_SECONDS = (30.0, 90.0)
+_MAX_PAPER_RETRY_WAIT_SECONDS = 120.0
+
+
+def _is_retryable_paper_error(exc: Exception) -> bool:
+    """Return ``True`` for transient upstream failures worth retrying."""
+    seen: set[int] = set()
+    current: BaseException | None = exc
+
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        if getattr(current, "status_code", None) in _TRANSIENT_HTTP_STATUS_CODES:
+            return True
+        current = current.__cause__ or current.__context__
+
+    return False
+
+
+def _process_single_paper(paper, skill, src_config):
+    """Process one paper once and return its analysis."""
+    from swarm_notes import analyst
+    from swarm_notes.vault_writer import write_paper
+
+    analysis = analyst.analyse(paper, skill)
+
+    if src_config.settings.enable_domain_expert:
+        from swarm_notes.domain_expert import extract_open_questions
+
+        analysis.open_questions = extract_open_questions(paper.arxiv_id, skill)
+
+    write_paper(analysis, skill.name)
+    return analysis
+
+
+def _process_paper_with_retries(paper, skill, src_config):
+    """Retry transient upstream failures for one paper with a bounded wait budget."""
+    total_wait = 0.0
+    max_attempts = len(_PAPER_RETRY_DELAYS_SECONDS) + 1
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            return _process_single_paper(paper, skill, src_config)
+        except Exception as exc:
+            is_retryable = _is_retryable_paper_error(exc)
+            if not is_retryable or attempt == max_attempts:
+                if is_retryable:
+                    logger.error(
+                        "Paper %s failed after %d attempt(s): %s",
+                        paper.arxiv_id,
+                        attempt,
+                        exc,
+                    )
+                raise
+
+            remaining_wait = _MAX_PAPER_RETRY_WAIT_SECONDS - total_wait
+            delay = min(_PAPER_RETRY_DELAYS_SECONDS[attempt - 1], remaining_wait)
+            if delay <= 0:
+                raise
+
+            logger.warning(
+                "Transient failure processing paper %s on attempt %d/%d: %s. Retrying in %.0f second(s).",
+                paper.arxiv_id,
+                attempt,
+                max_attempts,
+                exc,
+                delay,
+            )
+            time.sleep(delay)
+            total_wait += delay
+
 
 @app.command()
 def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path to config.yaml")) -> None:
@@ -30,9 +102,9 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
     else:
         logger.info("No config.yaml found at '%s', using environment variables / defaults.", config)
 
-    from swarm_notes import analyst, federation, router, watcher
+    from swarm_notes import federation, router, watcher
     from swarm_notes.vault_manager import commit_staging, discard_staging, init_staging, init_vault, get_existing_arxiv_ids
-    from swarm_notes.vault_writer import update_public_feed, write_paper, write_site_config
+    from swarm_notes.vault_writer import update_public_feed, write_site_config
 
     # Load skills from disk based on config
     router.load_skills()
@@ -100,15 +172,7 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
                     "Processing %s with skill %s", paper.arxiv_id, skill.name
                 )
                 skills_used_map[skill.id] = skill
-                analysis = analyst.analyse(paper, skill)
-                
-                # Check Domain Expert Configuration
-                if src_config.settings.enable_domain_expert:
-                    from swarm_notes.domain_expert import extract_open_questions
-                    questions = extract_open_questions(paper.arxiv_id, skill)
-                    analysis.open_questions = questions
-                    
-                write_paper(analysis, skill.name)
+                analysis = _process_paper_with_retries(paper, skill, src_config)
                 analyses.append(analysis)
             except Exception as exc:
                 logger.error(
