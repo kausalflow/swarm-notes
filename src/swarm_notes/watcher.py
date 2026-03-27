@@ -21,7 +21,11 @@ _ATOM_NS = "http://www.w3.org/2005/Atom"
 _ARXIV_NS = "http://arxiv.org/schemas/atom"
 _ARXIV_QUERY_TIMEOUT_SECONDS = 30
 _ARXIV_RETRY_DELAYS_SECONDS = (2.0, 5.0)
+_ARXIV_MIN_INTERVAL_SECONDS = 3.0
 _TRANSIENT_HTTP_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+_ARXIV_USER_AGENT = "swarm-notes/0.1 (+https://github.com/kausalflow/swarm-notes)"
+
+_last_arxiv_request_started_at: float | None = None
 
 
 @dataclass
@@ -107,12 +111,14 @@ def _query_arxiv(keyword: str, max_results: int) -> list[RawPaper]:
     )
     url = f"{_ARXIV_API_BASE}?{params}"
     logger.debug("ArXiv query: %s", url)
+    request = urllib.request.Request(url, headers={"User-Agent": _ARXIV_USER_AGENT})
 
     max_attempts = len(_ARXIV_RETRY_DELAYS_SECONDS) + 1
 
     for attempt in range(1, max_attempts + 1):
         try:
-            with urllib.request.urlopen(url, timeout=_ARXIV_QUERY_TIMEOUT_SECONDS) as response:  # noqa: S310
+            _respect_arxiv_rate_limit()
+            with urllib.request.urlopen(request, timeout=_ARXIV_QUERY_TIMEOUT_SECONDS) as response:  # noqa: S310
                 xml_bytes = response.read()
             return _parse_atom_feed(xml_bytes, keyword)
         except Exception as exc:
@@ -120,7 +126,7 @@ def _query_arxiv(keyword: str, max_results: int) -> list[RawPaper]:
                 logger.error("Failed to query ArXiv for '%s': %s", keyword, exc)
                 return []
 
-            delay = _ARXIV_RETRY_DELAYS_SECONDS[attempt - 1]
+            delay = _get_arxiv_retry_delay(exc, attempt)
             logger.warning(
                 "Transient ArXiv query failure for '%s' on attempt %d/%d: %s. Retrying in %.0f second(s).",
                 keyword,
@@ -132,6 +138,22 @@ def _query_arxiv(keyword: str, max_results: int) -> list[RawPaper]:
             time.sleep(delay)
 
     return []
+
+
+def _respect_arxiv_rate_limit() -> None:
+    """Sleep as needed so requests stay under ArXiv's rate limit guidance."""
+    global _last_arxiv_request_started_at
+
+    now = time.monotonic()
+    if _last_arxiv_request_started_at is not None:
+        elapsed = now - _last_arxiv_request_started_at
+        remaining = _ARXIV_MIN_INTERVAL_SECONDS - elapsed
+        if remaining > 0:
+            logger.debug("Waiting %.2f second(s) before the next ArXiv request", remaining)
+            time.sleep(remaining)
+            now = time.monotonic()
+
+    _last_arxiv_request_started_at = now
 
 
 def _is_retryable_arxiv_error(exc: Exception) -> bool:
@@ -149,6 +171,22 @@ def _is_retryable_arxiv_error(exc: Exception) -> bool:
         return isinstance(reason, str) and "timed out" in reason.lower()
 
     return False
+
+
+def _get_arxiv_retry_delay(exc: Exception, attempt: int) -> float:
+    """Return retry delay for transient ArXiv failures, honoring Retry-After when present."""
+    default_delay = _ARXIV_RETRY_DELAYS_SECONDS[attempt - 1]
+    if not isinstance(exc, urllib.error.HTTPError) or exc.code != 429:
+        return default_delay
+
+    retry_after = exc.headers.get("Retry-After") if exc.headers is not None else None
+    if retry_after is None:
+        return default_delay
+
+    try:
+        return max(default_delay, float(retry_after))
+    except ValueError:
+        return default_delay
 
 
 def _parse_atom_feed(xml_bytes: bytes, keyword: str) -> list[RawPaper]:
