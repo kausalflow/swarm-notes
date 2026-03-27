@@ -12,3 +12,9 @@ arxiv_categories:
   - cs.LG
   - cs.AI
   - stat.ML
+critic_context: |
+  Approve concepts only when they represent a reusable method, architectural pattern,
+  or evaluation idea that is likely to appear again across multiple ML papers.
+  Reject generic phrases such as training pipeline, benchmark setup, or model improvements.
+  Approve open questions only when they expose a real unresolved bottleneck in generalization,
+  optimization, evaluation, or reliability rather than a routine request for more data or compute.

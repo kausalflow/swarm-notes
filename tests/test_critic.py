@@ -99,6 +99,7 @@ def test_review_analysis_replaces_candidates_with_approved_items(mock_agent_clas
     mock_result.output.approved_concepts = [approved_concept]
     mock_result.output.approved_open_questions = [approved_question]
     mock_result.output.review_summary = "Approved one concept and one open question."
+    mock_result.output.rejected_candidates = ["Rejected 'benchmark setup' because it is generic and paper-local."]
 
     mock_agent = mock_agent_class.return_value
     mock_agent.run_sync.return_value = mock_result
@@ -107,3 +108,5 @@ def test_review_analysis_replaces_candidates_with_approved_items(mock_agent_clas
 
     assert result.concepts == [approved_concept]
     assert result.open_questions == [approved_question]
+    assert result.critic_review_summary == "Approved one concept and one open question."
+    assert result.critic_rejected_candidates == ["Rejected 'benchmark setup' because it is generic and paper-local."]
