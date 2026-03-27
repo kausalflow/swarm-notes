@@ -92,32 +92,44 @@ def get_existing_concept_slugs() -> list[str]:
     return [f.stem for f in settings.vault_concepts_dir.glob("*.md")]
 
 
-def get_existing_arxiv_ids() -> set[str]:
-    """Return the set of arxiv IDs already present in the live vault (and staging).
+def make_storage_id(source: str, paper_id: str) -> str:
+    """Return the normalized storage identifier used for deduplication."""
+    return f"{source.strip().lower()}:{paper_id.strip()}"
 
-    Paper filenames follow the pattern ``{arxiv_id}-{title-slug}.md``, where
-    ``arxiv_id`` is of the form ``YYMM.NNNNN``.  This function extracts the ID
-    by splitting on the first ``-`` that follows the numeric arxiv ID pattern.
 
-    Parameters
-    ----------
-    None
+def get_existing_storage_ids() -> set[str]:
+    """Return source-aware paper IDs already present in vault and staging.
 
-    Returns
-    -------
-    set[str]
-        A set of arxiv ID strings such as ``{"2603.23284", "2603.23294"}``.
+    Supported filename formats:
+    - New: ``<source>-<paper_id>-<title-slug>.md``
+    - Legacy: ``<paper_id>-<title-slug>.md`` (assumed source ``arxiv``)
     """
     import re
-    pattern = re.compile(r"^(\d{4}\.\d{4,5})-")
+
+    new_pattern = re.compile(r"^([a-z0-9_]+)-(\d{4}\.\d{4,5})-")
+    legacy_pattern = re.compile(r"^(\d{4}\.\d{4,5})-")
     ids: set[str] = set()
 
     for search_dir in (settings.vault_papers_dir, settings.tmp_papers_dir):
         if not search_dir.exists():
             continue
-        for f in search_dir.glob("*.md"):
-            m = pattern.match(f.name)
-            if m:
-                ids.add(m.group(1))
+        for file_path in search_dir.glob("*.md"):
+            new_match = new_pattern.match(file_path.name)
+            if new_match:
+                ids.add(make_storage_id(new_match.group(1), new_match.group(2)))
+                continue
+
+            legacy_match = legacy_pattern.match(file_path.name)
+            if legacy_match:
+                ids.add(make_storage_id("arxiv", legacy_match.group(1)))
 
     return ids
+
+
+def get_existing_arxiv_ids() -> set[str]:
+    """Backward-compatible ArXiv-only view of existing storage IDs."""
+    return {
+        storage_id.split(":", 1)[1]
+        for storage_id in get_existing_storage_ids()
+        if storage_id.startswith("arxiv:")
+    }

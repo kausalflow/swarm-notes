@@ -103,7 +103,14 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
         logger.info("No config.yaml found at '%s', using environment variables / defaults.", config)
 
     from swarm_notes import federation, router, watcher
-    from swarm_notes.vault_manager import commit_staging, discard_staging, init_staging, init_vault, get_existing_arxiv_ids
+    from swarm_notes.vault_manager import (
+        commit_staging,
+        discard_staging,
+        get_existing_storage_ids,
+        init_staging,
+        init_vault,
+        make_storage_id,
+    )
     from swarm_notes.vault_writer import update_public_feed, write_site_config
 
     # Load skills from disk based on config
@@ -143,8 +150,12 @@ def run(config: str = typer.Option("config.yaml", "--config", "-c", help="Path t
         # ------------------------------------------------------------------
         # 4b. Deduplicate – skip papers already in the vault
         # ------------------------------------------------------------------
-        existing_ids = get_existing_arxiv_ids()
-        new_papers = [p for p in papers if p.arxiv_id not in existing_ids]
+        # Load existing source-aware paper IDs from vault to avoid reprocessing.
+        existing_ids = get_existing_storage_ids()
+        new_papers = [
+            p for p in papers
+            if make_storage_id(p.source, p.arxiv_id) not in existing_ids
+        ]
         skipped = len(papers) - len(new_papers)
         if skipped:
             logger.info(

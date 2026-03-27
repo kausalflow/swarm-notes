@@ -1,10 +1,11 @@
 # Example research-cruise configuration
 llm_model: "gemini-flash-lite-latest"
-arxiv_keywords:
+paper_source: "arxiv"  # "arxiv" or "semantic_scholar"
+paper_keywords:
   - "time series"
   - "forecasting"
-arxiv_max_results_per_keyword: 10
-arxiv_total_cap: 50
+paper_max_results_per_keyword: 10
+paper_total_cap: 50
 federation_feeds: []
 public_feed_max_items: 10
 

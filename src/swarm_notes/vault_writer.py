@@ -33,7 +33,8 @@ issued:
 url: "{url}"
 
 # Custom fields
-arxiv_id: "{arxiv_id}"
+paper_id: "{paper_id}"
+paper_source: "{paper_source}"
 domain: "{domain}"
 tags:
 {tag_lines}
@@ -63,7 +64,7 @@ def write_paper(analysis: PaperAnalysis, skill_name: str) -> Path:
     Path
         Path to the written staging file.
     """
-    slug = _make_slug(analysis.arxiv_id, analysis.title)
+    slug = _make_slug(analysis.source, analysis.arxiv_id, analysis.title)
     out_path = settings.tmp_papers_dir / f"{slug}.md"
 
     frontmatter = _build_frontmatter(analysis, skill_name)
@@ -108,7 +109,8 @@ def _build_frontmatter(analysis: PaperAnalysis, skill_name: str) -> str:
         author_lines=author_lines,
         date_parts=date_parts,
         url=analysis.url,
-        arxiv_id=analysis.arxiv_id,
+        paper_id=analysis.arxiv_id,
+        paper_source=analysis.source,
         domain=analysis.domain,
         tag_lines=tag_lines,
         architecture_lines=architecture_lines,
@@ -126,7 +128,7 @@ def _build_body(analysis: PaperAnalysis) -> str:
     lines.append(f"# {analysis.title}\n")
     lines.append(f"**Authors**: {', '.join(analysis.authors)}")
     lines.append(f"**Date**: {analysis.published}")
-    lines.append(f"**ArXiv**: [{analysis.arxiv_id}]({analysis.url})\n")
+    lines.append(f"**Paper ID**: [{analysis.source}:{analysis.arxiv_id}]({analysis.url})\n")
 
     lines.append("## Summary\n")
     lines.append(f"{analysis.summary}\n")
@@ -171,7 +173,7 @@ def _build_body(analysis: PaperAnalysis) -> str:
 
     # Links
     lines.append("## Links\n")
-    lines.append(f"- [ArXiv Abstract]({analysis.url})")
+    lines.append(f"- [Abstract]({analysis.url})")
     lines.append(f"- [PDF]({analysis.url.replace('abs', 'pdf')})")
     lines.append("")
 
@@ -244,7 +246,7 @@ def _create_open_question(question: OpenQuestion, analysis: PaperAnalysis) -> No
         except Exception as exc:
             logger.warning("VaultWriter: Failed to parse existing frontmatter for %s: %s", slug, exc)
 
-    paper_slug = _make_slug(analysis.arxiv_id, analysis.title)
+    paper_slug = _make_slug(analysis.source, analysis.arxiv_id, analysis.title)
     paper_id = f"[[{paper_slug}]]"
     if paper_id not in papers:
         papers.append(paper_id)
@@ -281,7 +283,11 @@ def update_public_feed(analyses: list[PaperAnalysis]) -> None:
         List of :class:`PaperAnalysis` objects from the current run.
     """
     existing: list[dict] = _load_feed()
-    existing_ids = {entry["arxiv_id"] for entry in existing}
+    existing_ids = {
+        entry.get("paper_id") or entry.get("arxiv_id")
+        for entry in existing
+        if entry.get("paper_id") or entry.get("arxiv_id")
+    }
 
     new_entries = [
         _analysis_to_feed_entry(a)
@@ -317,7 +323,7 @@ def write_site_config() -> None:
         Human-readable name for this swarm-notes deployment.
     site_description : str
         Short description shown in the hero subtitle.
-    arxiv_keywords : list[str]
+    paper_keywords : list[str]
         Research topics this instance tracks (rendered as pills in the hero).
     updated_at : str
         ISO-8601 UTC timestamp of the last pipeline run.
@@ -329,7 +335,8 @@ def write_site_config() -> None:
     payload = {
         "site_name": settings.site_name,
         "site_description": settings.site_description,
-        "arxiv_keywords": settings.arxiv_keywords,
+        "paper_keywords": settings.paper_keywords,
+        "arxiv_keywords": settings.paper_keywords,
         "updated_at": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
     out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -380,7 +387,8 @@ def append_daily_discussion(content: str) -> None:
 
 def _analysis_to_feed_entry(analysis: PaperAnalysis) -> dict:
     return {
-        "arxiv_id": analysis.arxiv_id,
+        "paper_id": analysis.arxiv_id,
+        "paper_source": analysis.source,
         "title": analysis.title,
         "authors": analysis.authors,
         "published": analysis.published,
@@ -407,10 +415,11 @@ def _load_feed() -> list[dict]:
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _make_slug(arxiv_id: str, title: str) -> str:
-    """Create a filename slug: ``<arxiv_id>-<title-slug>``."""
+def _make_slug(source: str, paper_id: str, title: str) -> str:
+    """Create a filename slug: ``<source>-<paper_id>-<title-slug>``."""
+    source_slug = _slugify(source) or "unknown"
     title_slug = _slugify(title)[:60].rstrip("-")
-    return f"{arxiv_id}-{title_slug}"
+    return f"{source_slug}-{paper_id}-{title_slug}"
 
 
 def _slugify(text: str) -> str:

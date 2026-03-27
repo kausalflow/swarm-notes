@@ -66,6 +66,7 @@ class PaperAnalysis(BaseModel):
     authors: list[str] = Field(description="List of author full names.")
     published: str = Field(description="Publication date as YYYY-MM-DD.")
     arxiv_id: str = Field(description="ArXiv identifier (e.g. '2301.12345').")
+    source: str = Field(default="arxiv", description="Paper source backend (e.g. 'arxiv', 'semantic_scholar').")
     url: str = Field(description="Canonical URL of the paper.")
 
     summary: Annotated[
@@ -212,6 +213,7 @@ def analyse(paper: RawPaper, skill: SkillSpec) -> PaperAnalysis:
 
     # Ensure metadata from the raw paper is preserved accurately
     analysis.arxiv_id = paper.arxiv_id
+    analysis.source = paper.source
     analysis.url = paper.url
     analysis.published = paper.published
     if not analysis.authors:
