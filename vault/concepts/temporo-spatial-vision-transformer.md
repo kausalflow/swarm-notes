@@ -1,10 +1,13 @@
 ---
-title: "Temporo-Spatial Vision Transformer"
-slug: "temporo-spatial-vision-transformer"
-type: concept
+created_at: '2026-03-26T07:10:46Z'
 generated_stub: true
-processed_at: "2026-03-26T07:10:46Z"
-created_at: "2026-03-26T07:10:46Z"
+modified_at: '2026-03-28T05:29:11Z'
+processed_at: '2026-03-26T07:10:46Z'
+slug: temporo-spatial-vision-transformer
+source_papers:
+- '[[openalex-2603.24552-the-role-of-spatial-context-and-multitask-learning-in-the-de]]'
+title: Temporo-Spatial Vision Transformer
+type: concept
 ---
 
 # Temporo-Spatial Vision Transformer
@@ -16,3 +19,4 @@ A Vision Transformer architecture specifically designed to process and leverage 
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
+- [[openalex-2603.24552-the-role-of-spatial-context-and-multitask-learning-in-the-de]]

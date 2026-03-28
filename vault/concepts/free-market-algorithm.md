@@ -1,10 +1,13 @@
 ---
-title: "Free-Market Algorithm"
-slug: "free-market-algorithm"
-type: concept
+created_at: '2026-03-26T06:26:39Z'
 generated_stub: true
-processed_at: "2026-03-26T06:26:39Z"
-created_at: "2026-03-26T06:26:39Z"
+modified_at: '2026-03-28T05:29:51Z'
+processed_at: '2026-03-26T06:26:39Z'
+slug: free-market-algorithm
+source_papers:
+- '[[openalex-2603.24559-the-free-market-algorithm-self-organizing-optimization-for-o]]'
+title: Free-Market Algorithm
+type: concept
 ---
 
 # Free-Market Algorithm
@@ -16,3 +19,4 @@ A novel metaheuristic optimization algorithm inspired by free-market economics t
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
+- [[openalex-2603.24559-the-free-market-algorithm-self-organizing-optimization-for-o]]

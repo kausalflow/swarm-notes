@@ -1,10 +1,13 @@
 ---
-title: "Normalizing Flow for Time Series"
-slug: "flots-normalizing-flow-time-series"
-type: concept
+created_at: '2026-03-26T07:10:56Z'
 generated_stub: true
-processed_at: "2026-03-26T07:10:56Z"
-created_at: "2026-03-26T07:10:56Z"
+modified_at: '2026-03-28T05:29:41Z'
+processed_at: '2026-03-26T07:10:56Z'
+slug: flots-normalizing-flow-time-series
+source_papers:
+- '[[openalex-2603.24466-short-term-turbulence-prediction-for-seeing-using-machine-le]]'
+title: Normalizing Flow for Time Series
+type: concept
 ---
 
 # Normalizing Flow for Time Series
@@ -16,3 +19,4 @@ A probabilistic deep learning method based on normalizing flows adapted for time
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
+- [[openalex-2603.24466-short-term-turbulence-prediction-for-seeing-using-machine-le]]

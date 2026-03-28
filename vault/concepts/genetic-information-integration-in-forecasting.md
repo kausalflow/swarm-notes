@@ -1,10 +1,13 @@
 ---
-title: "Genetic Information Integration in Forecasting"
-slug: "genetic-information-integration-in-forecasting"
-type: concept
+created_at: '2026-03-26T06:26:52Z'
 generated_stub: true
-processed_at: "2026-03-26T06:26:52Z"
-created_at: "2026-03-26T06:26:52Z"
+modified_at: '2026-03-28T05:29:00Z'
+processed_at: '2026-03-26T06:26:52Z'
+slug: genetic-information-integration-in-forecasting
+source_papers:
+- '[[openalex-2603.24474-leveraging-synthetic-and-genetic-data-to-improve-epidemic-fo]]'
+title: Genetic Information Integration in Forecasting
+type: concept
 ---
 
 # Genetic Information Integration in Forecasting
@@ -16,3 +19,4 @@ Incorporating pathogen genetic sequencing data alongside epidemiological time se
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
+- [[openalex-2603.24474-leveraging-synthetic-and-genetic-data-to-improve-epidemic-fo]]
