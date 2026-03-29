@@ -3,9 +3,9 @@ name: Deploy Astro site to Pages
 on:
   push:
     branches: ["main", "master"]
-    paths:
-      - "website/**"
-      - "vault/**"
+    #paths:
+    #  - "website/**"
+    #  - "vault/**"
   workflow_dispatch:
 
 permissions:
