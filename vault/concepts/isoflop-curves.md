@@ -1,10 +1,13 @@
 ---
-title: "IsoFLOP Curves"
-slug: "isoflop-curves"
-type: concept
+created_at: '2026-03-27T09:10:10Z'
 generated_stub: true
-processed_at: "2026-03-27T09:10:10Z"
-created_at: "2026-03-27T09:10:10Z"
+modified_at: '2026-03-29T06:08:10Z'
+processed_at: '2026-03-27T09:10:10Z'
+slug: isoflop-curves
+source_papers:
+- '[[openalex-2603.25687-on-neural-scaling-laws-for-weather-emulation-through-continu]]'
+title: IsoFLOP Curves
+type: concept
 ---
 
 # IsoFLOP Curves
@@ -16,3 +19,4 @@ Curves that illustrate the relationship between model performance and computatio
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
+- [[openalex-2603.25687-on-neural-scaling-laws-for-weather-emulation-through-continu]]

@@ -1,10 +1,13 @@
 ---
-title: "Physics-Spatiotemporal Masked Autoencoder"
-slug: "physics-spatiotemporal-masked-autoencoder"
-type: concept
+created_at: '2026-03-27T09:10:15Z'
 generated_stub: true
-processed_at: "2026-03-27T09:10:15Z"
-created_at: "2026-03-27T09:10:15Z"
+modified_at: '2026-03-29T06:07:07Z'
+processed_at: '2026-03-27T09:10:15Z'
+slug: physics-spatiotemporal-masked-autoencoder
+source_papers:
+- '[[openalex-2603.25597-spatiotemporal-system-forecasting-with-irregular-time-steps]]'
+title: Physics-Spatiotemporal Masked Autoencoder
+type: concept
 ---
 
 # Physics-Spatiotemporal Masked Autoencoder
@@ -16,3 +19,4 @@ A novel forecasting method integrating convolutional autoencoders for spatial fe
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
+- [[openalex-2603.25597-spatiotemporal-system-forecasting-with-irregular-time-steps]]

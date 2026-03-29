@@ -1,8 +1,10 @@
 ---
 created_at: '2026-03-27T09:10:15Z'
+modified_at: '2026-03-29T06:07:07Z'
 source_papers:
 - '[[2603.25597-spatiotemporal-system-forecasting-with-irregular-time-steps]]'
-title: Scalable Attention for Long Sequences
+- '[[openalex-2603.25597-spatiotemporal-system-forecasting-with-irregular-time-steps]]'
+title: Enhance Transformer Scalability
 ---
 
 **Background:** The quadratic complexity of the self-attention mechanism in transformer architectures presents scalability limitations when processing very long sequences.

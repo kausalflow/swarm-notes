@@ -1,10 +1,13 @@
 ---
-title: "Ultrastructure-to-Dynamics Compiler"
-slug: "ultrastructure-to-dynamics-compiler"
-type: concept
+created_at: '2026-03-27T09:10:05Z'
 generated_stub: true
-processed_at: "2026-03-27T09:10:05Z"
-created_at: "2026-03-27T09:10:05Z"
+modified_at: '2026-03-29T06:08:40Z'
+processed_at: '2026-03-27T09:10:05Z'
+slug: ultrastructure-to-dynamics-compiler
+source_papers:
+- '[[openalex-2603.25713-compiling-molecular-ultrastructure-into-neural-dynamics]]'
+title: Ultrastructure-to-Dynamics Compiler
+type: concept
 ---
 
 # Ultrastructure-to-Dynamics Compiler
@@ -16,3 +19,4 @@ A learned mapping that translates high-resolution, molecularly annotated neurona
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
+- [[openalex-2603.25713-compiling-molecular-ultrastructure-into-neural-dynamics]]
