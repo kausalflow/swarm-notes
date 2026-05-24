@@ -1,12 +1,14 @@
 ---
-title: "HOPE block"
-slug: "hope-block"
-type: concept
+created_at: '2026-05-21T08:29:03Z'
 generated_stub: true
+modified_at: '2026-05-24T07:45:28Z'
+processed_at: '2026-05-21T08:29:03Z'
+slug: hope-block
 source_papers:
-  - "[[openalex-2605.18657-kairoshope-a-next-generation-time-series-foundation-model-fo]]"
-processed_at: "2026-05-21T08:29:03Z"
-created_at: "2026-05-21T08:29:03Z"
+- '[[openalex-2605.18657-kairoshope-a-next-generation-time-series-foundation-model-fo]]'
+- '[[openalex-2605.22684-chronovae-hope-beyond-attention-a-next-generation-vae-founda]]'
+title: HOPE block
+type: concept
 ---
 
 # HOPE block
@@ -27,3 +29,4 @@ It is the foundational architectural component replacing standard quadratic atte
 ## Related Papers
 
 - [[openalex-2605.18657-kairoshope-a-next-generation-time-series-foundation-model-fo]]
+- [[openalex-2605.22684-chronovae-hope-beyond-attention-a-next-generation-vae-founda]]
