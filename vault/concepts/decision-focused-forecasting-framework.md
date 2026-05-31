@@ -1,12 +1,14 @@
 ---
-title: "Decision-Focused Forecasting Framework"
-slug: "decision-focused-forecasting-framework"
-type: concept
+created_at: '2026-04-11T05:54:44Z'
 generated_stub: true
+modified_at: '2026-05-31T08:09:25Z'
+processed_at: '2026-04-11T05:54:44Z'
+slug: decision-focused-forecasting-framework
 source_papers:
-  - "[[openalex-2604.07106-decision-focused-conservation-voltage-reduction-to-consider]]"
-processed_at: "2026-04-11T05:54:44Z"
-created_at: "2026-04-11T05:54:44Z"
+- '[[openalex-2604.07106-decision-focused-conservation-voltage-reduction-to-consider]]'
+- '[[openalex-2605.29243-wait-theres-a-way-out-a-decision-mechanism-for-forecasting-c]]'
+title: Decision-Focused Forecasting Framework
+type: concept
 ---
 
 # Decision-Focused Forecasting Framework
@@ -27,3 +29,4 @@ It addresses the critical problem of cascading errors in hierarchical control sy
 ## Related Papers
 
 - [[openalex-2604.07106-decision-focused-conservation-voltage-reduction-to-consider]]
+- [[openalex-2605.29243-wait-theres-a-way-out-a-decision-mechanism-for-forecasting-c]]

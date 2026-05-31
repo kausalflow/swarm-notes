@@ -1,10 +1,13 @@
 ---
-title: "Inverse CVAE for Retrodiction"
-slug: "inverse-cvae-for-retrodiction"
-type: concept
+created_at: '2026-03-27T14:09:37Z'
 generated_stub: true
-processed_at: "2026-03-27T14:09:37Z"
-created_at: "2026-03-27T14:09:37Z"
+modified_at: '2026-05-31T08:11:17Z'
+processed_at: '2026-03-27T14:09:37Z'
+slug: inverse-cvae-for-retrodiction
+source_papers:
+- '[[openalex-2605.29193-bayesian-reversal-of-the-liquid-level-trajectory-in-a-draini]]'
+title: Inverse CVAE for Retrodiction
+type: concept
 ---
 
 # Inverse CVAE for Retrodiction
@@ -16,3 +19,4 @@ A Conditional Variational Autoencoder structure adapted for Bayesian inversion t
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
+- [[openalex-2605.29193-bayesian-reversal-of-the-liquid-level-trajectory-in-a-draini]]
