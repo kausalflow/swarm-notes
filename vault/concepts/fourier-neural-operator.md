@@ -1,10 +1,13 @@
 ---
-title: "Fourier Neural Operator"
-slug: "fourier-neural-operator"
-type: concept
+created_at: '2026-03-27T09:10:53Z'
 generated_stub: true
-processed_at: "2026-03-27T09:10:53Z"
-created_at: "2026-03-27T09:10:53Z"
+modified_at: '2026-06-12T08:53:30Z'
+processed_at: '2026-03-27T09:10:53Z'
+slug: fourier-neural-operator
+source_papers:
+- '[[openalex-2606.10848-data-driven-surrogate-models-for-forecasting-experimentally]]'
+title: Fourier Neural Operator
+type: concept
 ---
 
 # Fourier Neural Operator
@@ -16,3 +19,4 @@ A neural operator that learns mappings between infinite-dimensional function spa
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
+- [[openalex-2606.10848-data-driven-surrogate-models-for-forecasting-experimentally]]
