@@ -1,10 +1,13 @@
 ---
-title: "Chronos-2"
-slug: "chronos-2"
-type: concept
+created_at: '2026-03-27T14:09:50Z'
 generated_stub: true
-processed_at: "2026-03-27T14:09:50Z"
-created_at: "2026-03-27T14:09:50Z"
+modified_at: '2026-06-13T08:15:58Z'
+processed_at: '2026-03-27T14:09:50Z'
+slug: chronos-2
+source_papers:
+- '[[openalex-2606.11990-time-series-foundation-model-embeddings-for-remaining-useful]]'
+title: Chronos-2
+type: concept
 ---
 
 # Chronos-2
@@ -16,3 +19,4 @@ A large-scale, general-purpose time-series foundation model evaluated for transp
 ## Related Papers
 
 <!-- Papers that mention this concept will be linked here -->
+- [[openalex-2606.11990-time-series-foundation-model-embeddings-for-remaining-useful]]
