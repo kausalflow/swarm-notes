@@ -1,12 +1,14 @@
 ---
-title: "Quantum Reservoir Computing"
-slug: "quantum-reservoir-computing"
-type: concept
+created_at: '2026-04-20T07:09:56Z'
 generated_stub: true
+modified_at: '2026-06-14T08:38:01Z'
+processed_at: '2026-04-20T07:09:56Z'
+slug: quantum-reservoir-computing
 source_papers:
-  - "[[openalex-2512.02928-time-series-forecasting-with-multiphoton-quantum-states-and]]"
-processed_at: "2026-04-20T07:09:56Z"
-created_at: "2026-04-20T07:09:56Z"
+- '[[openalex-2512.02928-time-series-forecasting-with-multiphoton-quantum-states-and]]'
+- '[[openalex-2606.12806-quantum-reservoir-computing-for-short-term-power-load-foreca]]'
+title: Quantum Reservoir Computing
+type: concept
 ---
 
 # Quantum Reservoir Computing
@@ -27,3 +29,4 @@ This is the central computational paradigm explored, combining quantum interfere
 ## Related Papers
 
 - [[openalex-2512.02928-time-series-forecasting-with-multiphoton-quantum-states-and]]
+- [[openalex-2606.12806-quantum-reservoir-computing-for-short-term-power-load-foreca]]
