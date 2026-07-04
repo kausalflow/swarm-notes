@@ -1,12 +1,14 @@
 ---
-title: "Decision-focused learning"
-slug: "decision-focused-learning"
-type: concept
+created_at: '2026-05-30T07:36:30Z'
 generated_stub: true
+modified_at: '2026-07-04T07:36:47Z'
+processed_at: '2026-05-30T07:36:30Z'
+slug: decision-focused-learning
 source_papers:
-  - "[[openalex-2605.28340-decision-focused-learning-for-optimal-pv-battery-scheduling]]"
-processed_at: "2026-05-30T07:36:30Z"
-created_at: "2026-05-30T07:36:30Z"
+- '[[openalex-2605.28340-decision-focused-learning-for-optimal-pv-battery-scheduling]]'
+- '[[openalex-2607.01171-decision-aware-training-for-sample-based-generative-models]]'
+title: Decision-focused learning
+type: concept
 ---
 
 # Decision-focused learning
@@ -27,3 +29,4 @@ It demonstrates that optimizing for downstream task performance can yield better
 ## Related Papers
 
 - [[openalex-2605.28340-decision-focused-learning-for-optimal-pv-battery-scheduling]]
+- [[openalex-2607.01171-decision-aware-training-for-sample-based-generative-models]]
