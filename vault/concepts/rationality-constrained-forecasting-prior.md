@@ -1,12 +1,14 @@
 ---
-title: "Rationality-Constrained Forecasting Prior"
-slug: "rationality-constrained-forecasting-prior"
-type: concept
+created_at: '2026-03-28T05:29:36Z'
 generated_stub: true
+modified_at: '2026-07-18T06:52:08Z'
+processed_at: '2026-03-28T05:29:36Z'
+slug: rationality-constrained-forecasting-prior
 source_papers:
-  - "[[openalex-2603.23993-garp-efm-improving-foundation-models-with-revealed-preferenc]]"
-processed_at: "2026-03-28T05:29:36Z"
-created_at: "2026-03-28T05:29:36Z"
+- '[[openalex-2603.23993-garp-efm-improving-foundation-models-with-revealed-preferenc]]'
+- '[[openalex-2607.13759-time-preference-effects-in-forecasting]]'
+title: Rationality-Constrained Forecasting Prior
+type: concept
 ---
 
 # Rationality-Constrained Forecasting Prior
@@ -27,3 +29,4 @@ This term defines the resulting model: a foundation model whose predictions are 
 ## Related Papers
 
 - [[openalex-2603.23993-garp-efm-improving-foundation-models-with-revealed-preferenc]]
+- [[openalex-2607.13759-time-preference-effects-in-forecasting]]
