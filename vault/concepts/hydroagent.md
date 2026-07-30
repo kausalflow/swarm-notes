@@ -1,12 +1,14 @@
 ---
-title: "HydroAgent"
-slug: "hydroagent"
-type: concept
+created_at: '2026-05-21T08:36:39Z'
 generated_stub: true
+modified_at: '2026-07-30T07:26:15Z'
+processed_at: '2026-05-21T08:36:39Z'
+slug: hydroagent
 source_papers:
-  - "[[openalex-2605.17792-hydroagent-closing-the-gap-between-frontier-llms-and-human-e]]"
-processed_at: "2026-05-21T08:36:39Z"
-created_at: "2026-05-21T08:36:39Z"
+- '[[openalex-2605.17792-hydroagent-closing-the-gap-between-frontier-llms-and-human-e]]'
+- '[[openalex-2607.23983-hydroagent-formalizing-forecaster-expertise-into-skill-orche]]'
+title: HydroAgent
+type: concept
 ---
 
 # HydroAgent
@@ -27,3 +29,4 @@ Represents a novel paradigm for automating complex physical model calibration by
 ## Related Papers
 
 - [[openalex-2605.17792-hydroagent-closing-the-gap-between-frontier-llms-and-human-e]]
+- [[openalex-2607.23983-hydroagent-formalizing-forecaster-expertise-into-skill-orche]]
