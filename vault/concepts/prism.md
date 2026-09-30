@@ -1,12 +1,14 @@
 ---
-title: "PRISM"
-slug: "prism"
-type: concept
+created_at: '2026-08-07T06:03:56Z'
 generated_stub: true
+modified_at: '2026-09-30T10:49:50Z'
+processed_at: '2026-08-07T06:03:56Z'
+slug: prism
 source_papers:
-  - "[[openalex-2608.03926-prism-powerful-time-series-to-image-ts2i-representations-for]]"
-processed_at: "2026-08-07T06:03:56Z"
-created_at: "2026-08-07T06:03:56Z"
+- '[[openalex-2608.03926-prism-powerful-time-series-to-image-ts2i-representations-for]]'
+- '[[openalex-2609.33279-domain-generalization-under-sampling-pattern-shifts-in-irreg]]'
+title: PRISM
+type: concept
 ---
 
 # PRISM
@@ -27,3 +29,4 @@ PRISM provides a systematic plug-and-play meta-workflow for mapping multivariate
 ## Related Papers
 
 - [[openalex-2608.03926-prism-powerful-time-series-to-image-ts2i-representations-for]]
+- [[openalex-2609.33279-domain-generalization-under-sampling-pattern-shifts-in-irreg]]
