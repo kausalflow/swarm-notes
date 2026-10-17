@@ -1,6 +1,6 @@
 ---
 # CSL-compatible fields
-title: "The changing optical and X-ray emission of the dormant $\gamma$ Cas star HD 45314"
+title: "The changing optical and X-ray emission of the dormant $\\gamma$ Cas star HD 45314"
 author:
   - literal: "G. Rauw"
   - literal: "Y. Nazé"

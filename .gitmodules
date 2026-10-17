@@ -1,0 +1,3 @@
+[submodule "swarm-notes-ui"]
+	path = swarm-notes-ui
+	url = https://github.com/kausalflow/swarm-notes-ui.git

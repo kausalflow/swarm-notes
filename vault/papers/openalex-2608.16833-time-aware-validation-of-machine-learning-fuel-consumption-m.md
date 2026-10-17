@@ -1,6 +1,6 @@
 ---
 # CSL-compatible fields
-title: "Time-Aware Validation of Machine Learning Fuel Consumption Models: Evidence from 1\,Hz Operational Data, CCGS \textit{Sir Wilfrid Laurier}"
+title: "Time-Aware Validation of Machine Learning Fuel Consumption Models: Evidence from 1\\,Hz Operational Data, CCGS \\textit{Sir Wilfrid Laurier}"
 author:
   - literal: "Samarasimha Reddy Chittamuru"
   - literal: "Ayhan Akintürk"

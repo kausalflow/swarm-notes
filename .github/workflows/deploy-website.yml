@@ -3,10 +3,14 @@ name: Deploy Astro site to Pages
 on:
   push:
     branches: ["main", "master"]
-    #paths:
-    #  - "website/**"
+    # paths:
+    #  - "swarm-notes-ui/**"
     #  - "vault/**"
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Autonomous Research Tracker"]
+    types:
+      - completed
 
 permissions:
   contents: read
@@ -18,11 +22,12 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  BUILD_PATH: "./website"
+  BUILD_PATH: "./swarm-notes-ui"
 
 jobs:
   build:
     name: Build
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,11 +47,13 @@ jobs:
       - name: Install dependencies
         run: npm install
         working-directory: ${{ env.BUILD_PATH }}
-        
+
       - name: Build with Astro
         run: npm run build
         working-directory: ${{ env.BUILD_PATH }}
-        
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
+              
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:

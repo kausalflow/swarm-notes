@@ -1,6 +1,6 @@
 ---
 # CSL-compatible fields
-title: "POEM: Phase-Aware $\mathrm{SO}(2)$ Feature Rotation for Time Series Forecasting Under Periodicity Drift"
+title: "POEM: Phase-Aware $\\mathrm{SO}(2)$ Feature Rotation for Time Series Forecasting Under Periodicity Drift"
 author:
   - literal: "Jiawen Zhu"
   - literal: "Shuhan Liu"

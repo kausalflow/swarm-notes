@@ -1,6 +1,6 @@
 ---
 # CSL-compatible fields
-title: "PrecipCorrDiff: A Deep Learning Framework for Generating 0.0625$^\circ$ High-Resolution IMD Gridded Precipitation Data"
+title: "PrecipCorrDiff: A Deep Learning Framework for Generating 0.0625$^\\circ$ High-Resolution IMD Gridded Precipitation Data"
 author:
   - literal: "Bipin Kumar"
   - literal: "Rajib Chattopadhyay"
