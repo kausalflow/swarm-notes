@@ -1,12 +1,14 @@
 ---
-title: "Forecast-Error Distribution Entropy"
-slug: "forecast-error-distribution-entropy"
-type: concept
+created_at: '2026-10-16T09:23:37Z'
 generated_stub: true
+modified_at: '2026-10-23T09:39:41Z'
+processed_at: '2026-10-16T09:23:37Z'
+slug: forecast-error-distribution-entropy
 source_papers:
-  - "[[openalex-2610.18390-beyond-rmse-and-granger-gain-multi-horizon-forecast-error-en]]"
-processed_at: "2026-10-16T09:23:37Z"
-created_at: "2026-10-16T09:23:37Z"
+- '[[openalex-2610.18390-beyond-rmse-and-granger-gain-multi-horizon-forecast-error-en]]'
+- '[[openalex-2610.28563-asymmetric-bidirectional-predictive-dynamics-in-google-searc]]'
+title: Forecast-Error Distribution Entropy
+type: concept
 ---
 
 # Forecast-Error Distribution Entropy
@@ -27,3 +29,4 @@ Central methodological contribution quantifying signed forecast-error distributi
 ## Related Papers
 
 - [[openalex-2610.18390-beyond-rmse-and-granger-gain-multi-horizon-forecast-error-en]]
+- [[openalex-2610.28563-asymmetric-bidirectional-predictive-dynamics-in-google-searc]]
