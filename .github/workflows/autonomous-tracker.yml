@@ -2,7 +2,7 @@ name: Autonomous Research Tracker
 
 on:
   schedule:
-    # Run every Monday at 06:00 UTC
+    # Run daily at 05:00 UTC
     - cron: "0 5 * * *"
   workflow_dispatch:
     inputs:
@@ -33,8 +33,8 @@ jobs:
       - name: Set up Python 3.11
         run: uv python install 3.11
 
-      - name: Install dependencies
-        run: uv sync
+      - name: Install swarm-notes
+        run: uv tool install swarm-notes==0.3.4
 
       - name: Run agent pipeline
         env:
@@ -44,7 +44,7 @@ jobs:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           LLM_MODEL: ${{ secrets.LLM_MODEL || vars.LLM_MODEL }}
           CONFIG_FILE: ${{ github.event.inputs.config_file || 'configs/config.ts.yaml' }}
-        run: uv run python -m swarm_notes.main --config "$CONFIG_FILE"
+        run: uvx swarm-notes --config "$CONFIG_FILE"
 
       - name: Upload tmp_vault artifact
         if: ${{ always() }}

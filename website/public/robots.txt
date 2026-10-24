@@ -1,8 +1,0 @@
-# robots.txt for Swarm Notes
-# https://swarmnotes.kausalflow.com
-
-User-agent: *
-Allow: /
-
-# Sitemap location
-Sitemap: https://swarmnotes.kausalflow.com/sitemap-index.xml
