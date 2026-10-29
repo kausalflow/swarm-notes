@@ -1,12 +1,14 @@
 ---
-title: "LEAP"
-slug: "leap"
-type: concept
+created_at: '2026-09-04T09:10:54Z'
 generated_stub: true
+modified_at: '2026-10-29T11:10:28Z'
+processed_at: '2026-09-04T09:10:54Z'
+slug: leap
 source_papers:
-  - "[[openalex-2609.01337-leap-likelihood-elicitation-and-aggregation-for-llm-based-pr]]"
-processed_at: "2026-09-04T09:10:54Z"
-created_at: "2026-09-04T09:10:54Z"
+- '[[openalex-2609.01337-leap-likelihood-elicitation-and-aggregation-for-llm-based-pr]]'
+- '[[openalex-2610.35190-leap-a-latent-embedding-anomaly-patch-transformer-for-time-s]]'
+title: LEAP
+type: concept
 ---
 
 # LEAP
@@ -27,3 +29,4 @@ LEAP replaces monolithic LLM prediction with separate likelihood elicitation per
 ## Related Papers
 
 - [[openalex-2609.01337-leap-likelihood-elicitation-and-aggregation-for-llm-based-pr]]
+- [[openalex-2610.35190-leap-a-latent-embedding-anomaly-patch-transformer-for-time-s]]
